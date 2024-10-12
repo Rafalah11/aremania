@@ -26,6 +26,18 @@ abstract class Routes {
   static const AREMA_AREMAPUTRI = _Paths.AREMA_AREMAPUTRI;
   static const AREMA_AREMAJUNIOR = _Paths.AREMA_AREMAJUNIOR;
   static const AREMA_BERITAFOTO = _Paths.AREMA_BERITAFOTO;
+  static const NGALAM_KULINER = _Paths.NGALAM_KULINER;
+  static const NGALAM_DESTINASI = _Paths.NGALAM_DESTINASI;
+  static const NGALAM_MALANGAN = _Paths.NGALAM_MALANGAN;
+  static const NGALAM_INFOPENTING = _Paths.NGALAM_INFOPENTING;
+  static const HALAMAN_AWAL = _Paths.HALAMAN_AWAL;
+  static const FAVORITE = _Paths.FAVORITE;
+  static const TICKET = _Paths.TICKET;
+  static const RINCIAN_TICKET = _Paths.RINCIAN_TICKET;
+  static const KATEGORI = _Paths.KATEGORI;
+  static const LOGIN = _Paths.LOGIN;
+  static const HALAMAN_LOGIN = _Paths.HALAMAN_LOGIN;
+  static const HALAMAN_DAFTAR = _Paths.HALAMAN_DAFTAR;
 }
 
 abstract class _Paths {
@@ -53,4 +65,16 @@ abstract class _Paths {
   static const AREMA_AREMAPUTRI = '/arema-aremaputri';
   static const AREMA_AREMAJUNIOR = '/arema-aremajunior';
   static const AREMA_BERITAFOTO = '/arema-beritafoto';
+  static const NGALAM_KULINER = '/ngalam-kuliner';
+  static const NGALAM_DESTINASI = '/ngalam-destinasi';
+  static const NGALAM_MALANGAN = '/ngalam-malangan';
+  static const NGALAM_INFOPENTING = '/ngalam-infopenting';
+  static const HALAMAN_AWAL = '/halaman-awal';
+  static const FAVORITE = '/favorite';
+  static const TICKET = '/ticket';
+  static const RINCIAN_TICKET = '/rincian-ticket';
+  static const KATEGORI = '/kategori';
+  static const LOGIN = '/login';
+  static const HALAMAN_LOGIN = '/halaman-login';
+  static const HALAMAN_DAFTAR = '/halaman-daftar';
 }

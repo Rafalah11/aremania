@@ -25,7 +25,7 @@ class NgalamReadTerbaruView extends StatefulWidget {
 
 class _ReadBeritaTerbaruViewState extends State<NgalamReadTerbaruView> {
   bool isBookmarked = false; // Untuk mengontrol warna bookmark
-  int _selectedIndex = 0; // Untuk melacak tab yang dipilih
+  int _selectedIndex = 1; // Untuk melacak tab yang dipilih
 
   void _onItemTapped(int index) {
     setState(() {
@@ -223,11 +223,15 @@ class _ReadBeritaTerbaruViewState extends State<NgalamReadTerbaruView> {
             icon: Icon(Icons.bookmark),
             label: 'Bookmark',
           ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.confirmation_number), // Material Icons untuk tiket
+            label: 'Ticket',
+          ),
         ],
-        currentIndex: _selectedIndex, // Mengatur item yang dipilih
+        currentIndex: _selectedIndex,
         selectedItemColor: Colors.blue,
         unselectedItemColor: Colors.grey,
-        onTap: _onItemTapped, // Menangani event ketika item dipilih
+        onTap: _onItemTapped,
       ),
     );
   }

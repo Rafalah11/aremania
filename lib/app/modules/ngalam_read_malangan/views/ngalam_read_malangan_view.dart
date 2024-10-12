@@ -223,11 +223,15 @@ class _ReadBeritaTerbaruViewState extends State<NgalamReadMalanganView> {
             icon: Icon(Icons.bookmark),
             label: 'Bookmark',
           ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.confirmation_number), // Material Icons untuk tiket
+            label: 'Ticket',
+          ),
         ],
-        currentIndex: _selectedIndex, // Mengatur item yang dipilih
+        currentIndex: _selectedIndex,
         selectedItemColor: Colors.blue,
         unselectedItemColor: Colors.grey,
-        onTap: _onItemTapped, // Menangani event ketika item dipilih
+        onTap: _onItemTapped,
       ),
     );
   }

@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:myapp/app/modules/Favorite/views/favorite_view.dart';
+import 'package:myapp/app/modules/home/views/home_view.dart';
+import 'package:myapp/app/modules/ngalam_terbaru/views/ngalam_terbaru_view.dart';
+import 'package:myapp/app/modules/ticket/views/ticket_view.dart';
 
 void main() {
   runApp(MyApp());
@@ -23,11 +27,34 @@ class _NewsPageState extends State<NewsPage> {
   bool _isBookmarked = false; // State untuk melacak status bookmark
   int _selectedIndex = 0; // Untuk melacak tab yang dipilih
 
-
   void _onItemTapped(int index) {
     setState(() {
-      _selectedIndex = index;
+      _selectedIndex = index; // Mengubah indeks terpilih
     });
+
+    // Navigasi berdasarkan indeks
+    if (index == 0) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => HomeScreen()),
+      );
+    } else if (index == 1) {
+      // Indeks 1 adalah untuk ikon "Explore"
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => NgalamTerbaruView()),
+      );
+    } else if (index == 2) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => FavoriteView()),
+      );
+    } else if (index == 3) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => Ticket_View()),
+      );
+    }
   }
 
   @override
@@ -162,11 +189,15 @@ class _NewsPageState extends State<NewsPage> {
             icon: Icon(Icons.bookmark),
             label: 'Bookmark',
           ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.confirmation_number), // Material Icons untuk tiket
+            label: 'Ticket',
+          ),
         ],
-        currentIndex: _selectedIndex, // Mengatur item yang dipilih
+        currentIndex: _selectedIndex,
         selectedItemColor: Colors.blue,
         unselectedItemColor: Colors.grey,
-        onTap: _onItemTapped, // Menangani event ketika item dipilih
+        onTap: _onItemTapped,
       ),
     );
   }

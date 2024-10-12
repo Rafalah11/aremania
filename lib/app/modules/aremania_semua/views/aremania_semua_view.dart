@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:myapp/app/modules/Favorite/views/favorite_view.dart';
+import 'package:myapp/app/modules/home/views/home_view.dart';
+import 'package:myapp/app/modules/kategori/views/kategori_view.dart';
+import 'package:myapp/app/modules/ngalam_terbaru/views/ngalam_terbaru_view.dart';
+import 'package:myapp/app/modules/ticket/views/ticket_view.dart';
 
 void main() {
   runApp(MyApp());
@@ -27,8 +32,32 @@ class _NewsPageState extends State<AremaniaSemuaView> {
 
   void _onItemTapped(int index) {
     setState(() {
-      _selectedIndex = index;
+      _selectedIndex = index; // Mengubah indeks terpilih
     });
+
+    // Navigasi berdasarkan indeks
+    if (index == 0) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => HomeScreen()),
+      );
+    } else if (index == 1) {
+      // Indeks 1 adalah untuk ikon "Explore"
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => NgalamTerbaruView()),
+      );
+    } else if (index == 2) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => FavoriteView()),
+      );
+    } else if (index == 3) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => Ticket_View()),
+      );
+    }
   }
 
   @override
@@ -39,29 +68,34 @@ class _NewsPageState extends State<AremaniaSemuaView> {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          'Aremania/nita',
+          'Berita Terbaru',
           style: TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.bold,
           ),
         ),
-        leading: Icon(Icons.arrow_back_ios, color: Colors.black),
+        leading: IconButton(
+          icon: Icon(Icons.menu, color: Colors.black),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>
+                      KategoriView()), // Ganti dengan nama halaman yang sesuai
+            );
+          },
+        ),
         actions: [
-          // Menggunakan Padding untuk menggeser ikon bookmark ke kanan
           Padding(
-            padding: const EdgeInsets.only(
-                left: 30.0), // Mengatur padding kiri untuk ikon bookmark
+            padding: const EdgeInsets.only(left: 30.0),
             child: IconButton(
               icon: Icon(
                 _isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-                color: _isBookmarked
-                    ? Colors.black
-                    : Colors
-                        .black54, // Mengubah warna berdasarkan status bookmark
+                color: _isBookmarked ? Colors.black : Colors.black54,
               ),
               onPressed: () {
                 setState(() {
-                  _isBookmarked = !_isBookmarked; // Toggle status bookmark
+                  _isBookmarked = !_isBookmarked;
                 });
               },
             ),
@@ -163,11 +197,15 @@ class _NewsPageState extends State<AremaniaSemuaView> {
             icon: Icon(Icons.bookmark),
             label: 'Bookmark',
           ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.confirmation_number), // Material Icons untuk tiket
+            label: 'Ticket',
+          ),
         ],
-        currentIndex: _selectedIndex, // Mengatur item yang dipilih
+        currentIndex: _selectedIndex,
         selectedItemColor: Colors.blue,
         unselectedItemColor: Colors.grey,
-        onTap: _onItemTapped, // Menangani event ketika item dipilih
+        onTap: _onItemTapped,
       ),
     );
   }

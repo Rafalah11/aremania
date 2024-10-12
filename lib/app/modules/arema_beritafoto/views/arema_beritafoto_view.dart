@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:myapp/app/modules/Favorite/views/favorite_view.dart';
 import 'package:myapp/app/modules/arema_aremajunior/views/arema_aremajunior_view.dart';
 import 'package:myapp/app/modules/arema_aremaputri/views/arema_aremaputri_view.dart';
 import 'package:myapp/app/modules/arema_editorial/views/arema_editorial_view.dart';
+import 'package:myapp/app/modules/home/views/home_view.dart';
+import 'package:myapp/app/modules/kategori/views/kategori_view.dart';
+import 'package:myapp/app/modules/ngalam_terbaru/views/ngalam_terbaru_view.dart';
+import 'package:myapp/app/modules/ticket/views/ticket_view.dart';
 
 void main() {
   runApp(MyApp());
@@ -37,8 +42,32 @@ class _NewsPageState extends State<AremaBeritafotoView> {
 
   void _onItemTapped(int index) {
     setState(() {
-      _selectedIndex = index;
+      _selectedIndex = index; // Mengubah indeks terpilih
     });
+
+    // Navigasi berdasarkan indeks
+    if (index == 0) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => HomeScreen()),
+      );
+    } else if (index == 1) {
+      // Indeks 1 adalah untuk ikon "Explore"
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => NgalamTerbaruView()),
+      );
+    } else if (index == 2) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => FavoriteView()),
+      );
+    } else if (index == 3) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => Ticket_View()),
+      );
+    }
   }
 
   void _onMenuTapped(int index) {
@@ -78,7 +107,12 @@ class _NewsPageState extends State<AremaBeritafotoView> {
         leading: IconButton(
           icon: Icon(Icons.menu, color: Colors.black),
           onPressed: () {
-            // Navigasi ke halaman kategori
+           Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        KategoriView()), // Ganti dengan nama halaman yang sesuai
+              );
           },
         ),
         actions: [

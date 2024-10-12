@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:myapp/app/modules/Favorite/views/favorite_view.dart';
 import 'package:myapp/app/modules/arema_aremaputri/views/arema_aremaputri_view.dart';
 import 'package:myapp/app/modules/arema_beritafoto/views/arema_beritafoto_view.dart';
 import 'package:myapp/app/modules/arema_editorial/views/arema_editorial_view.dart';
 import 'package:myapp/app/modules/arema_read_aremajunior/views/arema_read_aremajunior_view.dart';
+import 'package:myapp/app/modules/home/views/home_view.dart';
+import 'package:myapp/app/modules/kategori/views/kategori_view.dart';
+import 'package:myapp/app/modules/ngalam_terbaru/views/ngalam_terbaru_view.dart';
+import 'package:myapp/app/modules/ticket/views/ticket_view.dart';
 
 void main() {
   runApp(MyApp());
@@ -38,8 +43,32 @@ class _NewsPageState extends State<AremaAremajuniorView> {
 
   void _onItemTapped(int index) {
     setState(() {
-      _selectedIndex = index;
+      _selectedIndex = index; // Mengubah indeks terpilih
     });
+
+    // Navigasi berdasarkan indeks
+    if (index == 0) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => HomeScreen()),
+      );
+    } else if (index == 1) {
+      // Indeks 1 adalah untuk ikon "Explore"
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => NgalamTerbaruView()),
+      );
+    } else if (index == 2) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => FavoriteView()),
+      );
+    } else if (index == 3) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => Ticket_View()),
+      );
+    }
   }
 
   void _onMenuTapped(int index) {
@@ -57,6 +86,8 @@ class _NewsPageState extends State<AremaAremajuniorView> {
       Get.to(() => AremaAremaputriView());
     } else if (index == 2) {
       Get.to(() => AremaBeritafotoView());
+    } else if (index == 3) {
+      Get.to(() => AremaAremajuniorView());
     }
   }
 
@@ -77,7 +108,12 @@ class _NewsPageState extends State<AremaAremajuniorView> {
         leading: IconButton(
           icon: Icon(Icons.menu, color: Colors.black),
           onPressed: () {
-            // Navigasi ke halaman kategori
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>
+                      KategoriView()), // Ganti dengan nama halaman yang sesuai
+            );
           },
         ),
         actions: [
@@ -172,6 +208,7 @@ class _NewsPageState extends State<AremaAremajuniorView> {
                         'Arema Kalahkan Persib Bandung, Inilah Statistik dan Skor Akhir',
                     subtitle: 'Berita Arema • 1 jam yang lalu',
                     imagePath: 'assets/gambar4.jpg',
+                    context: context, // Pass the context here
                   ),
                   SizedBox(height: 16),
                   _buildSmallNewsListItem(
@@ -369,6 +406,7 @@ class _NewsPageState extends State<AremaAremajuniorView> {
     required String title,
     required String subtitle,
     required String imagePath,
+    required BuildContext context, // Pass the BuildContext
   }) {
     return Container(
       width: double.infinity,
@@ -379,14 +417,25 @@ class _NewsPageState extends State<AremaAremajuniorView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: double.infinity,
-            height: 200,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: Image.asset(
-                imagePath,
-                fit: BoxFit.cover,
+          GestureDetector(
+            // Wrap the image with GestureDetector
+            onTap: () {
+              // Navigate to AremaJuniorRead page
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => AremaReadAremajuniorView()),
+              );
+            },
+            child: Container(
+              width: double.infinity,
+              height: 200,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.asset(
+                  imagePath,
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
           ),
