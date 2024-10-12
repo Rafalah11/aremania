@@ -38,6 +38,7 @@ abstract class Routes {
   static const LOGIN = _Paths.LOGIN;
   static const HALAMAN_LOGIN = _Paths.HALAMAN_LOGIN;
   static const HALAMAN_DAFTAR = _Paths.HALAMAN_DAFTAR;
+  static const ABC = _Paths.ABC;
 }
 
 abstract class _Paths {
@@ -77,4 +78,5 @@ abstract class _Paths {
   static const LOGIN = '/login';
   static const HALAMAN_LOGIN = '/halaman-login';
   static const HALAMAN_DAFTAR = '/halaman-daftar';
+  static const ABC = '/abc';
 }

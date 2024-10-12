@@ -4,6 +4,8 @@ import '../modules/Favorite/bindings/favorite_binding.dart';
 import '../modules/Favorite/views/favorite_view.dart';
 import '../modules/News_page/bindings/news_page_binding.dart';
 import '../modules/News_page/views/news_page_view.dart';
+import '../modules/abc/bindings/abc_binding.dart';
+import '../modules/abc/views/abc_view.dart';
 import '../modules/arema_aremajunior/bindings/arema_aremajunior_binding.dart';
 import '../modules/arema_aremajunior/views/arema_aremajunior_view.dart';
 import '../modules/arema_aremaputri/bindings/arema_aremaputri_binding.dart';
@@ -279,6 +281,11 @@ class AppPages {
       name: _Paths.HALAMAN_DAFTAR,
       page: () => HalamanDaftarView(),
       binding: HalamanDaftarBinding(),
+    ),
+    GetPage(
+      name: _Paths.ABC,
+      page: () => const AbcView(),
+      binding: AbcBinding(),
     ),
   ];
 }
