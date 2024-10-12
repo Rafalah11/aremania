@@ -28,6 +28,8 @@ import '../modules/aremaday_semua/bindings/aremaday_semua_binding.dart';
 import '../modules/aremaday_semua/views/aremaday_semua_view.dart';
 import '../modules/aremania_semua/bindings/aremania_semua_binding.dart';
 import '../modules/aremania_semua/views/aremania_semua_view.dart';
+import '../modules/halaman_animasi_awal/bindings/halaman_animasi_awal_binding.dart';
+import '../modules/halaman_animasi_awal/views/halaman_animasi_awal_view.dart';
 import '../modules/halaman_daftar/bindings/halaman_daftar_binding.dart';
 import '../modules/halaman_daftar/views/halaman_daftar_view.dart';
 import '../modules/halaman_login/bindings/halaman_login_binding.dart';
@@ -112,6 +114,7 @@ class AppPages {
   static const LOGIN = Routes.LOGIN;
   static const HALAMAN_LOGIN = Routes.HALAMAN_LOGIN;
   static const HALAMAN_DAFTAR = Routes.HALAMAN_DAFTAR;
+  static const HALAMAN_ANIMASI_AWAL = Routes.HALAMAN_ANIMASI_AWAL;
 
   static final routes = [
     GetPage(
@@ -293,6 +296,11 @@ class AppPages {
       name: _Paths.ABCD,
       page: () => const AbcdView(),
       binding: AbcdBinding(),
+    ),
+    GetPage(
+      name: _Paths.HALAMAN_ANIMASI_AWAL,
+      page: () => HalamanAnimasiAwalView(),
+      binding: HalamanAnimasiAwalBinding(),
     ),
   ];
 }

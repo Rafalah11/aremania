@@ -117,11 +117,11 @@ class _NewsPageState extends State<NgalamTerbaruView> {
           icon: Icon(Icons.menu, color: Colors.black),
           onPressed: () {
             Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) =>
-                        KategoriView()), // Ganti dengan nama halaman yang sesuai
-              );
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>
+                      KategoriView()), // Ganti dengan nama halaman yang sesuai
+            );
           },
         ),
         actions: [
@@ -216,6 +216,7 @@ class _NewsPageState extends State<NgalamTerbaruView> {
                         'Arema Kalahkan Persib Bandung, Inilah Statistik dan Skor Akhir',
                     subtitle: 'Berita Arema • 1 jam yang lalu',
                     imagePath: 'assets/gambar4.jpg',
+                    context: context,
                   ),
                   SizedBox(height: 16),
                   _buildSmallNewsListItem(
@@ -413,6 +414,7 @@ class _NewsPageState extends State<NgalamTerbaruView> {
     required String title,
     required String subtitle,
     required String imagePath,
+    required BuildContext context, // Menambahkan parameter context
   }) {
     return Container(
       width: double.infinity,
@@ -423,14 +425,26 @@ class _NewsPageState extends State<NgalamTerbaruView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: double.infinity,
-            height: 200,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: Image.asset(
-                imagePath,
-                fit: BoxFit.cover,
+          GestureDetector(
+            // Membungkus Image.asset dengan GestureDetector
+            onTap: () {
+              // Aksi ketika gambar diklik
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        NgalamReadTerbaruView()), // Ganti dengan halaman yang diinginkan
+              );
+            },
+            child: Container(
+              width: double.infinity,
+              height: 200,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.asset(
+                  imagePath,
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
           ),
@@ -461,7 +475,6 @@ class _NewsPageState extends State<NgalamTerbaruView> {
                     ),
                   ],
                 ),
-                SizedBox(height: 16),
               ],
             ),
           ),

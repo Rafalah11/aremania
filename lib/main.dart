@@ -8,7 +8,7 @@ void main() {
   runApp(
     GetMaterialApp(
       title: "Application",
-      initialRoute: AppPages.LOGIN,
+      initialRoute: AppPages.HALAMAN_ANIMASI_AWAL,
       getPages: AppPages.routes,
     ),
   );

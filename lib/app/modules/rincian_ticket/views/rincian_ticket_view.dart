@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:myapp/app/modules/Favorite/views/favorite_view.dart';
+import 'package:myapp/app/modules/home/views/home_view.dart';
 import 'package:myapp/app/modules/login/views/login_view.dart';
+import 'package:myapp/app/modules/ngalam_terbaru/views/ngalam_terbaru_view.dart';
 import 'package:myapp/app/modules/ticket/views/ticket_view.dart';
 
 void main() {
@@ -25,10 +28,34 @@ class MatchDetailScreen extends StatefulWidget {
 class _RincianTicketScreenState extends State<MatchDetailScreen> {
   int _selectedIndex = 0;
 
-  void _onItemTapped(int index) {
+void _onItemTapped(int index) {
     setState(() {
-      _selectedIndex = index;
+      _selectedIndex = index; // Mengubah indeks terpilih
     });
+
+    // Navigasi berdasarkan indeks
+    if (index == 0) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => HomeScreen()),
+      );
+    } else if (index == 1) {
+      // Indeks 1 adalah untuk ikon "Explore"
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => NgalamTerbaruView()),
+      );
+    } else if (index == 2) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => FavoriteView()),
+      );
+    } else if (index == 3) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => Ticket_View()),
+      );
+    }
   }
 
   @override
@@ -178,105 +205,29 @@ class _RincianTicketScreenState extends State<MatchDetailScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
-              spreadRadius: 5,
-              blurRadius: 7,
-              offset: Offset(0, 3),
-            ),
-          ],
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(25),
-            topRight: Radius.circular(25),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
           ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: BottomNavigationBar(
-            type: BottomNavigationBarType.fixed, // Untuk lebih dari 3 item
-            backgroundColor: Colors.white,
-            currentIndex: _selectedIndex,
-            selectedItemColor: Colors.blueAccent,
-            unselectedItemColor: Colors.grey,
-            showSelectedLabels: false, // Menghilangkan label
-            showUnselectedLabels: false, // Menghilangkan label
-            onTap: _onItemTapped, // Ketika item ditekan
-            items: <BottomNavigationBarItem>[
-              BottomNavigationBarItem(
-                icon: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Container(
-                      height: 50,
-                      width: 50,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade200,
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                    Icon(Icons.home),
-                  ],
-                ),
-                label: 'Home',
-              ),
-              BottomNavigationBarItem(
-                icon: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Container(
-                      height: 50,
-                      width: 50,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade200,
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                    Icon(Icons.explore),
-                  ],
-                ),
-                label: 'Explore',
-              ),
-              BottomNavigationBarItem(
-                icon: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Container(
-                      height: 50,
-                      width: 50,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade200,
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                    Icon(Icons.bookmark),
-                  ],
-                ),
-                label: 'Bookmark',
-              ),
-              BottomNavigationBarItem(
-                icon: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Container(
-                      height: 50,
-                      width: 50,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade200,
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                    Icon(Icons.confirmation_number), // Ikon tiket
-                  ],
-                ),
-                label: 'Ticket',
-              ),
-            ],
+          BottomNavigationBarItem(
+            icon: Icon(Icons.explore),
+            label: 'Information',
           ),
-        ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.bookmark),
+            label: 'Bookmark',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.confirmation_number), // Material Icons untuk tiket
+            label: 'Ticket',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.blue,
+        unselectedItemColor: Colors.grey,
+        onTap: _onItemTapped,
       ),
     );
   }

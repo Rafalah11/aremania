@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:myapp/app/modules/Favorite/views/favorite_view.dart';
 import 'package:myapp/app/modules/arema_aremaputri/views/arema_aremaputri_view.dart';
 import 'package:myapp/app/modules/arema_beritafoto/views/arema_beritafoto_view.dart';
 import 'package:myapp/app/modules/arema_editorial/views/arema_editorial_view.dart';
@@ -12,6 +13,7 @@ import 'package:myapp/app/modules/ngalam_kuliner/views/ngalam_kuliner_view.dart'
 import 'package:myapp/app/modules/ngalam_malangan/views/ngalam_malangan_view.dart';
 import 'package:myapp/app/modules/ngalam_read_destinasi/views/ngalam_read_destinasi_view.dart';
 import 'package:myapp/app/modules/ngalam_terbaru/views/ngalam_terbaru_view.dart';
+import 'package:myapp/app/modules/ticket/views/ticket_view.dart';
 
 void main() {
   runApp(MyApp());
@@ -45,7 +47,7 @@ class _NewsPageState extends State<NgalamDestinasiView> {
     'Info Penting'
   ];
 
-void _onItemTapped(int index) {
+  void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index; // Mengubah indeks terpilih
     });
@@ -56,10 +58,21 @@ void _onItemTapped(int index) {
         context,
         MaterialPageRoute(builder: (context) => HomeScreen()),
       );
-    } else if (index == 1) { // Indeks 1 adalah untuk ikon "Explore"
+    } else if (index == 1) {
+      // Indeks 1 adalah untuk ikon "Explore"
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => NgalamTerbaruView()),
+      );
+    } else if (index == 2) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => FavoriteView()),
+      );
+    } else if (index == 3) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => Ticket_View()),
       );
     }
   }
@@ -104,11 +117,11 @@ void _onItemTapped(int index) {
           icon: Icon(Icons.menu, color: Colors.black),
           onPressed: () {
             Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) =>
-                        KategoriView()), // Ganti dengan nama halaman yang sesuai
-              );
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>
+                      KategoriView()), // Ganti dengan nama halaman yang sesuai
+            );
           },
         ),
         actions: [
@@ -203,6 +216,7 @@ void _onItemTapped(int index) {
                         'Arema Kalahkan Persib Bandung, Inilah Statistik dan Skor Akhir',
                     subtitle: 'Berita Arema • 1 jam yang lalu',
                     imagePath: 'assets/gambar4.jpg',
+                    context: context,
                   ),
                   SizedBox(height: 16),
                   _buildSmallNewsListItem(
@@ -400,6 +414,7 @@ void _onItemTapped(int index) {
     required String title,
     required String subtitle,
     required String imagePath,
+    required BuildContext context, // Menambahkan parameter context
   }) {
     return Container(
       width: double.infinity,
@@ -410,14 +425,26 @@ void _onItemTapped(int index) {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: double.infinity,
-            height: 200,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: Image.asset(
-                imagePath,
-                fit: BoxFit.cover,
+          GestureDetector(
+            // Membungkus Image.asset dengan GestureDetector
+            onTap: () {
+              // Aksi ketika gambar diklik
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        NgalamReadDestinasiView()), // Ganti dengan halaman yang diinginkan
+              );
+            },
+            child: Container(
+              width: double.infinity,
+              height: 200,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.asset(
+                  imagePath,
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
           ),
@@ -448,7 +475,6 @@ void _onItemTapped(int index) {
                     ),
                   ],
                 ),
-                SizedBox(height: 16),
               ],
             ),
           ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:myapp/app/modules/Favorite/views/favorite_view.dart';
 import 'package:myapp/app/modules/arema_aremaputri/views/arema_aremaputri_view.dart';
 import 'package:myapp/app/modules/arema_beritafoto/views/arema_beritafoto_view.dart';
 import 'package:myapp/app/modules/arema_editorial/views/arema_editorial_view.dart';
@@ -11,8 +12,10 @@ import 'package:myapp/app/modules/ngalam_infopenting/views/ngalam_infopenting_vi
 import 'package:myapp/app/modules/ngalam_kuliner/views/ngalam_kuliner_view.dart';
 import 'package:myapp/app/modules/ngalam_malangan/bindings/ngalam_malangan_binding.dart';
 import 'package:myapp/app/modules/ngalam_malangan/views/ngalam_malangan_view.dart';
+import 'package:myapp/app/modules/ngalam_read_malangan/views/ngalam_read_malangan_view.dart';
 import 'package:myapp/app/modules/ngalam_read_malangankuliner/views/ngalam_read_malangankuliner_view.dart';
 import 'package:myapp/app/modules/ngalam_terbaru/views/ngalam_terbaru_view.dart';
+import 'package:myapp/app/modules/ticket/views/ticket_view.dart';
 
 void main() {
   runApp(MyApp());
@@ -46,7 +49,8 @@ class _NewsPageState extends State<NgalamMalanganView> {
     'Info Penting'
   ];
 
-  void _onItemTapped(int index) {
+
+void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index; // Mengubah indeks terpilih
     });
@@ -62,6 +66,16 @@ class _NewsPageState extends State<NgalamMalanganView> {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => NgalamTerbaruView()),
+      );
+    } else if (index == 2) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => FavoriteView()),
+      );
+    } else if (index == 3) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => Ticket_View()),
       );
     }
   }
@@ -204,7 +218,7 @@ class _NewsPageState extends State<NgalamMalanganView> {
                     title:
                         'Arema Kalahkan Persib Bandung, Inilah Statistik dan Skor Akhir',
                     subtitle: 'Berita Arema • 1 jam yang lalu',
-                    imagePath: 'assets/gambar4.jpg',
+                    imagePath: 'assets/gambar4.jpg', context: context,
                   ),
                   SizedBox(height: 16),
                   _buildSmallNewsListItem(
@@ -398,10 +412,11 @@ class _NewsPageState extends State<NgalamMalanganView> {
     );
   }
 
-  Widget _buildFullWidthNewsItem({
+ Widget _buildFullWidthNewsItem({
     required String title,
     required String subtitle,
     required String imagePath,
+    required BuildContext context, // Menambahkan parameter context
   }) {
     return Container(
       width: double.infinity,
@@ -412,14 +427,26 @@ class _NewsPageState extends State<NgalamMalanganView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: double.infinity,
-            height: 200,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: Image.asset(
-                imagePath,
-                fit: BoxFit.cover,
+          GestureDetector(
+            // Membungkus Image.asset dengan GestureDetector
+            onTap: () {
+              // Aksi ketika gambar diklik
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        NgalamReadMalanganView()), // Ganti dengan halaman yang diinginkan
+              );
+            },
+            child: Container(
+              width: double.infinity,
+              height: 200,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.asset(
+                  imagePath,
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
           ),
@@ -450,7 +477,6 @@ class _NewsPageState extends State<NgalamMalanganView> {
                     ),
                   ],
                 ),
-                SizedBox(height: 16),
               ],
             ),
           ),
