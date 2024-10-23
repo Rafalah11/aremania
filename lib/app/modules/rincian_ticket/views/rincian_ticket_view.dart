@@ -75,7 +75,7 @@ class _RincianTicketScreenState extends State<MatchDetailScreen> {
           },
         ),
         title: Text(
-          "Arema FC VS Persija Jakarta",
+          "AremaFC VS Persija Jakarta",
           style: TextStyle(color: Colors.black),
         ),
       ),
