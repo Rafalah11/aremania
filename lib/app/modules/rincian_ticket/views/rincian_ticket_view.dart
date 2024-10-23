@@ -27,7 +27,7 @@ class MatchDetailScreen extends StatefulWidget {
 class _RincianTicketScreenState extends State<MatchDetailScreen> {
   int _selectedIndex = 0;
 
-void _onItemTapped(int index) {
+  void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index; // Mengubah indeks terpilih
     });
@@ -75,7 +75,7 @@ void _onItemTapped(int index) {
           },
         ),
         title: Text(
-          "Arema FC VS Persija Jakarta",
+          "AremaFC VS Persija Jakarta",
           style: TextStyle(color: Colors.black),
         ),
       ),
