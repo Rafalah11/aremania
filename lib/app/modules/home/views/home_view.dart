@@ -359,7 +359,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Image.asset('assets/berita_1.png',
+                            Image.asset('assets/gambar4.jpg',
                                 fit: BoxFit.cover),
                             Padding(
                               padding: const EdgeInsets.all(8.0),
@@ -392,7 +392,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Image.asset('assets/berita_2.png',
+                            Image.asset('assets/gambar5.jpg',
                                 fit: BoxFit.cover),
                             Padding(
                               padding: const EdgeInsets.all(8.0),
@@ -441,7 +441,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Image.asset('assets/berita_1.png',
+                            Image.asset('assets/gambar7.jpeg',
                                 fit: BoxFit.cover),
                             Padding(
                               padding: const EdgeInsets.all(8.0),
@@ -474,7 +474,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Image.asset('assets/berita_2.png',
+                            Image.asset('assets/gambar8.jpeg',
                                 fit: BoxFit.cover),
                             Padding(
                               padding: const EdgeInsets.all(8.0),
@@ -523,7 +523,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Image.asset('assets/berita_1.png',
+                            Image.asset('assets/gambar9.png',
                                 fit: BoxFit.cover),
                             Padding(
                               padding: const EdgeInsets.all(8.0),
@@ -556,7 +556,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Image.asset('assets/berita_2.png',
+                            Image.asset('assets/gambar10.jpg',
                                 fit: BoxFit.cover),
                             Padding(
                               padding: const EdgeInsets.all(8.0),

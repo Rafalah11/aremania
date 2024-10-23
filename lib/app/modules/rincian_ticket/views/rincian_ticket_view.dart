@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:myapp/app/modules/Favorite/views/favorite_view.dart';
 import 'package:myapp/app/modules/home/views/home_view.dart';
 import 'package:myapp/app/modules/login/views/login_view.dart';

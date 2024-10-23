@@ -1,17 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:myapp/app/modules/Favorite/views/favorite_view.dart';
-import 'package:myapp/app/modules/arema_aremaputri/views/arema_aremaputri_view.dart';
-import 'package:myapp/app/modules/arema_beritafoto/views/arema_beritafoto_view.dart';
-import 'package:myapp/app/modules/arema_editorial/views/arema_editorial_view.dart';
-import 'package:myapp/app/modules/arema_read_aremajunior/views/arema_read_aremajunior_view.dart';
 import 'package:myapp/app/modules/home/views/home_view.dart';
 import 'package:myapp/app/modules/kategori/views/kategori_view.dart';
 import 'package:myapp/app/modules/ngalam_destinasi/views/ngalam_destinasi_view.dart';
 import 'package:myapp/app/modules/ngalam_infopenting/views/ngalam_infopenting_view.dart';
 import 'package:myapp/app/modules/ngalam_kuliner/views/ngalam_kuliner_view.dart';
-import 'package:myapp/app/modules/ngalam_malangan/bindings/ngalam_malangan_binding.dart';
-import 'package:myapp/app/modules/ngalam_malangan/views/ngalam_malangan_view.dart';
 import 'package:myapp/app/modules/ngalam_read_malangan/views/ngalam_read_malangan_view.dart';
 import 'package:myapp/app/modules/ngalam_read_malangankuliner/views/ngalam_read_malangankuliner_view.dart';
 import 'package:myapp/app/modules/ngalam_terbaru/views/ngalam_terbaru_view.dart';
@@ -49,8 +43,7 @@ class _NewsPageState extends State<NgalamMalanganView> {
     'Info Penting'
   ];
 
-
-void _onItemTapped(int index) {
+  void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index; // Mengubah indeks terpilih
     });
@@ -120,11 +113,11 @@ void _onItemTapped(int index) {
           icon: Icon(Icons.menu, color: Colors.black),
           onPressed: () {
             Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) =>
-                        KategoriView()), // Ganti dengan nama halaman yang sesuai
-              );
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>
+                      KategoriView()), // Ganti dengan nama halaman yang sesuai
+            );
           },
         ),
         actions: [
@@ -218,7 +211,8 @@ void _onItemTapped(int index) {
                     title:
                         'Arema Kalahkan Persib Bandung, Inilah Statistik dan Skor Akhir',
                     subtitle: 'Berita Arema • 1 jam yang lalu',
-                    imagePath: 'assets/gambar4.jpg', context: context,
+                    imagePath: 'assets/gambar4.jpg',
+                    context: context,
                   ),
                   SizedBox(height: 16),
                   _buildSmallNewsListItem(
@@ -412,7 +406,7 @@ void _onItemTapped(int index) {
     );
   }
 
- Widget _buildFullWidthNewsItem({
+  Widget _buildFullWidthNewsItem({
     required String title,
     required String subtitle,
     required String imagePath,

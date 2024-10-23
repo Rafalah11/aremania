@@ -1,13 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:myapp/app/modules/Favorite/views/favorite_view.dart';
-import 'package:myapp/app/modules/arema_aremaputri/views/arema_aremaputri_view.dart';
-import 'package:myapp/app/modules/arema_beritafoto/views/arema_beritafoto_view.dart';
-import 'package:myapp/app/modules/arema_editorial/views/arema_editorial_view.dart';
-import 'package:myapp/app/modules/arema_read_aremajunior/views/arema_read_aremajunior_view.dart';
 import 'package:myapp/app/modules/home/views/home_view.dart';
 import 'package:myapp/app/modules/kategori/views/kategori_view.dart';
-import 'package:myapp/app/modules/ngalam_destinasi/views/ngalam_destinasi_view.dart';
 import 'package:myapp/app/modules/ngalam_infopenting/views/ngalam_infopenting_view.dart';
 import 'package:myapp/app/modules/ngalam_kuliner/views/ngalam_kuliner_view.dart';
 import 'package:myapp/app/modules/ngalam_malangan/views/ngalam_malangan_view.dart';
