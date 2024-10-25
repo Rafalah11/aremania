@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "115252540924",
+    "project_id": "mobilemateri-16b83",
+    "storage_bucket": "mobilemateri-16b83.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:115252540924:android:99247d398de30233c26e79",
+        "android_client_info": {
+          "package_name": "com.example.myapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDjqU-ca4KINpcmPSoR3h9kTk_BM4VjS9M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,131 +1,146 @@
 import 'package:flutter/material.dart';
-import 'package:myapp/app/modules/login/views/login_view.dart';
+import 'package:get/get.dart';
+import 'package:myapp/app/controllers/auth_controller.dart';
+import 'package:myapp/app/modules/halaman_login/views/halaman_login_view.dart';
 
-void main() {
-  runApp(HalamanDaftarView());
-}
-
-class HalamanDaftarView extends StatelessWidget {
+class HalamanDaftarView extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: DaftarPage(),
-    );
-  }
+  State<HalamanDaftarView> createState() => _RegisterPageViewState();
 }
 
-class DaftarPage extends StatelessWidget {
+class _RegisterPageViewState extends State<HalamanDaftarView> {
+  final AuthController _authController = Get.put(AuthController());
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          // Membungkus dengan SingleChildScrollView
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.arrow_back),
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              LoginView()),
-                    );
-                  },
+      backgroundColor: Colors.blueGrey[50], // Light background
+      appBar: AppBar(
+        title: Text(
+          'Create Account',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.blueAccent, // AppBar color
+        elevation: 0,
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(height: 40),
+              Text(
+                "Register",
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blueAccent, // Text color
                 ),
-                SizedBox(height: 20),
-                Center(
-                  child: Text(
-                    'Daftar',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 40),
+              // Email Input
+              TextField(
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: InputDecoration(
+                  labelText: 'Email',
+                  labelStyle: TextStyle(color: Colors.blueAccent),
+                  filled: true,
+                  fillColor: Colors.white,
+                  prefixIcon: Icon(Icons.email, color: Colors.blueAccent),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.blueAccent),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.blueAccent, width: 2),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                SizedBox(height: 40),
-                TextField(
-                  decoration: InputDecoration(
-                    labelText: 'Email',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+              ),
+              SizedBox(height: 20),
+              // Password Input
+              TextField(
+                controller: _passwordController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  labelStyle: TextStyle(color: Colors.blueAccent),
+                  filled: true,
+                  fillColor: Colors.white,
+                  prefixIcon: Icon(Icons.lock, color: Colors.blueAccent),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.blueAccent),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.blueAccent, width: 2),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                SizedBox(height: 20),
-                TextField(
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: 'Kata Sandi',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+              ),
+              SizedBox(height: 40),
+              // Register Button
+              Obx(() {
+                return ElevatedButton(
+                  onPressed: _authController.isLoading.value
+                      ? null
+                      : () {
+                          _authController.registerUser(
+                            _emailController.text,
+                            _passwordController.text,
+                          );
+                        },
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(vertical: 14, horizontal: 80),
+                    backgroundColor: Colors.blueAccent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ), // Button color
+                  ),
+                  child: _authController.isLoading.value
+                      ? CircularProgressIndicator(
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
+                        )
+                      : Text(
+                          'Sign Up',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white, // Text color
+                          ),
+                        ),
+                );
+              }),
+              SizedBox(height: 20),
+              // Login Redirect
+              GestureDetector(
+                onTap: () {
+                  Get.to(HalamanLoginView());
+                },
+                child: Text(
+                  'Already have an account? Log In',
+                  style: TextStyle(
+                    color: const Color.fromARGB(255, 0, 22, 59),
                   ),
                 ),
-                SizedBox(height: 20),
-                TextField(
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: 'Konfirmasi Kata Sandi',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 20),
-                Center(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      // Action untuk tombol daftar
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 100, vertical: 20),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                    child: Text(
-                      'Daftar',
-                      style: TextStyle(fontSize: 18),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 20),
-                Center(
-                  child: Text('Atau',
-                      style: TextStyle(color: Colors.grey, fontSize: 16)),
-                ),
-                SizedBox(height: 20),
-                Center(
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      // Action untuk daftar menggunakan Google
-                    },
-                    icon: Image.asset(
-                      'assets/.png', // Ganti dengan URL icon Google Anda
-                      height: 24, // Menyesuaikan ukuran ikon
-                    ),
-                    label: Text(
-                      'Continue with Google',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.black,
-                      backgroundColor: Colors.white,
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                        side: BorderSide(color: Colors.grey),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
