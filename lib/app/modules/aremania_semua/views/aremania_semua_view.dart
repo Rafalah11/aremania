@@ -26,7 +26,7 @@ class AremaniaSemuaView extends StatefulWidget {
 
 class _NewsPageState extends State<AremaniaSemuaView> {
   bool _isBookmarked = false; // State untuk melacak status bookmark
-  int _selectedIndex = 0; // Untuk melacak tab yang dipilih
+  int _selectedIndex = 1; // Untuk melacak tab yang dipilih
 
   // Daftar widget yang sesuai dengan tab yang dipilih
 
@@ -68,7 +68,7 @@ class _NewsPageState extends State<AremaniaSemuaView> {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          'Berita Terbaru',
+          'Aremania',
           style: TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.bold,

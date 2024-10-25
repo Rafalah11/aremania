@@ -359,8 +359,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Image.asset('assets/gambar4.jpg',
-                                fit: BoxFit.cover),
+                            Image.asset(
+                              'assets/gambar4.jpg',
+                              fit: BoxFit.cover,
+                              height: 150, // Atur tinggi gambar agar konsisten
+                            ),
                             Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Column(
@@ -370,13 +373,24 @@ class _HomeScreenState extends State<HomeScreen> {
                                     "Arema FC Perkuat Lini Serang, Rekrut Striker Asing Jelang Putaran ...",
                                     style:
                                         TextStyle(fontWeight: FontWeight.bold),
+                                    maxLines: 2, // Membatasi jumlah baris teks
+                                    overflow: TextOverflow
+                                        .ellipsis, // Tambahkan ellipsis jika teks melebihi batas
                                   ),
                                   SizedBox(height: 5),
                                   Row(
                                     children: [
                                       Icon(Icons.remove_red_eye, size: 12),
                                       SizedBox(width: 5),
-                                      Text("Berita Arema • Senin, 4 Jun 24"),
+                                      Text("Berita Arema"),
+                                    ],
+                                  ),
+                                  SizedBox(height: 5),
+                                  Row(
+                                    children: [
+                                      Icon(Icons.circle, size: 12),
+                                      SizedBox(width: 5),
+                                      Text("Senin, 4 Jun 24"),
                                     ],
                                   ),
                                 ],
@@ -392,8 +406,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Image.asset('assets/gambar5.jpg',
-                                fit: BoxFit.cover),
+                            Image.asset(
+                              'assets/gambar5.jpg',
+                              fit: BoxFit.cover,
+                              height: 150, // Atur tinggi gambar agar konsisten
+                            ),
                             Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Column(
@@ -403,13 +420,24 @@ class _HomeScreenState extends State<HomeScreen> {
                                     "5 Fakta Menarik Wiliam Marcilio, Mastro Arema Dari Rio de Janeiro",
                                     style:
                                         TextStyle(fontWeight: FontWeight.bold),
+                                    maxLines: 2, // Membatasi jumlah baris teks
+                                    overflow: TextOverflow
+                                        .ellipsis, // Tambahkan ellipsis jika teks melebihi batas
                                   ),
                                   SizedBox(height: 5),
                                   Row(
                                     children: [
                                       Icon(Icons.remove_red_eye, size: 12),
                                       SizedBox(width: 5),
-                                      Text("Focus • Senin, 4 Jun 24"),
+                                      Text("Focus"),
+                                    ],
+                                  ),
+                                  SizedBox(height: 5),
+                                  Row(
+                                    children: [
+                                      Icon(Icons.circle, size: 12),
+                                      SizedBox(width: 5),
+                                      Text("Senin, 4 Jun 24"),
                                     ],
                                   ),
                                 ],
@@ -421,6 +449,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ],
                 ),
+
                 SizedBox(height: 20),
                 // Tabs dan konten Berita Terbaru
                 Row(
@@ -441,8 +470,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Image.asset('assets/gambar7.jpeg',
-                                fit: BoxFit.cover),
+                            Image.asset(
+                              'assets/gambar7.jpeg',
+                              fit: BoxFit.cover,
+                              height: 150, // Atur tinggi gambar agar konsisten
+                            ),
                             Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Column(
@@ -452,13 +484,24 @@ class _HomeScreenState extends State<HomeScreen> {
                                     "Jadwal Arema di Liga 1 2024-2025 Pekan 8",
                                     style:
                                         TextStyle(fontWeight: FontWeight.bold),
+                                    maxLines: 2, // Membatasi jumlah baris teks
+                                    overflow: TextOverflow
+                                        .ellipsis, // Tambahkan ellipsis jika teks melebihi batas
                                   ),
                                   SizedBox(height: 5),
                                   Row(
                                     children: [
                                       Icon(Icons.remove_red_eye, size: 12),
                                       SizedBox(width: 5),
-                                      Text("Arema Day • Rabu, 9 Okt 24"),
+                                      Text("Arema Day"),
+                                    ],
+                                  ),
+                                  SizedBox(height: 5),
+                                  Row(
+                                    children: [
+                                      Icon(Icons.circle, size: 12),
+                                      SizedBox(width: 5),
+                                      Text("Senin, 4 Jun 24"),
                                     ],
                                   ),
                                 ],
@@ -474,24 +517,38 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Image.asset('assets/gambar8.jpeg',
-                                fit: BoxFit.cover),
+                            Image.asset(
+                              'assets/gambar8.jpeg',
+                              fit: BoxFit.cover,
+                              height: 150, // Atur tinggi gambar agar konsisten
+                            ),
                             Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    "Hasil Liga 1 2024-2025 PSIS Semarang vs Arema, 26 September ...",
+                                    "Hasil Liga 1 2024-2025 PSIS Semarang vs Arema, 26 September",
                                     style:
                                         TextStyle(fontWeight: FontWeight.bold),
+                                    maxLines: 2, // Membatasi jumlah baris teks
+                                    overflow: TextOverflow
+                                        .ellipsis, // Tambahkan ellipsis jika teks melebihi batas
                                   ),
                                   SizedBox(height: 5),
                                   Row(
                                     children: [
                                       Icon(Icons.remove_red_eye, size: 12),
                                       SizedBox(width: 5),
-                                      Text("Arema Day • Rabu, 9 Okt 24"),
+                                      Text("Arema Day"),
+                                    ],
+                                  ),
+                                  SizedBox(height: 5),
+                                  Row(
+                                    children: [
+                                      Icon(Icons.circle, size: 12),
+                                      SizedBox(width: 5),
+                                      Text("Senin, 4 Jun 24"),
                                     ],
                                   ),
                                 ],
@@ -503,6 +560,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ],
                 ),
+
                 SizedBox(height: 20),
                 // Tabs dan konten Berita Terbaru
                 Row(
@@ -523,24 +581,38 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Image.asset('assets/gambar9.png',
-                                fit: BoxFit.cover),
+                            Image.asset(
+                              'assets/gambar9.png',
+                              fit: BoxFit.cover,
+                              height: 150, // Atur tinggi gambar agar konsisten
+                            ),
                             Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    "Presidium Aremania Buka Lebar Pintu Sekretariat Untuk ...",
+                                    "Presidium Aremania Buka Lebar Pintu Sekretariat Untuk",
                                     style:
                                         TextStyle(fontWeight: FontWeight.bold),
+                                    maxLines: 2, // Membatasi jumlah baris teks
+                                    overflow: TextOverflow
+                                        .ellipsis, // Tambahkan ellipsis jika teks melebihi batas
                                   ),
                                   SizedBox(height: 5),
                                   Row(
                                     children: [
                                       Icon(Icons.remove_red_eye, size: 12),
                                       SizedBox(width: 5),
-                                      Text("Aremania • Kamis, 6 Jun 24"),
+                                      Text("Aremania"),
+                                    ],
+                                  ),
+                                  SizedBox(height: 5),
+                                  Row(
+                                    children: [
+                                      Icon(Icons.circle, size: 12),
+                                      SizedBox(width: 5),
+                                      Text("Senin, 4 Jun 24"),
                                     ],
                                   ),
                                 ],
@@ -556,24 +628,38 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Image.asset('assets/gambar10.jpg',
-                                fit: BoxFit.cover),
+                            Image.asset(
+                              'assets/gambar10.jpg',
+                              fit: BoxFit.cover,
+                              height: 150, // Atur tinggi gambar agar konsisten
+                            ),
                             Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    "Hadiri Doa Bersama 2 Tahun Tragedi Kanjuruhan, Begini ...",
+                                    "Hadiri Doa Bersama 2 Tahun Tragedi Kanjuruhan, Begini",
                                     style:
                                         TextStyle(fontWeight: FontWeight.bold),
+                                    maxLines: 2, // Membatasi jumlah baris teks
+                                    overflow: TextOverflow
+                                        .ellipsis, // Tambahkan ellipsis jika teks melebihi batas
                                   ),
                                   SizedBox(height: 5),
                                   Row(
                                     children: [
                                       Icon(Icons.remove_red_eye, size: 12),
                                       SizedBox(width: 5),
-                                      Text("Aremania • Kamis, 6 Jun 24"),
+                                      Text("Aremanita"),
+                                    ],
+                                  ),
+                                  SizedBox(height: 5),
+                                  Row(
+                                    children: [
+                                      Icon(Icons.circle, size: 12),
+                                      SizedBox(width: 5),
+                                      Text("Senin, 4 Jun 24"),
                                     ],
                                   ),
                                 ],

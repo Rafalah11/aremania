@@ -26,7 +26,7 @@ class AremadaySemuaView extends StatefulWidget {
 
 class _NewsPageState extends State<AremadaySemuaView> {
   bool _isBookmarked = false; // State untuk melacak status bookmark
-  int _selectedIndex = 0; // Untuk melacak tab yang dipilih
+  int _selectedIndex = 1; // Untuk melacak tab yang dipilih
 
   void _onItemTapped(int index) {
     setState(() {

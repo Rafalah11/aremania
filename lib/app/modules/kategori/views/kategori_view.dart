@@ -1,24 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:myapp/app/modules/arema_editorial/views/arema_editorial_view.dart';
 import 'package:myapp/app/modules/aremaday_semua/views/aremaday_semua_view.dart';
 import 'package:myapp/app/modules/aremania_semua/views/aremania_semua_view.dart';
 import 'package:myapp/app/modules/ngalam_terbaru/views/ngalam_terbaru_view.dart';
 
 void main() {
-  runApp(KategoriView());
+  runApp(MyApp());
 }
 
-class KategoriView extends StatelessWidget {
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
+      // Menggunakan GetMaterialApp sebagai root
       debugShowCheckedModeBanner: false,
-      home: kategori(),
+      home: KategoriView(),
     );
   }
 }
 
-class kategori extends StatelessWidget {
+class KategoriView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,14 +31,14 @@ class kategori extends StatelessWidget {
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {
-            // Aksi kembali
+            Get.back(); // Menggunakan Get.back untuk kembali ke halaman sebelumnya
           },
         ),
         actions: [
           IconButton(
             icon: Icon(Icons.search, color: Colors.black),
             onPressed: () {
-              // Aksi pencarian
+              // Tambahkan fungsi pencarian di sini jika diperlukan
             },
           ),
         ],
@@ -45,66 +47,51 @@ class kategori extends StatelessWidget {
         children: [
           ListTile(
             leading: Icon(Icons.language,
-                color: Colors.blue), // Ganti dengan ikon yang sesuai
+                color: Colors.blue), // Ikon untuk halaman Ngalam
             title: Text('Ngalam'),
             trailing: Icon(Icons.chevron_right),
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) =>
-                        NgalamTerbaruView()), // Ganti dengan nama halaman yang sesuai
-              );
+              Get.to(() =>
+                  NgalamTerbaruView()); // Navigasi ke halaman Ngalam Terbaru
             },
           ),
           ListTile(
             leading: Icon(Icons.star,
-                color: Colors.blue), // Ganti dengan ikon yang sesuai
+                color: Colors.blue), // Ikon untuk halaman Berita Arema
             title: Text('Berita Arema'),
             trailing: Icon(Icons.chevron_right),
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) =>
-                        AremaEditorialView()), // Ganti dengan nama halaman yang sesuai
-              );
+              Get.to(() =>
+                  AremaEditorialView()); // Navigasi ke halaman Arema Editorial
             },
           ),
           ListTile(
-            leading: Icon(Icons.people, color: Colors.blue),
+            leading: Icon(Icons.people,
+                color: Colors.blue), // Ikon untuk halaman Aremania
             title: Text('Aremania'),
             trailing: Icon(Icons.chevron_right),
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) =>
-                        AremaniaSemuaView()), // Ganti dengan nama halaman yang sesuai
-              );
+              Get.to(() =>
+                  AremaniaSemuaView()); // Navigasi ke halaman Aremania Semua
             },
           ),
           ListTile(
             leading: Icon(Icons.public,
-                color: Colors.blue), // Ganti dengan ikon yang sesuai
+                color: Colors.blue), // Ikon untuk halaman Nasional
             title: Text('Nasional'),
             trailing: Icon(Icons.chevron_right),
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) =>
-                        AremadaySemuaView()), // Ganti dengan nama halaman yang sesuai
-              );
+              Get.to(() =>
+                  AremadaySemuaView()); // Navigasi ke halaman Arema Day Semua
             },
           ),
           ListTile(
             leading: Icon(Icons.calendar_today,
-                color: Colors.blue), // Ganti dengan ikon yang sesuai
+                color: Colors.blue), // Ikon untuk Jadwal Pertandingan
             title: Text('Jadwal Pertandingan'),
             trailing: Icon(Icons.chevron_right),
             onTap: () {
-              // Aksi ketika di-tap
+              // Tambahkan fungsi untuk halaman Jadwal Pertandingan
             },
           ),
         ],
