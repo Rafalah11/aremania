@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:myapp/app/modules/halaman_login/views/halaman_login_view.dart';
 import 'package:myapp/app/routes/app_pages.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthController extends GetxController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -34,6 +35,15 @@ class AuthController extends GetxController {
       await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
 
+      // Jika berhasil login, simpan status login di SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(
+          'token', 'your_token_value'); // atau simpan tanda autentikasi lainnya
+
+      // Menampilkan notifikasi keberhasilan login
+      Get.snackbar('Success', 'Login successful',
+          backgroundColor: Colors.green);
+
       // Jika berhasil login, arahkan ke HOME
       Get.offAllNamed(Routes.HOME);
     } on FirebaseAuthException catch (e) {
@@ -57,6 +67,12 @@ class AuthController extends GetxController {
 
   void logout() async {
     await FirebaseAuth.instance.signOut();
-    Get.offAllNamed(Routes.HALAMAN_LOGIN);
+
+    // Hapus token dari SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('token');
+
+    // Arahkan ke halaman login
+    Get.offAllNamed(Routes.HOME);
   }
 }

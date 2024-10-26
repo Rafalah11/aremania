@@ -65,17 +65,7 @@ class _MatchScheduleScreenState extends State<MatchScheduleScreen> {
           elevation: 0,
           title: Row(
             children: [
-              Image.asset('assets/logoweare.jpg', height: 60), // Logo Arema
-              SizedBox(width: 10),
-              Expanded(
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: IconButton(
-                    icon: Icon(Icons.person, color: Colors.grey),
-                    onPressed: () {},
-                  ),
-                ),
-              ),
+              Image.asset('assets/logoweare.jpg', height: 60), // Logo Arema,
             ],
           ),
           centerTitle: false,
@@ -179,46 +169,45 @@ class _MatchScheduleScreenState extends State<MatchScheduleScreen> {
 
   // Widget untuk kartu pertandingan
   Widget matchCard(String imagePath) {
-  return GestureDetector(
-    onTap: () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => RincianTicketView(),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => RincianTicketView(),
+          ),
+        );
+      },
+      child: Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        child: Column(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
+              child: Image.asset(
+                imagePath, // Menggunakan parameter imagePath
+                height: 150,
+                width: double.infinity,
+                fit: BoxFit.cover,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "19.00 WIB  •  10 Oktober 2024",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 4),
+                  Text("Stadion Glora Bung Karno"),
+                ],
+              ),
+            ),
+          ],
         ),
-      );
-    },
-    child: Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      child: Column(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
-            child: Image.asset(
-              imagePath, // Menggunakan parameter imagePath
-              height: 150,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "19.00 WIB  •  10 Oktober 2024",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 4),
-                Text("Stadion Glora Bung Karno"),
-              ],
-            ),
-          ),
-        ],
       ),
-    ),
-  );
-}
-
+    );
   }
+}

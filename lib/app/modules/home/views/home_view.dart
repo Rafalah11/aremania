@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:myapp/app/modules/Favorite/views/favorite_view.dart';
+import 'package:myapp/app/modules/home/controllers/home_controller.dart';
 import 'package:myapp/app/modules/ngalam_terbaru/views/ngalam_terbaru_view.dart';
 import 'package:myapp/app/modules/ticket/views/ticket_view.dart';
+import 'package:myapp/app/routes/app_pages.dart';
 
 void main() {
   runApp(HomeScreen());
@@ -15,6 +19,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   int _selectedMenuIndex = 0;
+  final HomeController homeController123 = Get.put(HomeController());
 
   // Menu Titles
   final List<String> _menuTitles = [
@@ -122,9 +127,17 @@ class _HomeScreenState extends State<HomeScreen> {
           centerTitle: false,
           actions: [
             IconButton(
-              icon: Icon(Icons.person,
-                  color: Colors.grey), // Ganti dengan icon orang
-              onPressed: () {},
+              icon: Icon(Icons.person, color: Colors.grey),
+              onPressed: () async {
+                await homeController123.checkLoginStatus(); // Cek status login
+                if (homeController123.isLoggedIn.value) {
+                  // Jika sudah login, arahkan ke halaman profil
+                  Get.toNamed(Routes.HALAMAN_PROFILE);
+                } else {
+                  // Jika belum login, arahkan ke halaman login
+                  Get.toNamed(Routes.HALAMAN_LOGIN);
+                }
+              },
             ),
           ],
         ),

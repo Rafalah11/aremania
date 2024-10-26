@@ -67,16 +67,6 @@ class _FavoriteView extends State<FavoriteView> {
         title: Row(
           children: [
             Image.asset('assets/logoweare.jpg', height: 60), // Logo Arema
-            SizedBox(width: 10),
-            Expanded(
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: IconButton(
-                  icon: Icon(Icons.person, color: Colors.grey),
-                  onPressed: () {},
-                ),
-              ),
-            ),
           ],
         ),
         centerTitle: false,

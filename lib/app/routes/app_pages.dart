@@ -30,6 +30,8 @@ import '../modules/halaman_daftar/bindings/halaman_daftar_binding.dart';
 import '../modules/halaman_daftar/views/halaman_daftar_view.dart';
 import '../modules/halaman_login/bindings/halaman_login_binding.dart';
 import '../modules/halaman_login/views/halaman_login_view.dart';
+import '../modules/halaman_profile/bindings/halaman_profile_binding.dart';
+import '../modules/halaman_profile/views/halaman_profile_view.dart';
 import '../modules/home/bindings/home_binding.dart';
 import '../modules/home/views/home_view.dart';
 import '../modules/kategori/bindings/kategori_binding.dart';
@@ -287,6 +289,11 @@ class AppPages {
       name: _Paths.HALAMAN_ANIMASI_AWAL,
       page: () => HalamanAnimasiAwalView(),
       binding: HalamanAnimasiAwalBinding(),
+    ),
+    GetPage(
+      name: _Paths.HALAMAN_PROFILE,
+      page: () => HalamanProfileView(),
+      binding: HalamanProfileBinding(),
     ),
   ];
 }
