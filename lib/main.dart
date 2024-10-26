@@ -11,7 +11,7 @@ void main() async {
   runApp(
     GetMaterialApp(
       title: "Application",
-      initialRoute: AppPages.HALAMAN_DAFTAR,
+      initialRoute: AppPages.HALAMAN_ANIMASI_AWAL,
       getPages: AppPages.routes,
     ),
   );
