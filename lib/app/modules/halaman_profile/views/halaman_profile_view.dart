@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:myapp/app/controllers/auth_controller.dart';
+import 'package:myapp/app/modules/halaman_informasi_pribadi/views/halaman_informasi_pribadi_view.dart';
+import 'package:myapp/app/routes/app_pages.dart';
 
 class HalamanProfileView extends StatelessWidget {
   final authController = Get.find<AuthController>();
@@ -52,7 +54,7 @@ class HalamanProfileView extends StatelessWidget {
                 icon: Icons.person,
                 title: 'Informasi Pribadi',
                 onTap: () {
-                  // TODO: Navigasi ke halaman Informasi Pribadi
+                  Get.toNamed(Routes.HALAMAN_INFORMASI_PRIBADI);
                 },
               ),
               ProfileOption(

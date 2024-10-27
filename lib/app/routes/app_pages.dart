@@ -28,6 +28,8 @@ import '../modules/halaman_animasi_awal/bindings/halaman_animasi_awal_binding.da
 import '../modules/halaman_animasi_awal/views/halaman_animasi_awal_view.dart';
 import '../modules/halaman_daftar/bindings/halaman_daftar_binding.dart';
 import '../modules/halaman_daftar/views/halaman_daftar_view.dart';
+import '../modules/halaman_informasi_pribadi/bindings/halaman_informasi_pribadi_binding.dart';
+import '../modules/halaman_informasi_pribadi/views/halaman_informasi_pribadi_view.dart';
 import '../modules/halaman_login/bindings/halaman_login_binding.dart';
 import '../modules/halaman_login/views/halaman_login_view.dart';
 import '../modules/halaman_profile/bindings/halaman_profile_binding.dart';
@@ -72,6 +74,7 @@ import '../modules/ticket/bindings/ticket_binding.dart';
 import '../modules/ticket/views/ticket_view.dart';
 import '../modules/trending_semua/bindings/trending_semua_binding.dart';
 import '../modules/trending_semua/views/trending_semua_view.dart';
+import '../modules/halaman_informasi_pribadi/views/halaman_edit_informasi_pribadi_view.dart';
 
 part 'app_routes.dart';
 
@@ -294,6 +297,18 @@ class AppPages {
       name: _Paths.HALAMAN_PROFILE,
       page: () => HalamanProfileView(),
       binding: HalamanProfileBinding(),
+    ),
+    GetPage(
+      name: _Paths.HALAMAN_INFORMASI_PRIBADI,
+      page: () => HalamanInformasiPribadiView(),
+      binding: HalamanInformasiPribadiBinding(),
+    ),
+    GetPage(
+      name: _Paths.HALAMAN_EDIT_INFORMASI_PRIBADI,
+      page: () => HalamanEditInformasiPribadiView(
+        userId: '',
+      ),
+      binding: HalamanInformasiPribadiBinding(),
     ),
   ];
 }

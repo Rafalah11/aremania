@@ -42,6 +42,8 @@ abstract class Routes {
   static const ABCD = _Paths.ABCD;
   static const HALAMAN_ANIMASI_AWAL = _Paths.HALAMAN_ANIMASI_AWAL;
   static const HALAMAN_PROFILE = _Paths.HALAMAN_PROFILE;
+  static const HALAMAN_INFORMASI_PRIBADI = _Paths.HALAMAN_INFORMASI_PRIBADI;
+    static const HALAMAN_EDIT_INFORMASI_PRIBADI = _Paths.HALAMAN_EDIT_INFORMASI_PRIBADI;
 }
 
 abstract class _Paths {
@@ -85,4 +87,6 @@ abstract class _Paths {
   static const ABCD = '/abcd';
   static const HALAMAN_ANIMASI_AWAL = '/halaman-animasi-awal';
   static const HALAMAN_PROFILE = '/halaman-profile';
+  static const HALAMAN_INFORMASI_PRIBADI = '/halaman-informasi-pribadi';
+  static const HALAMAN_EDIT_INFORMASI_PRIBADI = '/halaman-edit-informasi-pribadi';
 }
