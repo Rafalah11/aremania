@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
 
+import '../modules/FAQ/bindings/faq_binding.dart';
+import '../modules/FAQ/views/faq_view.dart';
 import '../modules/Favorite/bindings/favorite_binding.dart';
 import '../modules/Favorite/views/favorite_view.dart';
 import '../modules/News_page/bindings/news_page_binding.dart';
@@ -29,6 +31,7 @@ import '../modules/halaman_animasi_awal/views/halaman_animasi_awal_view.dart';
 import '../modules/halaman_daftar/bindings/halaman_daftar_binding.dart';
 import '../modules/halaman_daftar/views/halaman_daftar_view.dart';
 import '../modules/halaman_informasi_pribadi/bindings/halaman_informasi_pribadi_binding.dart';
+import '../modules/halaman_informasi_pribadi/views/halaman_edit_informasi_pribadi_view.dart';
 import '../modules/halaman_informasi_pribadi/views/halaman_informasi_pribadi_view.dart';
 import '../modules/halaman_login/bindings/halaman_login_binding.dart';
 import '../modules/halaman_login/views/halaman_login_view.dart';
@@ -36,8 +39,14 @@ import '../modules/halaman_profile/bindings/halaman_profile_binding.dart';
 import '../modules/halaman_profile/views/halaman_profile_view.dart';
 import '../modules/home/bindings/home_binding.dart';
 import '../modules/home/views/home_view.dart';
+import '../modules/kata_sandi/bindings/kata_sandi_binding.dart';
+import '../modules/kata_sandi/views/kata_sandi_view.dart';
 import '../modules/kategori/bindings/kategori_binding.dart';
 import '../modules/kategori/views/kategori_view.dart';
+import '../modules/kebijakan_privasi/bindings/kebijakan_privasi_binding.dart';
+import '../modules/kebijakan_privasi/views/kebijakan_privasi_view.dart';
+import '../modules/laporkan_masalah/bindings/laporkan_masalah_binding.dart';
+import '../modules/laporkan_masalah/views/laporkan_masalah_view.dart';
 import '../modules/login/bindings/login_binding.dart';
 import '../modules/login/views/login_view.dart';
 import '../modules/ngalam_destinasi/bindings/ngalam_destinasi_binding.dart';
@@ -60,6 +69,8 @@ import '../modules/ngalam_read_terbaru/bindings/ngalam_read_terbaru_binding.dart
 import '../modules/ngalam_read_terbaru/views/ngalam_read_terbaru_view.dart';
 import '../modules/ngalam_terbaru/bindings/ngalam_terbaru_binding.dart';
 import '../modules/ngalam_terbaru/views/ngalam_terbaru_view.dart';
+import '../modules/pusat_bantuan/bindings/pusat_bantuan_binding.dart';
+import '../modules/pusat_bantuan/views/pusat_bantuan_view.dart';
 import '../modules/read_aremaday/bindings/read_aremaday_binding.dart';
 import '../modules/read_aremaday/views/read_aremaday_view.dart';
 import '../modules/read_aremania/bindings/read_aremania_binding.dart';
@@ -74,7 +85,8 @@ import '../modules/ticket/bindings/ticket_binding.dart';
 import '../modules/ticket/views/ticket_view.dart';
 import '../modules/trending_semua/bindings/trending_semua_binding.dart';
 import '../modules/trending_semua/views/trending_semua_view.dart';
-import '../modules/halaman_informasi_pribadi/views/halaman_edit_informasi_pribadi_view.dart';
+import '../modules/ubah_kata_sandi/bindings/ubah_kata_sandi_binding.dart';
+import '../modules/ubah_kata_sandi/views/ubah_kata_sandi_view.dart';
 
 part 'app_routes.dart';
 
@@ -309,6 +321,36 @@ class AppPages {
         userId: '',
       ),
       binding: HalamanInformasiPribadiBinding(),
+    ),
+    GetPage(
+      name: _Paths.KATA_SANDI,
+      page: () => KataSandiView(),
+      binding: KataSandiBinding(),
+    ),
+    GetPage(
+      name: _Paths.UBAH_KATA_SANDI,
+      page: () => UbahKataSandiView(),
+      binding: UbahKataSandiBinding(),
+    ),
+    GetPage(
+      name: _Paths.KEBIJAKAN_PRIVASI,
+      page: () => KebijakanPrivasiView(),
+      binding: KebijakanPrivasiBinding(),
+    ),
+    GetPage(
+      name: _Paths.PUSAT_BANTUAN,
+      page: () => PusatBantuanView(),
+      binding: PusatBantuanBinding(),
+    ),
+    GetPage(
+      name: _Paths.LAPORKAN_MASALAH,
+      page: () => LaporkanMasalahView(),
+      binding: LaporkanMasalahBinding(),
+    ),
+    GetPage(
+      name: _Paths.FAQ,
+      page: () => FaqView(),
+      binding: FaqBinding(),
     ),
   ];
 }

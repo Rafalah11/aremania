@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:myapp/app/controllers/auth_controller.dart';
-import 'package:myapp/app/modules/halaman_informasi_pribadi/views/halaman_informasi_pribadi_view.dart';
+import 'package:myapp/app/modules/halaman_informasi_pribadi/controllers/halaman_informasi_pribadi_controller.dart';
 import 'package:myapp/app/routes/app_pages.dart';
 
 class HalamanProfileView extends StatelessWidget {
-  final authController = Get.find<AuthController>();
+  final HalamanInformasiPribadiController halamanInformasiPribadiController =
+      Get.find<HalamanInformasiPribadiController>();
+  final AuthController authController = Get.find<AuthController>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -16,38 +18,46 @@ class HalamanProfileView extends StatelessWidget {
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {
-            // Kembali ke halaman sebelumnya
             Navigator.pop(context);
           },
         ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.person, color: Colors.black),
-            onPressed: () {
-              // Aksi untuk ikon profil
-            },
-          ),
-        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
-          // Menambahkan scrollable view
           child: Column(
             children: [
-              CircleAvatar(
-                radius: 40,
-                backgroundColor: Colors.grey[300],
-                child: Icon(Icons.person, size: 60, color: Colors.white),
+              Obx(
+                () => CircleAvatar(
+                  radius: 40,
+                  backgroundColor: Colors.grey[300],
+                  backgroundImage: halamanInformasiPribadiController
+                          .photoUrl.value.isNotEmpty
+                      ? NetworkImage(
+                          halamanInformasiPribadiController.photoUrl.value)
+                      : null, // Tampilkan gambar dari Firebase jika ada
+                  child:
+                      halamanInformasiPribadiController.photoUrl.value.isEmpty
+                          ? Icon(Icons.person, size: 60, color: Colors.white)
+                          : null, // Tampilkan ikon jika foto tidak tersedia
+                ),
               ),
               SizedBox(height: 8),
-              Text(
-                'Emmie Watson',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              Obx(
+                () => Text(
+                  halamanInformasiPribadiController.nama.value.isNotEmpty
+                      ? halamanInformasiPribadiController.nama.value
+                      : 'Nama Pengguna', // Tampilkan nama dari Firebase atau teks default
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
               ),
-              Text(
-                'emmie170@gmail.com',
-                style: TextStyle(color: Colors.grey),
+              Obx(
+                () => Text(
+                  halamanInformasiPribadiController.email.value.isNotEmpty
+                      ? halamanInformasiPribadiController.email.value
+                      : 'Email tidak tersedia', // Tampilkan email dari Firebase atau teks default
+                  style: TextStyle(color: Colors.grey),
+                ),
               ),
               SizedBox(height: 20),
               ProfileOption(
@@ -61,14 +71,14 @@ class HalamanProfileView extends StatelessWidget {
                 icon: Icons.privacy_tip,
                 title: 'Kebijakan Privasi',
                 onTap: () {
-                  // TODO: Navigasi ke halaman Kebijakan Privasi
+                  Get.toNamed(Routes.KEBIJAKAN_PRIVASI);
                 },
               ),
               ProfileOption(
                 icon: Icons.security,
                 title: 'Kata Sandi dan Keamanan',
                 onTap: () {
-                  // TODO: Navigasi ke halaman Kata Sandi dan Keamanan
+                  Get.toNamed(Routes.KATA_SANDI);
                 },
               ),
               ProfileOption(
@@ -84,21 +94,21 @@ class HalamanProfileView extends StatelessWidget {
                 icon: Icons.help,
                 title: 'Pusat Bantuan',
                 onTap: () {
-                  // TODO: Navigasi ke halaman Pusat Bantuan
+                  Get.toNamed(Routes.PUSAT_BANTUAN);
                 },
               ),
               ProfileOption(
                 icon: Icons.report,
                 title: 'Laporkan Masalah',
                 onTap: () {
-                  // TODO: Navigasi ke halaman Laporkan Masalah
+                  Get.toNamed(Routes.LAPORKAN_MASALAH);
                 },
               ),
               ProfileOption(
                 icon: Icons.question_answer,
                 title: 'FAQ',
                 onTap: () {
-                  // TODO: Navigasi ke halaman FAQ
+                  Get.toNamed(Routes.FAQ);
                 },
               ),
               ProfileOption(
@@ -121,13 +131,13 @@ class ProfileOption extends StatelessWidget {
   final IconData icon;
   final String title;
   final Color color;
-  final VoidCallback onTap; // Menambahkan callback untuk onTap
+  final VoidCallback onTap;
 
   ProfileOption({
     required this.icon,
     required this.title,
     this.color = Colors.black,
-    required this.onTap, // Menandai onTap sebagai parameter wajib
+    required this.onTap,
   });
 
   @override
@@ -135,7 +145,7 @@ class ProfileOption extends StatelessWidget {
     return ListTile(
       leading: Icon(icon, color: color),
       title: Text(title),
-      onTap: onTap, // Menggunakan onTap untuk aksi
+      onTap: onTap,
     );
   }
 }

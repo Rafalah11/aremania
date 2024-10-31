@@ -14,13 +14,23 @@ class AuthController extends GetxController {
   Future<void> registerUser(String email, String password) async {
     try {
       isLoading.value = true;
-      await _auth.createUserWithEmailAndPassword(
+      UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
-      Get.snackbar('Success', 'Registration successful',
-          backgroundColor: Colors.green);
-      Get.off(HalamanLoginView()); // Navigasi ke halaman Login
+
+      // Kirim email verifikasi
+      await userCredential.user?.sendEmailVerification();
+
+      Get.snackbar(
+        'Success',
+        'Registration successful! Please verify your email before logging in.',
+        backgroundColor: Colors.green,
+      );
+
+      // Arahkan ke halaman login setelah pendaftaran
+      Get.off(HalamanLoginView());
     } catch (error) {
       Get.snackbar('Error', 'Registration failed: $error',
           backgroundColor: Colors.red);
@@ -29,25 +39,41 @@ class AuthController extends GetxController {
     }
   }
 
-  void login(String email, String password) async {
+  Future<void> login(String email, String password) async {
     try {
       // Proses login ke Firebase dengan email dan password
-      await FirebaseAuth.instance
-          .signInWithEmailAndPassword(email: email, password: password);
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
-      // Jika berhasil login, simpan status login di SharedPreferences
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(
-          'token', 'your_token_value'); // atau simpan tanda autentikasi lainnya
+      // Cek status verifikasi email
+      if (userCredential.user?.emailVerified ?? false) {
+        // Jika email sudah diverifikasi, simpan status login di SharedPreferences
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('token',
+            'your_token_value'); // atau simpan tanda autentikasi lainnya
 
-      // Menampilkan notifikasi keberhasilan login
-      Get.snackbar('Success', 'Login successful',
-          backgroundColor: Colors.green);
+        Get.snackbar('Success', 'Login successful',
+            backgroundColor: Colors.green);
 
-      // Jika berhasil login, arahkan ke HOME
-      Get.offAllNamed(Routes.HOME);
+        // Jika berhasil login, arahkan ke HOME
+        Get.offAllNamed(Routes.HOME);
+      } else {
+        // Jika email belum diverifikasi, beri tahu pengguna
+        Get.snackbar(
+          'Verification Needed',
+          'Please verify your email to log in. A verification email has been sent.',
+          backgroundColor: Colors.orange,
+        );
+
+        // Kirim ulang email verifikasi
+        await userCredential.user?.sendEmailVerification();
+
+        // Logout agar sesi tidak disimpan
+        await _auth.signOut();
+      }
     } on FirebaseAuthException catch (e) {
-      // Tangani setiap error yang terjadi berdasarkan kode error dari Firebase
       if (e.code == 'user-not-found') {
         Get.snackbar('Error', 'No user found for that email.');
       } else if (e.code == 'wrong-password') {
@@ -60,13 +86,12 @@ class AuthController extends GetxController {
         Get.snackbar('Error', e.message ?? 'An unknown error occurred.');
       }
     } catch (e) {
-      // Tangani error lain yang tidak berhubungan dengan FirebaseAuthException
       Get.snackbar('Error', 'An unexpected error occurred.');
     }
   }
 
   void logout() async {
-    await FirebaseAuth.instance.signOut();
+    await _auth.signOut();
 
     // Hapus token dari SharedPreferences
     final prefs = await SharedPreferences.getInstance();

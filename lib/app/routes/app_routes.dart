@@ -43,7 +43,14 @@ abstract class Routes {
   static const HALAMAN_ANIMASI_AWAL = _Paths.HALAMAN_ANIMASI_AWAL;
   static const HALAMAN_PROFILE = _Paths.HALAMAN_PROFILE;
   static const HALAMAN_INFORMASI_PRIBADI = _Paths.HALAMAN_INFORMASI_PRIBADI;
-    static const HALAMAN_EDIT_INFORMASI_PRIBADI = _Paths.HALAMAN_EDIT_INFORMASI_PRIBADI;
+  static const HALAMAN_EDIT_INFORMASI_PRIBADI =
+      _Paths.HALAMAN_EDIT_INFORMASI_PRIBADI;
+  static const KATA_SANDI = _Paths.KATA_SANDI;
+  static const UBAH_KATA_SANDI = _Paths.UBAH_KATA_SANDI;
+  static const KEBIJAKAN_PRIVASI = _Paths.KEBIJAKAN_PRIVASI;
+  static const PUSAT_BANTUAN = _Paths.PUSAT_BANTUAN;
+  static const LAPORKAN_MASALAH = _Paths.LAPORKAN_MASALAH;
+  static const FAQ = _Paths.FAQ;
 }
 
 abstract class _Paths {
@@ -88,5 +95,12 @@ abstract class _Paths {
   static const HALAMAN_ANIMASI_AWAL = '/halaman-animasi-awal';
   static const HALAMAN_PROFILE = '/halaman-profile';
   static const HALAMAN_INFORMASI_PRIBADI = '/halaman-informasi-pribadi';
-  static const HALAMAN_EDIT_INFORMASI_PRIBADI = '/halaman-edit-informasi-pribadi';
+  static const HALAMAN_EDIT_INFORMASI_PRIBADI =
+      '/halaman-edit-informasi-pribadi';
+  static const KATA_SANDI = '/kata-sandi';
+  static const UBAH_KATA_SANDI = '/ubah-kata-sandi';
+  static const KEBIJAKAN_PRIVASI = '/kebijakan-privasi';
+  static const PUSAT_BANTUAN = '/pusat-bantuan';
+  static const LAPORKAN_MASALAH = '/laporkan-masalah';
+  static const FAQ = '/faq';
 }

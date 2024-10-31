@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:myapp/app/controllers/auth_controller.dart';
 import 'package:myapp/app/modules/halaman_daftar/views/halaman_daftar_view.dart';
+import 'package:myapp/app/routes/app_pages.dart';
 
 class HalamanLoginView extends StatefulWidget {
   @override
@@ -91,6 +92,21 @@ class _LoginPageViewState extends State<HalamanLoginView> {
                   focusedBorder: OutlineInputBorder(
                     borderSide: BorderSide(color: Colors.blueAccent, width: 2),
                     borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+              SizedBox(height: 10),
+              GestureDetector(
+                onTap: () {
+                  Get.toNamed(Routes.UBAH_KATA_SANDI);
+                },
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    'Forgot Password?',
+                    style: TextStyle(
+                      color: Color.fromARGB(255, 0, 22, 59),
+                    ),
                   ),
                 ),
               ),

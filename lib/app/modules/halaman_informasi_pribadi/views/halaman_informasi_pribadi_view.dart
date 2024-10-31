@@ -39,8 +39,6 @@ class HalamanInformasiPribadiView extends StatelessWidget {
                             : AssetImage('assets/gambar1.jpeg')
                                 as ImageProvider, // Tampilkan gambar default jika URL kosong
                       )),
-                  SizedBox(height: 8),
-                  Text('Ubah', style: TextStyle(color: Colors.white)),
                 ],
               ),
             ),
