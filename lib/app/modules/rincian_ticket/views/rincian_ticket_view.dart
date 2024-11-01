@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/app/modules/Favorite/views/favorite_view.dart';
 import 'package:myapp/app/modules/home/views/home_view.dart';
-import 'package:myapp/app/modules/login/views/login_view.dart';
 import 'package:myapp/app/modules/ngalam_terbaru/views/ngalam_terbaru_view.dart';
 import 'package:myapp/app/modules/ticket/views/ticket_view.dart';
+import 'package:myapp/app/modules/transaksi_ticket/views/transaksi_ticket_view.dart';
 
 void main() {
   runApp(RincianTicketView());
@@ -14,7 +14,14 @@ class RincianTicketView extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: MatchDetailScreen(),
-      theme: ThemeData(fontFamily: 'Roboto'),
+      theme: ThemeData(
+        fontFamily: 'Poppins',
+        primaryColor: Color(0xFF1A237E),
+        colorScheme: ColorScheme.light(
+          primary: Color(0xFF1A237E),
+          secondary: Color(0xFF304FFE),
+        ),
+      ),
     );
   }
 }
@@ -25,182 +32,342 @@ class MatchDetailScreen extends StatefulWidget {
 }
 
 class _RincianTicketScreenState extends State<MatchDetailScreen> {
-  int _selectedIndex = 0;
+  int _selectedIndex = 3;
 
   void _onItemTapped(int index) {
     setState(() {
-      _selectedIndex = index; // Mengubah indeks terpilih
+      _selectedIndex = index;
     });
 
-    // Navigasi berdasarkan indeks
-    if (index == 0) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => HomeScreen()),
-      );
-    } else if (index == 1) {
-      // Indeks 1 adalah untuk ikon "Explore"
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => NgalamTerbaruView()),
-      );
-    } else if (index == 2) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => FavoriteView()),
-      );
-    } else if (index == 3) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => Ticket_View()),
-      );
+    switch (index) {
+      case 0:
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => HomeScreen()),
+        );
+        break;
+      case 1:
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => NgalamTerbaruView()),
+        );
+        break;
+      case 2:
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => FavoriteView()),
+        );
+        break;
+      case 3:
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => Ticket_View()),
+        );
+        break;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black), // Tombol back
+          icon: Icon(Icons.arrow_back_ios, color: Color(0xFF1A237E)),
           onPressed: () {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(
-                  builder: (context) =>
-                      Ticket_View()), // Arahkan ke halaman tiket
+              MaterialPageRoute(builder: (context) => Ticket_View()),
             );
           },
         ),
         title: Text(
-          "AremaFC VS Persija Jakarta",
-          style: TextStyle(color: Colors.black),
+          "Detail Pertandingan",
+          style: TextStyle(
+            color: Color(0xFF1A237E),
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
       body: SingleChildScrollView(
-        // Wrap the body in a SingleChildScrollView
         child: Column(
           children: [
-            // Gambar dan info pertandingan
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Image.asset(
-                    'assets/gambar10.jpg', // Sesuaikan dengan path gambar tim
-                    height: 250,
-                    width: double.infinity,
+            // Match Image with Overlay
+            Stack(
+              children: [
+                Container(
+                  height: 250,
+                  width: double.infinity,
+                  child: Image.asset(
+                    'assets/gambar10.jpg',
                     fit: BoxFit.cover,
                   ),
-                  SizedBox(height: 16),
-                  Text(
-                    "Arema FC VS Persija Jakarta",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                ),
+                Container(
+                  height: 250,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        Colors.black.withOpacity(0.7),
+                      ],
                     ),
                   ),
-                  SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                ),
+                Positioned(
+                  bottom: 20,
+                  left: 20,
+                  right: 20,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        "19.00 WIB  •  10 Oktober 2024",
-                        style: TextStyle(color: Colors.grey),
+                      Container(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.blue[700],
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          "BRI Liga 1",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
+                      SizedBox(height: 8),
                       Text(
-                        "1 jam 30 menit",
-                        style: TextStyle(color: Colors.grey),
+                        "Arema FC vs Persija Jakarta",
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                       ),
                     ],
                   ),
-                  SizedBox(height: 8),
-                  Text(
-                    "Stadion Glora Bung Karno",
-                    style: TextStyle(color: Colors.grey),
+                ),
+              ],
+            ),
+
+            // Match Information
+            Container(
+              margin: EdgeInsets.all(20),
+              padding: EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: Offset(0, 4),
                   ),
-                  SizedBox(height: 16),
-                  Text(
-                    "Jangan Lewatkan laga bergengsi antara Arema FC dan Persija Jakarta dalam lanjutan BRI Liga 1! Segera beli tiket Anda untuk merasakan atmosfer luar biasa di stadion.",
-                    style: TextStyle(color: Colors.grey),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.calendar_today,
+                          size: 20, color: Colors.grey[600]),
+                      SizedBox(width: 10),
+                      Text(
+                        "10 Oktober 2024",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey[800],
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Icon(Icons.access_time,
+                          size: 20, color: Colors.grey[600]),
+                      SizedBox(width: 10),
+                      Text(
+                        "19:00 WIB",
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey[800],
+                        ),
+                      ),
+                      Text(
+                        " • Durasi 1 jam 30 menit",
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Icon(Icons.location_on,
+                          size: 20, color: Colors.grey[600]),
+                      SizedBox(width: 10),
+                      Text(
+                        "Stadion Gelora Bung Karno",
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey[800],
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 16),
-            // Daftar pemain
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: GridView.builder(
-                physics:
-                    NeverScrollableScrollPhysics(), // Disable GridView scrolling
-                shrinkWrap:
-                    true, // Allow GridView to take only the space it needs
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 4, // Jumlah kolom pemain
-                  mainAxisSpacing: 16,
-                  crossAxisSpacing: 16,
-                  childAspectRatio: 0.7,
-                ),
-                itemCount: 12, // Jumlah pemain
-                itemBuilder: (context, index) {
-                  return Column(
-                    children: [
-                      CircleAvatar(
-                        radius: 30,
-                        backgroundColor: Colors.grey.shade300,
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        "Sam",
-                        style: TextStyle(fontSize: 12),
-                      ),
-                      Text(
-                        "Worthington",
-                        style: TextStyle(fontSize: 12),
-                      ),
-                    ],
-                  );
-                },
+
+            // Match Description
+            Container(
+              margin: EdgeInsets.symmetric(horizontal: 20),
+              padding: EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: Offset(0, 4),
+                  ),
+                ],
               ),
-            ),
-            SizedBox(height: 16),
-            // Tombol "Beli Tiket"
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: () {
-                    // Navigate to the login page
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => LoginView()),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    backgroundColor: Colors.blueAccent,
-                  ),
-                  child: Text(
-                    "BELI TIKET",
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Text(
+                  //   "Deskripsi Pertandingan",
+                  //   style: TextStyle(
+                  //     fontSize: 18,
+                  //     fontWeight: FontWeight.bold,
+                  //     color: Color(0xFF1A237E),
+                  //   ),
+                  // ),
+                  SizedBox(height: 12),
+                  Text(
+                    "Jangan lewatkan laga bergengsi antara Arema FC dan Persija Jakarta dalam lanjutan BRI Liga 1! Saksikan pertarungan seru kedua tim dengan atmosfer yang luar biasa langsung dari stadion.",
                     style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      fontSize: 14,
+                      height: 1.5,
+                      color: Colors.grey[600],
                     ),
                   ),
-                ),
+                ],
               ),
             ),
 
-            SizedBox(height: 16),
+            // Players Section
+            Container(
+              margin: EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Pemain Utama",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1A237E),
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  GridView.builder(
+                    physics: NeverScrollableScrollPhysics(),
+                    shrinkWrap: true,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 4,
+                      mainAxisSpacing: 16,
+                      crossAxisSpacing: 16,
+                      childAspectRatio: 0.75,
+                    ),
+                    itemCount: 8,
+                    itemBuilder: (context, index) {
+                      return Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 10,
+                              offset: Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            CircleAvatar(
+                              radius: 30,
+                              backgroundColor: Colors.grey[200],
+                              child: Icon(
+                                Icons.person,
+                                size: 30,
+                                color: Colors.grey[400],
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              "Pemain ${index + 1}",
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+
+            // Buy Button
+            Container(
+              margin: EdgeInsets.all(20),
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => TicketPage()),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFF2D3250),
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 0,
+                ),
+                child: Container(
+                  width: double.infinity,
+                  child: Text(
+                    "Beli Tiket Sekarang",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),

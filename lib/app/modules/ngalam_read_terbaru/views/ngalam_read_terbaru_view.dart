@@ -1,4 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:myapp/app/modules/Favorite/views/favorite_view.dart';
+import 'package:myapp/app/modules/home/views/home_view.dart';
+import 'package:myapp/app/modules/ngalam_terbaru/views/ngalam_terbaru_view.dart';
+import 'package:myapp/app/modules/ticket/views/ticket_view.dart';
 
 void main() {
   runApp(MyApp());
@@ -31,6 +37,27 @@ class _ReadBeritaTerbaruViewState extends State<NgalamReadTerbaruView> {
     setState(() {
       _selectedIndex = index;
     });
+    if (index == 0) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => HomeScreen()),
+      );
+    } else if (index == 1) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => NgalamTerbaruView()),
+      );
+    } else if (index == 2) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => FavoriteView()),
+      );
+    } else if (index == 3) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => Ticket_View()),
+      );
+    }
   }
 
   @override
@@ -40,8 +67,7 @@ class _ReadBeritaTerbaruViewState extends State<NgalamReadTerbaruView> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios, color: Colors.black),
           onPressed: () {
-            // Kembali ke halaman sebelumnya
-            Navigator.pop(context);
+            Get.back();
           },
         ),
         title: Text(

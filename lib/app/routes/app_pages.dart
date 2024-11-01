@@ -1,4 +1,6 @@
 import 'package:get/get.dart';
+import 'package:myapp/app/modules/admin_informasi/bindings/admin_informasiBinding.dart';
+import 'package:myapp/app/modules/admin_informasi/views/adminInformasi_view.dart';
 
 import '../modules/FAQ/bindings/faq_binding.dart';
 import '../modules/FAQ/views/faq_view.dart';
@@ -128,6 +130,7 @@ class AppPages {
   static const HALAMAN_LOGIN = Routes.HALAMAN_LOGIN;
   static const HALAMAN_DAFTAR = Routes.HALAMAN_DAFTAR;
   static const HALAMAN_ANIMASI_AWAL = Routes.HALAMAN_ANIMASI_AWAL;
+  static const ADMIN_INFORMASI = Routes.ADMIN_INFORMASI;
 
   static final routes = [
     GetPage(
@@ -351,6 +354,11 @@ class AppPages {
       name: _Paths.FAQ,
       page: () => FaqView(),
       binding: FaqBinding(),
+    ),
+    GetPage(
+      name: _Paths.ADMIN_INFORMASI,
+      page: () => AdminFormPage(),
+      binding: AdminInformasiBinding(),
     ),
   ];
 }

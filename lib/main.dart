@@ -23,7 +23,7 @@ void main() async {
   runApp(
     GetMaterialApp(
       title: "Application",
-      initialRoute: AppPages.HALAMAN_ANIMASI_AWAL,
+      initialRoute: Routes.HALAMAN_ANIMASI_AWAL,
       getPages: AppPages.routes,
     ),
   );

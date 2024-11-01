@@ -3,6 +3,7 @@ import 'package:myapp/app/modules/Favorite/views/favorite_view.dart';
 import 'package:myapp/app/modules/home/views/home_view.dart';
 import 'package:myapp/app/modules/ngalam_terbaru/views/ngalam_terbaru_view.dart';
 import 'package:myapp/app/modules/rincian_ticket/views/rincian_ticket_view.dart';
+import 'package:myapp/app/modules/ticket_anda/views/ticket_anda_view.dart';
 
 void main() {
   runApp(Ticket_View());
@@ -13,7 +14,14 @@ class Ticket_View extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: MatchScheduleScreen(),
-      theme: ThemeData(fontFamily: 'Roboto'),
+      theme: ThemeData(
+        fontFamily: 'Poppins',
+        primaryColor: Color(0xFF1A237E),
+        colorScheme: ColorScheme.light(
+          primary: Color(0xFF1A237E),
+          secondary: Color(0xFF304FFE),
+        ),
+      ),
     );
   }
 }
@@ -28,31 +36,34 @@ class _MatchScheduleScreenState extends State<MatchScheduleScreen> {
 
   void _onItemTapped(int index) {
     setState(() {
-      _selectedIndex = index; // Mengubah indeks terpilih
+      _selectedIndex = index;
     });
 
-    // Navigasi berdasarkan indeks
-    if (index == 0) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => HomeScreen()),
-      );
-    } else if (index == 1) {
-      // Indeks 1 adalah untuk ikon "Explore"
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => NgalamTerbaruView()),
-      );
-    } else if (index == 2) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => FavoriteView()),
-      );
-    } else if (index == 3) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => Ticket_View()),
-      );
+    switch (index) {
+      case 0:
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => HomeScreen()),
+        );
+        break;
+      case 1:
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => NgalamTerbaruView()),
+        );
+        break;
+      case 2:
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => FavoriteView()),
+        );
+        break;
+      case 3:
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => Ticket_View()),
+        );
+        break;
     }
   }
 
@@ -60,61 +71,117 @@ class _MatchScheduleScreenState extends State<MatchScheduleScreen> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
+        backgroundColor: Colors.grey[100],
         appBar: AppBar(
           backgroundColor: Colors.white,
           elevation: 0,
           title: Row(
             children: [
-              Image.asset('assets/logoweare.jpg', height: 60), // Logo Arema,
+              Container(
+                height: 40,
+                child: Image.asset(
+                  'assets/logoweare.jpg',
+                  fit: BoxFit.contain,
+                ),
+              ),
+              Spacer(),
+              Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.grey[100],
+                ),
+                child: IconButton(
+                  icon: Icon(Icons.person_outlined, color: Color(0xFF1A237E)),
+                  onPressed: () {},
+                ),
+              ),
             ],
           ),
-          centerTitle: false,
         ),
         body: SingleChildScrollView(
           child: Column(
             children: [
-              // Bagian header dengan logo
-              Container(
-                color: Colors.blue.shade800,
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Image.asset(
-                      'assets/gambar1.jpeg', // Sesuaikan dengan path gambar tim
-                      height: 150,
-                      fit: BoxFit.cover,
-                    ),
-                  ],
-                ),
-              ),
-
-              // Jadwal pertandingan
+              // Upcoming Matches Section
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Container(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: Colors.blue.shade900,
-                    borderRadius: BorderRadius.circular(10),
+                    gradient: LinearGradient(
+                      colors: [Color(0xFF1A237E), Color(0xFF304FFE)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.blue.withOpacity(0.2),
+                        blurRadius: 15,
+                        offset: Offset(0, 8),
+                      ),
+                    ],
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.sports_soccer,
+                            color: Colors.white,
+                            size: 24,
+                          ),
+                          SizedBox(width: 12),
+                          Text(
+                            "Cek Jadwal Pertandingan",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 16),
                       Text(
-                        "Cek Jadwal Pertandingan",
+                        "Jangan Lewatkan Pertandingan Terbesar Musin Ini !",
                         style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                          color: Colors.white.withOpacity(0.9),
+                          fontSize: 16,
                         ),
                       ),
-                      SizedBox(height: 8),
-                      Text(
-                        "Jangan Lewatkan Pertandingan Terbesar Musim Ini!",
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 14,
+                      SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => TicketDetailPage(),
+                            ),
+                          );
+                        },
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              "Lihat Tiket Anda",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(width: 8),
+                            Icon(Icons.arrow_forward),
+                          ],
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Color(0xFF1A237E),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                       ),
                     ],
@@ -122,52 +189,60 @@ class _MatchScheduleScreenState extends State<MatchScheduleScreen> {
                 ),
               ),
 
-              // Konten di bawah jadwal pertandingan (seperti gambar tim dengan waktu pertandingan)
+              // Match Cards
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    matchCard('assets/gambar10.jpg'), // Kartu pertama
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16.0),
+                      child: Text(
+                        'Pertandingan Unggulan',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF1A237E),
+                        ),
+                      ),
+                    ),
+                    matchCard('assets/gambar10.jpg'),
                     SizedBox(height: 16),
-                    matchCard('assets/gambar11.jpg'), // Kartu kedua
+                    matchCard('assets/gambar11.jpg'),
                   ],
                 ),
               ),
             ],
           ),
         ),
-
-        // Bottom Navigation Bar
-        bottomNavigationBar: BottomNavigationBar(
-          items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.explore),
-              label: 'Information',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.bookmark),
-              label: 'Bookmark',
-            ),
-            BottomNavigationBarItem(
-              icon:
-                  Icon(Icons.confirmation_number), // Material Icons untuk tiket
-              label: 'Ticket',
-            ),
-          ],
-          currentIndex: _selectedIndex,
-          selectedItemColor: Colors.blue,
-          unselectedItemColor: Colors.grey,
-          onTap: _onItemTapped,
-        ),
+         bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.explore),
+            label: 'Information',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.bookmark),
+            label: 'Bookmark',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.confirmation_number), // Material Icons untuk tiket
+            label: 'Ticket',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.blue,
+        unselectedItemColor: Colors.grey,
+        onTap: _onItemTapped,
       ),
+      ),  
     );
   }
 
-  // Widget untuk kartu pertandingan
   Widget matchCard(String imagePath) {
     return GestureDetector(
       onTap: () {
@@ -178,15 +253,25 @@ class _MatchScheduleScreenState extends State<MatchScheduleScreen> {
           ),
         );
       },
-      child: Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: Offset(0, 4),
+            ),
+          ],
+        ),
         child: Column(
           children: [
             ClipRRect(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
               child: Image.asset(
-                imagePath, // Menggunakan parameter imagePath
-                height: 150,
+                imagePath,
+                height: 200,
                 width: double.infinity,
                 fit: BoxFit.cover,
               ),
@@ -196,12 +281,67 @@ class _MatchScheduleScreenState extends State<MatchScheduleScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    "19.00 WIB  •  10 Oktober 2024",
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.access_time,
+                        size: 16,
+                        color: Colors.grey[600],
+                      ),
+                      SizedBox(width: 8),
+                      Text(
+                        "19:00 WIB • 10 Oktober 2024",
+                        style: TextStyle(
+                          color: Colors.grey[800],
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
                   ),
-                  SizedBox(height: 4),
-                  Text("Stadion Glora Bung Karno"),
+                  SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.location_on_outlined,
+                        size: 16,
+                        color: Colors.grey[600],
+                      ),
+                      SizedBox(width: 8),
+                      Text(
+                        "Stadion Gelora Bung Karno",
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => RincianTicketView(),
+                              ),
+                            );
+                          },
+                          child: Text("Lihat Detail"),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xFF2D3250),
+                            padding: EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),

@@ -51,6 +51,7 @@ abstract class Routes {
   static const PUSAT_BANTUAN = _Paths.PUSAT_BANTUAN;
   static const LAPORKAN_MASALAH = _Paths.LAPORKAN_MASALAH;
   static const FAQ = _Paths.FAQ;
+  static const ADMIN_INFORMASI = _Paths.ADMIN_INFORMASI;
 }
 
 abstract class _Paths {
@@ -103,4 +104,5 @@ abstract class _Paths {
   static const PUSAT_BANTUAN = '/pusat-bantuan';
   static const LAPORKAN_MASALAH = '/laporkan-masalah';
   static const FAQ = '/faq';
+  static const ADMIN_INFORMASI = '/admin-informasi';
 }
