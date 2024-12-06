@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:get/get.dart';
+import 'package:intl/intl.dart'; // Import paket intl untuk format tanggal
 import 'package:myapp/app/modules/home/views/home_view.dart';
+import 'package:myapp/app/modules/ngalam_terbaru/controllers/ngalam_terbaru_controller.dart';
 import 'package:myapp/app/modules/ngalam_terbaru/views/ngalam_terbaru_view.dart';
+import 'package:myapp/app/modules/readdetailartikel/controllers/readdetailartikel_controller.dart';
 import 'package:myapp/app/modules/ticket/views/ticket_view.dart';
-
-void main() {
-  runApp(FavoriteView());
-}
+import 'package:myapp/app/routes/app_pages.dart';
 
 class FavoriteView extends StatefulWidget {
   @override
@@ -14,12 +16,83 @@ class FavoriteView extends StatefulWidget {
 
 class _FavoriteView extends State<FavoriteView> {
   int _selectedIndex = 2;
-  List<bool> _isBookmarked = [
-    false,
-    false,
-    false,
-    false
-  ]; // Status bookmark tiap item
+  List<bool> _isBookmarked = []; // Status bookmark tiap item
+  List<DocumentSnapshot> _newsItems = []; // Menyimpan dokumen berita
+  List<DocumentSnapshot> _filteredNewsItems =
+      []; // Menyimpan hasil filter pencarian
+  TextEditingController _searchController =
+      TextEditingController(); // Controller pencarian
+  final NgalamTerbaruController _ngalamTerbaruController = Get.find();
+  final ReaddetailartikelController _readArtikelController = Get.find();
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchBookmarks(); // Panggil fungsi untuk mengambil data bookmarks
+    _searchController
+        .addListener(_filterNews); // Menambahkan listener untuk pencarian
+  }
+
+  // Future<void> _fetchBookmarks() async {
+  //   try {
+  //     QuerySnapshot snapshot = await FirebaseFirestore.instance
+  //         .collection('bookmarks')
+  //         .orderBy('tanggal_upload', descending: true)
+  //         .get();
+
+  //     setState(() {
+  //       _newsItems = snapshot.docs;
+  //       _filteredNewsItems = List.from(_newsItems);
+  //     });
+  //   } catch (e) {
+  //     print("Error fetching bookmarks: $e");
+  //   }
+  // }
+  Future<void> _fetchBookmarks() async {
+    try {
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('bookmarks')
+          .orderBy('tanggal_upload', descending: true)
+          .get();
+
+      setState(() {
+        _newsItems = snapshot.docs;
+        _filteredNewsItems = List.from(_newsItems);
+      });
+
+      // Update bookmark status di kedua controller
+      for (var doc in snapshot.docs) {
+        String docId = doc.id;
+        // Update bookmarkStatus di kedua controller
+        _ngalamTerbaruController.bookmarkStatus[docId] = true;
+        _readArtikelController.bookmarkStatus[docId] = true;
+      }
+    } catch (e) {
+      print("Error fetching bookmarks: $e");
+    }
+  }
+
+  // Fungsi untuk memfilter berita berdasarkan pencarian
+  void _filterNews() {
+    String query =
+        _searchController.text.toLowerCase(); // Ambil query pencarian
+    if (query.isEmpty) {
+      // Jika pencarian kosong, tampilkan semua artikel
+      setState(() {
+        _filteredNewsItems = List.from(_newsItems);
+      });
+    } else {
+      // Jika ada query pencarian, filter artikel berdasarkan judul
+      setState(() {
+        _filteredNewsItems = _newsItems.where((newsItem) {
+          String title = newsItem['judul_artikel'] ?? '';
+          return title
+              .toLowerCase()
+              .contains(query); // Pencocokan kata kunci di judul artikel
+        }).toList();
+      });
+    }
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -33,7 +106,6 @@ class _FavoriteView extends State<FavoriteView> {
         MaterialPageRoute(builder: (context) => HomeScreen()),
       );
     } else if (index == 1) {
-      // Indeks 1 adalah untuk ikon "Explore"
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => NgalamTerbaruView()),
@@ -51,16 +123,90 @@ class _FavoriteView extends State<FavoriteView> {
     }
   }
 
-  void _toggleBookmark(int index) {
-    setState(() {
-      _isBookmarked[index] = !_isBookmarked[index];
-    });
+  // Fungsi untuk menampilkan dialog konfirmasi penghapusan bookmark
+  Future<void> _showDeleteDialog(int index, String docId) async {
+    bool? shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Hapus Bookmark"),
+          content: Text(
+              "Apakah Anda yakin ingin menghapus artikel ini dari favorit?"),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false); // Tidak jadi menghapus
+              },
+              child: Text("Tidak"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(true); // Hapus artikel
+              },
+              child: Text("Iya"),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldDelete == true) {
+      _toggleBookmark(index, docId);
+    }
   }
+
+  void _toggleBookmark(int index, String docId) async {
+    var newsItem = _filteredNewsItems[index];
+    String docId = newsItem.id;
+
+    // Remove from Firestore
+    try {
+      await FirebaseFirestore.instance
+          .collection('bookmarks')
+          .doc(docId)
+          .delete();
+
+      // Remove from local list
+      setState(() {
+        _filteredNewsItems.removeAt(index);
+      });
+
+      // Update NgalamTerbaruController's bookmark status
+      _ngalamTerbaruController.bookmarkStatus[docId] = false;
+    } catch (e) {
+      print("Error deleting bookmark: $e");
+    }
+  }
+  // void _toggleBookmark(int index) async {
+  //   var newsItem = _filteredNewsItems[index];
+  //   String docId = newsItem.id;
+
+  //   try {
+  //     // Menambahkan atau menghapus bookmark di Firestore
+  //     if (_ngalamTerbaruController.bookmarkStatus[docId] == true) {
+  //       await FirebaseFirestore.instance
+  //           .collection('bookmarks')
+  //           .doc(docId)
+  //           .delete();
+  //       _ngalamTerbaruController.bookmarkStatus[docId] =
+  //           false; // Set status bookmark ke false
+  //     } else {
+  //       await FirebaseFirestore.instance
+  //           .collection('bookmarks')
+  //           .doc(docId)
+  //           .set(newsItem.data() as Map<String, dynamic>);
+  //       _ngalamTerbaruController.bookmarkStatus[docId] =
+  //           true; // Set status bookmark ke true
+  //     }
+  //     setState(() {});
+  //   } catch (e) {
+  //     print("Error updating bookmark: $e");
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        home: Scaffold(
+    return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -86,6 +232,7 @@ class _FavoriteView extends State<FavoriteView> {
             ),
             SizedBox(height: 20), // Spasi antara judul dan pencarian
             TextField(
+              controller: _searchController,
               decoration: InputDecoration(
                 prefixIcon: Icon(Icons.search),
                 hintText: "Pencarian ...",
@@ -96,41 +243,12 @@ class _FavoriteView extends State<FavoriteView> {
             ),
             SizedBox(height: 20),
             Expanded(
-              child: ListView(
-                children: [
-                  _buildNewsItem(
-                      index: 0,
-                      category: "Aremania",
-                      title:
-                          "Presidium Aremania Buka Lebar Pintu Sekretariat Untuk ...",
-                      date: "4 Oktober 2024",
-                      imagePath:
-                          'assets/gambar1.jpeg'), // Gambar untuk artikel 1
-                  _buildNewsItem(
-                      index: 1,
-                      category: "Aremania",
-                      title:
-                          "Arema Menjalani 4 Laga Tandang Beruntun, Waktunya ...",
-                      date: "9 September 2024",
-                      imagePath:
-                          'assets/gambar2.jpeg'), // Gambar untuk artikel 2
-                  _buildNewsItem(
-                      index: 2,
-                      category: "Berita Arema",
-                      title:
-                          "Dalberto Luan Belo Menyala, Jalani Latihan Fisik Arema ...",
-                      date: "6 Oktober 2024",
-                      imagePath:
-                          'assets/gambar3.jpg'), // Gambar untuk artikel 3
-                  _buildNewsItem(
-                      index: 3,
-                      category: "Fokus",
-                      title:
-                          "5 Fakta Menarik Shulton Fajar, Local Hero yang Dipulangkan ...",
-                      date: "10 Oktober 2024",
-                      imagePath:
-                          'assets/gambar4.jpg'), // Gambar untuk artikel 4
-                ],
+              child: ListView.builder(
+                itemCount: _filteredNewsItems
+                    .length, // Menggunakan jumlah item yang sudah difilter
+                itemBuilder: (context, index) {
+                  return _buildNewsItem(index, _filteredNewsItems[index]);
+                },
               ),
             ),
           ],
@@ -160,58 +278,87 @@ class _FavoriteView extends State<FavoriteView> {
         unselectedItemColor: Colors.grey,
         onTap: _onItemTapped,
       ),
-    ));
+    );
   }
 
-  Widget _buildNewsItem(
-      {required int index,
-      required String category,
-      required String title,
-      required String date,
-      required String imagePath}) {
-    // Tambahkan parameter imagePath
-    return Card(
-      margin: EdgeInsets.only(bottom: 15),
-      child: Row(
-        children: [
-          Container(
-            width: 100,
-            height: 100,
-            child: Image.asset(imagePath, fit: BoxFit.cover), // Gambar berita
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    category, // Menampilkan kategori berita
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
-                  ),
-                  SizedBox(height: 5),
-                  Text(
-                    title,
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  SizedBox(height: 10),
-                  Text(date),
-                ],
+  Widget _buildNewsItem(int index, dynamic articleSnapshot) {
+    var newsItem = _filteredNewsItems[index];
+    String category = newsItem['kategori'] ?? 'No Category';
+    String title = newsItem['judul_artikel'] ?? 'No Title';
+
+    Timestamp timestamp = newsItem['tanggal_upload'];
+    String date = DateFormat('dd MMMM yyyy').format(timestamp.toDate());
+
+    String imagePath =
+        newsItem['gambar_url'] ?? 'https://example.com/default-image.png';
+
+    String docId = newsItem.id;
+
+    return GestureDetector(
+      onTap: () {
+        Get.toNamed(Routes.READ_FAVORITE, arguments: newsItem.data());
+      },
+      child: Card(
+        margin: EdgeInsets.only(bottom: 15),
+        child: Row(
+          children: [
+            Container(
+              width: 100,
+              height: 100,
+              child: Image.network(imagePath, fit: BoxFit.cover),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(category,
+                        style: TextStyle(fontSize: 12, color: Colors.grey)),
+                    SizedBox(height: 5),
+                    Text(title,
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis),
+                    SizedBox(height: 10),
+                    Text(date),
+                  ],
+                ),
               ),
             ),
-          ),
-          IconButton(
-            icon: Icon(
-              _isBookmarked[index] ? Icons.bookmark : Icons.bookmark_border,
-              color: Colors.blueAccent,
-            ),
-            onPressed: () {
-              _toggleBookmark(index); // Mengubah status bookmark
-            },
-          ),
-        ],
+            Obx(() {
+              bool isBookmarked = _ngalamTerbaruController
+                      .bookmarkStatus[docId] ??
+                  false ||
+                      (_readArtikelController.bookmarkStatus[docId] ?? false);
+
+              return IconButton(
+                icon: Icon(
+                  isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+                  color: isBookmarked ? Colors.blue : Colors.grey,
+                ),
+                onPressed: () {
+                  // Panggil dialog konfirmasi sebelum melakukan toggle
+                  _showDeleteDialog(
+                      index, docId); // Tampilkan dialog penghapusan
+                },
+              );
+            }),
+            // Obx(() {
+            //   bool isBookmarked =
+            //       _ngalamTerbaruController.bookmarkStatus[docId] ?? false;
+            //   return IconButton(
+            //     icon: Icon(
+            //         isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+            //         color: isBookmarked ? Colors.blue : Colors.grey),
+            //     onPressed: () {
+            //       _showDeleteDialog(
+            //           index, docId); // Menampilkan dialog konfirmasi
+            //     },
+            //   );
+            // }),
+          ],
+        ),
       ),
     );
   }

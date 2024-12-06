@@ -4,6 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:intl/intl.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get/get.dart';
+import 'package:myapp/app/routes/app_pages.dart'; // Ganti dengan import yang sesuai
 
 class AdminFormPage extends StatefulWidget {
   @override
@@ -135,10 +138,24 @@ class AdmininformasiView extends State<AdminFormPage> {
     }
   }
 
+  // Fungsi untuk logout
+  Future<void> _logout() async {
+    await FirebaseAuth.instance.signOut(); // Melakukan logout dari Firebase
+    Get.offAllNamed(Routes.HOME); // Mengarahkan ke halaman login
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Admin Informasi')),
+      appBar: AppBar(
+        title: Text('Admin Informasi'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: _logout, // Memanggil fungsi logout saat ditekan
+          ),
+        ],
+      ),
       body: Form(
         key: _formKey,
         child: ListView(

@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:myapp/app/modules/Favorite/views/favorite_view.dart';
 import 'package:myapp/app/modules/home/views/home_view.dart';
 import 'package:myapp/app/modules/kategori/views/kategori_view.dart';
 import 'package:myapp/app/modules/ngalam_destinasi/views/ngalam_destinasi_view.dart';
 import 'package:myapp/app/modules/ngalam_infopenting/views/ngalam_infopenting_view.dart';
 import 'package:myapp/app/modules/ngalam_kuliner/views/ngalam_kuliner_view.dart';
+import 'package:myapp/app/modules/ngalam_malangan/controllers/ngalam_malangan_controller.dart';
 import 'package:myapp/app/modules/ngalam_read_terbaru/views/ngalam_read_terbaru_view.dart';
+import 'package:myapp/app/modules/ngalam_terbaru/controllers/ngalam_terbaru_controller.dart';
 import 'package:myapp/app/modules/ticket/views/ticket_view.dart';
 import 'package:myapp/app/modules/ngalam_terbaru/views/ngalam_terbaru_view.dart';
+import 'package:myapp/app/routes/app_pages.dart';
 
 void main() {
   runApp(MyApp());
@@ -31,10 +35,14 @@ class NgalamMalanganView extends StatefulWidget {
 }
 
 class _NgalamMalanganViewState extends State<NgalamMalanganView> {
-  bool _isBookmarked = false;
+  // bool _isBookmarked = false;
+  Map<String, bool> bookmarkStatus = {};
   int _selectedIndex = 1;
-  int _selectedMenuIndex = 0;
-
+  int _selectedMenuIndex = 2;
+  final NgalamMalanganController _controller =
+      Get.put(NgalamMalanganController());
+  final NgalamTerbaruController _controllerterbaru =
+      Get.put(NgalamTerbaruController());
   final List<String> _menuTitles = [
     'Terbaru',
     'Destinasi',
@@ -125,17 +133,6 @@ class _NgalamMalanganViewState extends State<NgalamMalanganView> {
         ),
         actions: [
           IconButton(
-            icon: Icon(
-              _isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-              color: _isBookmarked ? Colors.black : Colors.black54,
-            ),
-            onPressed: () {
-              setState(() {
-                _isBookmarked = !_isBookmarked;
-              });
-            },
-          ),
-          IconButton(
             icon: Icon(Icons.search, color: Colors.black),
             onPressed: () {},
           ),
@@ -143,8 +140,160 @@ class _NgalamMalanganViewState extends State<NgalamMalanganView> {
       ),
       body: Column(
         children: [
-          _buildFeaturedNewsCard(),
-          // Horizontal scrollable menu
+          // StreamBuilder untuk mendapatkan gambar artikel terbaru
+          // Ambil ID Artikel Terbaru
+          StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('Informasi')
+                .orderBy('tanggal_upload',
+                    descending: true) // Mengambil dokumen terbaru
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return Container(
+                  height: 100,
+                  child: Center(child: CircularProgressIndicator()),
+                );
+              }
+
+              final latestArticleDoc = snapshot.data!.docs.isNotEmpty
+                  ? snapshot.data!.docs[0]
+                  : null;
+
+              // Cek apakah ada dokumen
+              if (latestArticleDoc == null) {
+                return Container(
+                  height: 100,
+                  child: Center(child: Text('No Articles Available')),
+                );
+              }
+
+              // Ambil detail artikel berdasarkan id_artikel terbaru
+              return StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('Informasi')
+                    .where('kategori', isEqualTo: 'ngalam')
+                    .where('sub_kategori', isEqualTo: 'malangan')
+                    .orderBy('tanggal_upload', descending: true)
+                    .snapshots(),
+                builder: (context, articleSnapshot) {
+                  if (!articleSnapshot.hasData) {
+                    return Container(
+                      height: 100,
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+
+                  final articleData = articleSnapshot.data!.docs.isNotEmpty
+                      ? articleSnapshot.data!.docs[0]
+                      : null;
+
+                  return GestureDetector(
+                    onTap: () {
+                      // Kirim seluruh data artikel ke halaman detail
+                      Get.toNamed(
+                        Routes.NGALAM_READ_TERBARU,
+                        arguments: articleData
+                            ?.data(), // Mengirim seluruh data dokumen
+                      );
+                    },
+                    child: Container(
+                      height: 200, // Set tinggi untuk gambar
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(
+                            0), // Pastikan tidak ada radius
+                        color: Colors
+                            .transparent, // Pastikan latar belakang transparan
+                      ),
+                      child: Stack(
+                        children: [
+                          // Gambar dengan transparansi
+                          Opacity(
+                            opacity: 0.8,
+                            child: articleData != null &&
+                                    articleData['gambar_url'] != null
+                                ? ClipRect(
+                                    child: Image.network(
+                                      articleData['gambar_url'],
+                                      fit: BoxFit.cover,
+                                      width: double.infinity,
+                                      height: 200,
+                                    ),
+                                  )
+                                : Container(
+                                    color: Colors.grey[300],
+                                    child: Center(
+                                        child: Text('No Image Available')),
+                                  ),
+                          ),
+                          // Overlay dengan teks di atas gambar
+                          Positioned(
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            child: Container(
+                              color: const Color.fromARGB(207, 0, 0, 0),
+                              padding: EdgeInsets.all(8),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    articleData?['judul_artikel'] ?? 'No Title',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  SizedBox(height: 5),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.account_circle,
+                                        color: Colors.white,
+                                        size: 20,
+                                      ),
+                                      SizedBox(width: 5),
+                                      Text(
+                                        articleData?['nama_upload'] ??
+                                            'Unknown Author',
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 18),
+                                      ),
+                                      SizedBox(width: 15),
+                                      Icon(
+                                        Icons.access_time,
+                                        color: Colors.white,
+                                        size: 20,
+                                      ),
+                                      SizedBox(width: 5),
+                                      Text(
+                                        articleData?['tanggal_upload'] != null
+                                            ? DateFormat('dd-MM-yyyy').format(
+                                                articleData!['tanggal_upload']
+                                                    .toDate())
+                                            : 'No Date',
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 18),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+          // Menu horizontal yang dapat digulir
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -198,18 +347,83 @@ class _NgalamMalanganViewState extends State<NgalamMalanganView> {
                 return ListView.builder(
                   itemCount: articles.length,
                   itemBuilder: (context, index) {
-                    final article = articles[index];
+                    // Ambil data artikel dari snapshot
+                    final articleData =
+                        articles[index].data() as Map<String, dynamic>;
+
+                    // Mengonversi timestamp ke tanggal
+                    String formattedDate = DateFormat('yyyy-MM-dd')
+                        .format(articleData['tanggal_upload'].toDate());
+
                     return ListTile(
-                      title: Text(article['judul_artikel']),
-                      subtitle: Text((article['tanggal_upload'] as Timestamp)
-                          .toDate()
-                          .toString()),
-                      leading: article['gambar_url'] != null
-                          ? Image.network(article['gambar_url'],
-                              width: 50, height: 50)
-                          : null,
+                      title: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              articleData['judul_artikel'] ?? 'No Title',
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          IconButton(
+                            icon: Obx(() => Icon(
+                                  _controllerterbaru.bookmarkStatus[
+                                              articles[index].id] ==
+                                          true
+                                      ? Icons.bookmark
+                                      : Icons.bookmark_border,
+                                  color: _controllerterbaru.bookmarkStatus[
+                                              articles[index].id] ==
+                                          true
+                                      ? Colors.blue
+                                      : Colors.grey,
+                                  size: 24,
+                                )),
+                            onPressed: () {
+                              // Pastikan untuk memanggil toggleBookmark dengan artikel ID yang benar
+                              _controllerterbaru.toggleBookmark(articles[index]
+                                  .id); // Pass articleId (String)
+                            },
+                          ),
+                        ],
+                      ),
+                      subtitle: Row(
+                        children: [
+                          Icon(Icons.account_circle,
+                              size: 16, color: Colors.grey),
+                          SizedBox(width: 4),
+                          Text(articleData['nama_upload'] ?? 'Unknown'),
+                          SizedBox(width: 10),
+                          Icon(Icons.access_time, size: 16, color: Colors.grey),
+                          SizedBox(width: 4),
+                          Text(formattedDate),
+                        ],
+                      ),
+                      leading: articleData['gambar_url'] != null
+                          ? SizedBox(
+                              width: 115,
+                              height: 150,
+                              child: Image.network(
+                                articleData['gambar_url'],
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                          : SizedBox(
+                              width: 115,
+                              height: 150,
+                              child: Container(
+                                  color: Colors.grey[300],
+                                  child: Center(
+                                      child: Text('No Image Available'))),
+                            ),
                       onTap: () {
-                        Get.to(() => NgalamReadTerbaruView());
+                        // Kirim seluruh data artikel ke halaman detail
+                        Get.toNamed(
+                          Routes.NGALAM_READ_TERBARU,
+                          arguments: articles[index]
+                              .data(), // Mengirim seluruh data dokumen
+                        );
                       },
                     );
                   },

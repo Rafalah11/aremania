@@ -1,9 +1,15 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:intl/intl.dart';
 import 'package:myapp/app/modules/Favorite/views/favorite_view.dart';
 import 'package:myapp/app/modules/home/views/home_view.dart';
 import 'package:myapp/app/modules/kategori/views/kategori_view.dart';
+import 'package:myapp/app/modules/ngalam_terbaru/controllers/ngalam_terbaru_controller.dart';
 import 'package:myapp/app/modules/ngalam_terbaru/views/ngalam_terbaru_view.dart';
 import 'package:myapp/app/modules/ticket/views/ticket_view.dart';
+import 'package:myapp/app/routes/app_pages.dart';
 
 void main() {
   runApp(MyApp());
@@ -25,8 +31,11 @@ class AremaniaSemuaView extends StatefulWidget {
 }
 
 class _NewsPageState extends State<AremaniaSemuaView> {
-  bool _isBookmarked = false; // State untuk melacak status bookmark
+  // bool _isBookmarked = false; // State untuk melacak status bookmark
   int _selectedIndex = 1; // Untuk melacak tab yang dipilih
+  final NgalamTerbaruController _controller =
+      Get.put(NgalamTerbaruController());
+  Map<String, bool> bookmarkStatus = {};
 
   // Daftar widget yang sesuai dengan tab yang dipilih
 
@@ -86,20 +95,6 @@ class _NewsPageState extends State<AremaniaSemuaView> {
           },
         ),
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(left: 30.0),
-            child: IconButton(
-              icon: Icon(
-                _isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-                color: _isBookmarked ? Colors.black : Colors.black54,
-              ),
-              onPressed: () {
-                setState(() {
-                  _isBookmarked = !_isBookmarked;
-                });
-              },
-            ),
-          ),
           IconButton(
             icon: Icon(Icons.search, color: Colors.black),
             onPressed: () {
@@ -108,79 +103,270 @@ class _NewsPageState extends State<AremaniaSemuaView> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // Featured news at the top, tanpa padding
-            _buildFeaturedNewsCard(),
-            // Padding untuk list berita lainnya
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Column(
-                children: [
-                  SizedBox(height: 16),
-                  _buildSmallNewsListItem(
-                    title:
-                        'Mbois, Pelatih Arema Terpilih Sebagai Coach Of The Week Pekan 7',
-                    subtitle: 'Berita Arema • 2 jam yang lalu',
-                    imagePath: 'assets/gambar2.jpeg', // Replace with your image
-                  ),
-                  SizedBox(height: 16),
-                  _buildSmallNewsListItem(
-                    title:
-                        '5 Fakta Menarik Thales Lira, Pemain Termahal yang Didatangkan Arema Musim Ini',
-                    subtitle: 'Berita Arema • 3 jam yang lalu',
-                    imagePath: 'assets/gambar3.jpg', // Replace with your image
-                  ),
-                  SizedBox(height: 16),
-                  _buildSmallNewsListItem(
-                    title:
-                        'Rekam Jejak Malut United, Sama Persis Dengan Pencapaian Arema',
-                    subtitle: 'Berita Arema • 3 jam yang lalu',
-                    imagePath: 'assets/gambar4.jpg', // Replace with your image
-                  ),
-                  SizedBox(height: 16),
-                  // Satu artikel terakhir dengan gambar yang memenuhi lebar penuh
-                  _buildFullWidthNewsItem(
-                    title:
-                        'Arema Kalahkan Persib Bandung, Inilah Statistik dan Skor Akhir',
-                    subtitle: 'Berita Arema • 1 jam yang lalu',
-                    imagePath: 'assets/gambar5.jpg', // Replace with your image
-                  ),
-                  SizedBox(height: 16),
-                  _buildSmallNewsListItem(
-                    title:
-                        'Rekam Jejak Malut United, Sama Persis Dengan Pencapaian Arema',
-                    subtitle: 'Berita Arema • 3 jam yang lalu',
-                    imagePath: 'assets/gambar6.jpeg', // Replace with your image
-                  ),
-                  SizedBox(height: 16),
-                  _buildSmallNewsListItem(
-                    title:
-                        'Rekam Jejak Malut United, Sama Persis Dengan Pencapaian Arema',
-                    subtitle: 'Berita Arema • 3 jam yang lalu',
-                    imagePath: 'assets/gambar7.jpeg', // Replace with your image
-                  ),
-                  SizedBox(height: 16),
-                  _buildSmallNewsListItem(
-                    title:
-                        'Rekam Jejak Malut United, Sama Persis Dengan Pencapaian Arema',
-                    subtitle: 'Berita Arema • 3 jam yang lalu',
-                    imagePath: 'assets/gambar8.jpeg', // Replace with your image
-                  ),
-                  SizedBox(height: 16),
-                  _buildSmallNewsListItem(
-                    title:
-                        'Rekam Jejak Malut United, Sama Persis Dengan Pencapaian Arema',
-                    subtitle: 'Berita Arema • 3 jam yang lalu',
-                    imagePath: 'assets/gambar9.png', // Replace with your image
-                  ),
-                  SizedBox(height: 20),
-                ],
-              ),
+      body: Column(
+        children: [
+          // StreamBuilder untuk mendapatkan gambar artikel terbaru
+          // Ambil ID Artikel Terbaru
+          StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('Informasi')
+                .where('kategori', isEqualTo: 'aremania')
+                .where('sub_kategori', isEqualTo: 'aremania')
+                .orderBy('tanggal_upload', descending: true)
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Container(
+                  height: 100,
+                  child: Center(child: CircularProgressIndicator()),
+                );
+              }
+
+              final latestArticleDoc = snapshot.data!.docs.isNotEmpty
+                  ? snapshot.data!.docs[0]
+                  : null;
+
+              // Cek apakah ada dokumen
+              if (latestArticleDoc == null) {
+                return Container(
+                  height: 100,
+                  child: Center(child: Text('No Articles Available')),
+                );
+              }
+
+              // Ambil id_artikel terbaru
+              String latestId = latestArticleDoc['id_artikel'];
+
+              // Ambil detail artikel berdasarkan id_artikel terbaru
+              return StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('Informasi')
+                    .where('id_artikel',
+                        isEqualTo:
+                            latestId) // Mengambil detail berdasarkan id_artikel terbaru
+                    .snapshots(),
+                builder: (context, articleSnapshot) {
+                  if (!articleSnapshot.hasData) {
+                    return Container(
+                      height: 100,
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+
+                  final articleData = articleSnapshot.data!.docs.isNotEmpty
+                      ? articleSnapshot.data!.docs[0]
+                      : null;
+
+                  return GestureDetector(
+                    onTap: () {
+                      // Kirim seluruh data artikel ke halaman detail
+                      Get.toNamed(
+                        Routes.NGALAM_READ_TERBARU,
+                        arguments: articleData
+                            ?.data(), // Mengirim seluruh data dokumen
+                      );
+                    },
+                    child: Container(
+                      height: 200, // Set tinggi untuk gambar
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(
+                            0), // Pastikan tidak ada radius
+                        color: Colors
+                            .transparent, // Pastikan latar belakang transparan
+                      ),
+                      child: Stack(
+                        children: [
+                          // Gambar dengan transparansi
+                          Opacity(
+                            opacity: 0.8,
+                            child: articleData != null &&
+                                    articleData['gambar_url'] != null
+                                ? ClipRect(
+                                    child: Image.network(
+                                      articleData['gambar_url'],
+                                      fit: BoxFit.cover,
+                                      width: double.infinity,
+                                      height: 200,
+                                    ),
+                                  )
+                                : Container(
+                                    color: Colors.grey[300],
+                                    child: Center(
+                                        child: Text('No Image Available')),
+                                  ),
+                          ),
+                          // Overlay dengan teks di atas gambar
+                          Positioned(
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            child: Container(
+                              color: const Color.fromARGB(207, 0, 0, 0),
+                              padding: EdgeInsets.all(8),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    articleData?['judul_artikel'] ?? 'No Title',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  SizedBox(height: 5),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.account_circle,
+                                        color: Colors.white,
+                                        size: 20,
+                                      ),
+                                      SizedBox(width: 5),
+                                      Text(
+                                        articleData?['nama_upload'] ??
+                                            'Unknown Author',
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 18),
+                                      ),
+                                      SizedBox(width: 15),
+                                      Icon(
+                                        Icons.access_time,
+                                        color: Colors.white,
+                                        size: 20,
+                                      ),
+                                      SizedBox(width: 5),
+                                      Text(
+                                        articleData?['tanggal_upload'] != null
+                                            ? DateFormat('dd-MM-yyyy').format(
+                                                articleData!['tanggal_upload']
+                                                    .toDate())
+                                            : 'No Date',
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 18),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('Informasi')
+                  .where('kategori', isEqualTo: 'aremania')
+                  .where('sub_kategori', isEqualTo: 'aremania')
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return Center(child: CircularProgressIndicator());
+                }
+
+                final articles = snapshot.data!.docs;
+                if (articles.isEmpty) {
+                  return Center(child: Text('No articles available.'));
+                }
+
+                return ListView.builder(
+                  itemCount: articles.length,
+                  itemBuilder: (context, index) {
+                    // Ambil data artikel dari snapshot
+                    final articleData =
+                        articles[index].data() as Map<String, dynamic>;
+
+                    // Mengonversi timestamp ke tanggal
+                    String formattedDate = DateFormat('yyyy-MM-dd')
+                        .format(articleData['tanggal_upload'].toDate());
+
+                    return ListTile(
+                      title: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              articleData['judul_artikel'] ?? 'No Title',
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          IconButton(
+                            icon: Obx(() => Icon(
+                                  _controller.bookmarkStatus[
+                                              articles[index].id] ==
+                                          true
+                                      ? Icons.bookmark
+                                      : Icons.bookmark_border,
+                                  color: _controller.bookmarkStatus[
+                                              articles[index].id] ==
+                                          true
+                                      ? Colors.blue
+                                      : Colors.grey,
+                                  size: 24,
+                                )),
+                            onPressed: () {
+                              // Pastikan untuk memanggil toggleBookmark dengan artikel ID yang benar
+                              _controller.toggleBookmark(articles[index]
+                                  .id); // Pass articleId (String)
+                            },
+                          ),
+                        ],
+                      ),
+                      subtitle: Row(
+                        children: [
+                          Icon(Icons.account_circle,
+                              size: 16, color: Colors.grey),
+                          SizedBox(width: 4),
+                          Text(articleData['nama_upload'] ?? 'Unknown'),
+                          SizedBox(width: 10),
+                          Icon(Icons.access_time, size: 16, color: Colors.grey),
+                          SizedBox(width: 4),
+                          Text(formattedDate),
+                        ],
+                      ),
+                      leading: articleData['gambar_url'] != null
+                          ? SizedBox(
+                              width: 115,
+                              height: 150,
+                              child: Image.network(
+                                articleData['gambar_url'],
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                          : SizedBox(
+                              width: 115,
+                              height: 150,
+                              child: Container(
+                                  color: Colors.grey[300],
+                                  child: Center(
+                                      child: Text('No Image Available'))),
+                            ),
+                      onTap: () {
+                        // Kirim seluruh data artikel ke halaman detail
+                        Get.toNamed(
+                          Routes.NGALAM_READ_TERBARU,
+                          arguments: articles[index]
+                              .data(), // Mengirim seluruh data dokumen
+                        );
+                      },
+                    );
+                  },
+                );
+              },
             ),
-          ],
-        ),
+          ),
+        ],
       ),
       // Bottom Navigation Bar
       bottomNavigationBar: BottomNavigationBar(
@@ -206,185 +392,6 @@ class _NewsPageState extends State<AremaniaSemuaView> {
         selectedItemColor: Colors.blue,
         unselectedItemColor: Colors.grey,
         onTap: _onItemTapped,
-      ),
-    );
-  }
-
-  // Featured news card tanpa padding
-  Widget _buildFeaturedNewsCard() {
-    return Stack(
-      children: [
-        // Background image
-        Container(
-          width: double.infinity, // Memastikan gambar memenuhi lebar penuh
-          height: 240,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: Opacity(
-              opacity: 0.8, // Agar sudut tetap melengkung
-              child: Image.asset(
-                'assets/gambar1.jpeg', // Ganti dengan gambar yang sesuai
-                fit: BoxFit.cover, // Memastikan gambar memenuhi container
-                width: double.infinity, // Memenuhi lebar penuh
-              ),
-            ),
-          ),
-        ),
-        // Overlay text
-        Positioned(
-          bottom: 16,
-          left: 16,
-          right: 16,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Rekam Jejak Malut United, Sama Persis Dengan Pencapaian Arema',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 22,
-                ),
-              ),
-              SizedBox(height: 8),
-              Row(
-                children: [
-                  Icon(Icons.circle_rounded, color: Colors.white, size: 16),
-                  SizedBox(width: 4),
-                  Text(
-                    'Intip Lawan',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 15,
-                    ),
-                  ),
-                  SizedBox(width: 16),
-                  Icon(Icons.access_time, color: Colors.white, size: 16),
-                  SizedBox(width: 4),
-                  Text(
-                    '14 detik yang lalu',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 15,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  // Helper method to build small news list item with smaller image and details
-  Widget _buildSmallNewsListItem({
-    required String title,
-    required String subtitle,
-    required String imagePath,
-  }) {
-    return Row(
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: Image.asset(
-            imagePath,
-            width: 120, // Lebar gambar yang lebih kecil
-            height: 80,
-            fit: BoxFit.cover,
-          ),
-        ),
-        SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              SizedBox(height: 8),
-              Row(
-                children: [
-                  Icon(Icons.access_time, size: 14),
-                  SizedBox(width: 4),
-                  Text(
-                    subtitle,
-                    style: TextStyle(fontSize: 12),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  // Helper method to build the news list item with full-width image and text overlay
-  Widget _buildFullWidthNewsItem({
-    required String title,
-    required String subtitle,
-    required String imagePath,
-  }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16), // Margin bawah antar item
-      child: Stack(
-        children: [
-          // Gambar yang memenuhi lebar penuh
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.asset(
-              imagePath,
-              width: double.infinity, // Gambar memenuhi lebar layar
-              height: 200, // Atur tinggi gambar sesuai keinginan
-              fit: BoxFit.cover, // Gambar menyesuaikan ukuran container
-            ),
-          ),
-          // Overlay teks di atas gambar
-          Positioned(
-            bottom: 16,
-            left: 16,
-            right: 16,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                SizedBox(height: 4),
-                Row(
-                  children: [
-                    Icon(Icons.access_time, color: Colors.white, size: 16),
-                    SizedBox(width: 4),
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.9), // Warna subtitle
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }

@@ -10,8 +10,6 @@ class HalamanInformasiPribadiView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Memanggil loadUserData untuk memuat data pengguna saat halaman dibuka
-    controller.loadUserData();
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.orange,
@@ -24,57 +22,81 @@ class HalamanInformasiPribadiView extends StatelessWidget {
         ),
         title: Text('Ubah Profil', style: TextStyle(color: Colors.white)),
       ),
-      body: Column(
-        children: [
-          Container(
-            color: Colors.orange,
-            padding: EdgeInsets.symmetric(vertical: 20),
-            child: Center(
-              child: Column(
+      body: Obx(() {
+        // Cek apakah data user sudah lengkap atau belum
+        if (controller.nama.value.isEmpty) {
+          // Jika data belum diisi, arahkan ke halaman edit
+          return Center(
+            child: ElevatedButton(
+              onPressed: () {
+                String? userId = controller.getCurrentUserId();
+                if (userId != null) {
+                  Get.to(HalamanEditInformasiPribadiView(
+                    userId: userId,
+                    isNewUser:
+                        true, // Tampilkan halaman edit untuk pengisian data
+                  ));
+                } else {
+                  Get.snackbar(
+                      'Error', 'User tidak ditemukan. Silakan login ulang.');
+                }
+              },
+              child: Text('Isi Data Pribadi'),
+            ),
+          );
+        }
+
+        // Jika data sudah ada, tampilkan halaman informasi pribadi
+        return Column(
+          children: [
+            Container(
+              color: Colors.orange,
+              padding: EdgeInsets.symmetric(vertical: 20),
+              child: Center(
+                child: Column(
+                  children: [
+                    Obx(() => CircleAvatar(
+                          radius: 40,
+                          backgroundImage: controller.photoUrl.value.isNotEmpty
+                              ? NetworkImage(controller.photoUrl.value)
+                              : AssetImage('assets/gambar1.jpeg')
+                                  as ImageProvider, // Tampilkan gambar default jika URL kosong
+                        )),
+                  ],
+                ),
+              ),
+            ),
+            Expanded(
+              child: ListView(
                 children: [
-                  Obx(() => CircleAvatar(
-                        radius: 40,
-                        backgroundImage: controller.photoUrl.value.isNotEmpty
-                            ? NetworkImage(controller.photoUrl.value)
-                            : AssetImage('assets/gambar1.jpeg')
-                                as ImageProvider, // Tampilkan gambar default jika URL kosong
-                      )),
+                  _buildTextField('Nama', controller.nama),
+                  _buildTextField('Jenis Kelamin', controller.jenisKelamin),
+                  _buildTextField('Tanggal Lahir', controller.tanggalLahir),
+                  _buildTextField('No. Handphone', controller.nomorHandphone),
+                  _buildTextField('Email', controller.email),
                 ],
               ),
             ),
-          ),
-          Expanded(
-            child: ListView(
-              children: [
-                _buildTextField('Nama', controller.nama),
-                _buildTextField('Jenis Kelamin', controller.jenisKelamin),
-                _buildTextField('Tanggal Lahir', controller.tanggalLahir),
-                _buildTextField('No. Handphone', controller.nomorHandphone),
-                _buildTextField('Email', controller.email),
-              ],
+            ElevatedButton(
+              onPressed: () {
+                String? userId = controller.getCurrentUserId();
+                if (userId != null) {
+                  Get.to(HalamanEditInformasiPribadiView(
+                    userId: userId,
+                    isNewUser: controller.nama.value.isEmpty,
+                  ));
+                } else {
+                  Get.snackbar(
+                      'Error', 'User tidak ditemukan. Silakan login ulang.');
+                }
+              },
+              child: Obx(() => Text(
+                    controller.nama.value.isEmpty ? 'Isi Data' : 'Edit Profile',
+                  )),
             ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              // Ambil userId dari controller
-              String? userId = controller.getCurrentUserId();
-              if (userId != null) {
-                Get.to(HalamanEditInformasiPribadiView(
-                  userId: userId,
-                  isNewUser: controller.nama.value.isEmpty,
-                ));
-              } else {
-                // Tampilkan pesan jika userId tidak tersedia
-                Get.snackbar(
-                    'Error', 'User tidak ditemukan. Silakan login ulang.');
-              }
-            },
-            child: Obx(() => Text(
-                  controller.nama.value.isEmpty ? 'Isi Data' : 'Edit Profile',
-                )),
-          ),
-        ],
-      ),
+          ],
+        );
+      }),
     );
   }
 

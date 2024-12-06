@@ -1,295 +1,154 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:myapp/app/modules/Favorite/views/favorite_view.dart';
-import 'package:myapp/app/modules/home/views/home_view.dart';
-import 'package:myapp/app/modules/ngalam_terbaru/views/ngalam_terbaru_view.dart';
-import 'package:myapp/app/modules/ticket/views/ticket_view.dart';
+import 'package:intl/intl.dart';
+import 'package:myapp/app/modules/ngalam_terbaru/controllers/ngalam_terbaru_controller.dart';
 
-void main() {
-  runApp(MyApp());
-}
+class NgalamReadTerbaruView extends StatelessWidget {
+  // Menyimpan status bookmark menggunakan RxBool
+  RxBool isBookmarked = false.obs;
 
-class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Indonesia Sports News',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: NgalamReadTerbaruView(),
-    );
-  }
-}
+    // Ambil data artikel yang dikirim sebagai argument
+    final Map<String, dynamic> articleData = Get.arguments;
 
-class NgalamReadTerbaruView extends StatefulWidget {
-  @override
-  _ReadBeritaTerbaruViewState createState() => _ReadBeritaTerbaruViewState();
-}
+    // Ambil id_artikel dari data yang dikirimkan
+    String idArtikel = articleData['id_artikel'] ?? ''; // Gunakan id_artikel
 
-class _ReadBeritaTerbaruViewState extends State<NgalamReadTerbaruView> {
-  bool isBookmarked = false; // Untuk mengontrol warna bookmark
-  int _selectedIndex = 1; // Untuk melacak tab yang dipilih
+    // Mengonversi timestamp ke tanggal yang dapat dibaca
+    String formattedDate = articleData['tanggal_upload'] != null
+        ? DateFormat('yyyy-MM-dd')
+            .format(articleData['tanggal_upload'].toDate())
+        : 'No Date';
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-    if (index == 0) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => HomeScreen()),
-      );
-    } else if (index == 1) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => NgalamTerbaruView()),
-      );
-    } else if (index == 2) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => FavoriteView()),
-      );
-    } else if (index == 3) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => Ticket_View()),
-      );
+    // Set status bookmark saat pertama kali memuat data artikel
+    if (articleData['isBookmarked'] != null) {
+      isBookmarked.value = articleData['isBookmarked'] == true;
     }
-  }
 
-  @override
-  Widget build(BuildContext context) {
+    // Fungsi untuk mengupdate status bookmark di Firestore
+    Future<void> updateBookmarkStatus() async {
+      try {
+        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+            .collection('Informasi')
+            .where('id_artikel', isEqualTo: idArtikel)
+            .get();
+
+        if (querySnapshot.docs.isNotEmpty) {
+          DocumentSnapshot documentSnapshot = querySnapshot.docs.first;
+
+          bool newStatus = !isBookmarked.value;
+
+          // Update nilai isBookmarked di Firestore
+          await documentSnapshot.reference.update({'isBookmarked': newStatus});
+
+          // Perbarui status bookmark secara lokal
+          isBookmarked.value = newStatus;
+
+          // Update juga di controller agar sinkron dengan halaman daftar
+          Get.find<NgalamTerbaruController>().bookmarkStatus[idArtikel] =
+              newStatus;
+
+          print('Bookmark updated for ID: $idArtikel -> $newStatus');
+        }
+      } catch (e) {
+        print('Error updating bookmark: $e');
+      }
+    }
+
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () {
-            Get.back();
-          },
-        ),
-        title: Text(
-          'Terbaru',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.w900),
-        ),
-        centerTitle: true, // Teks "Terbaru" di tengah
-        backgroundColor: Colors.white,
-        actions: [
-          IconButton(
-            icon: Icon(
-              isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-              color: isBookmarked ? Colors.black : Colors.grey,
-            ),
-            onPressed: () {
-              setState(() {
-                isBookmarked = !isBookmarked;
-              });
-            },
-          ),
-        ],
-        elevation: 1, // Menambahkan bayangan tipis di bawah AppBar
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Rekam Jejak Malut United Sama Persis Dengan Pencapaian Arema',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 24,
-                    ),
-                    textAlign: TextAlign.justify,
-                  ),
-                  SizedBox(height: 8),
-                  Row(
-                    children: [
-                      // Ikon lingkaran di sebelah "oleh Admin"
-                      Icon(
-                        Icons.circle_rounded,
-                        size: 15, // Ukuran ikon lingkaran
-                        color: Colors.grey,
-                      ),
-                      SizedBox(width: 4), // Jarak antara ikon dan teks
-                      Text(
-                        'oleh Admin',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey,
-                        ),
-                      ),
-                      SizedBox(
-                        width: 15,
-                      ),
-                      // Ikon jam di sebelah waktu terbit
-                      Icon(
-                        Icons.access_time, // Ikon jam
-                        size: 16, // Ukuran ikon jam
-                        color: Colors.grey,
-                      ),
-                      SizedBox(width: 4), // Jarak antara ikon jam dan teks
-                      Text(
-                        '19 Oktober 2024',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 16),
-                  Divider(
-                    color: Colors.grey, // Line panjang di bawah title
-                    thickness: 1,
-                  ),
-                  SizedBox(height: 16),
-                ],
-              ),
-            ),
-
-            // Gambar di sini, setelah Divider
-            Stack(
-              children: [
-                Image.asset(
-                  'assets/gambar5.jpg', // Ganti dengan path gambar Anda
-                  height: 300,
-                  width: double.infinity, // Memenuhi lebar layar
-                  fit: BoxFit.cover, // Menutupi area secara proporsional
+            Text(articleData['kategori'] ?? 'No Category'),
+            SizedBox(width: 10),
+            // Membungkus IconButton dengan Obx untuk status reaktif
+            Obx(() {
+              return IconButton(
+                icon: Icon(
+                  isBookmarked.value ? Icons.bookmark : Icons.bookmark_border,
+                  color: isBookmarked.value ? Colors.blue : Colors.grey,
                 ),
-              ],
-            ),
-
-            // Padding untuk konten berikutnya
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Tak banyak yang sadar jika rekam jejak Malut United ternyata sama persis dengan pencapaian Arema. Kedua tim bakal diperteukan di Pekan 8 Liga 1 2024-2025, Sabtu (19/10/2024), pukul 15.30 WIB.Pada pertandinan terakhirnya, Malut United mampu meraih kemenangan tandan di markas PSS Sleman 1-0, sesuatu yang gagal dilakukan Arema di Pekan 6 lalu. Arema menelan kekalahan 1-3 dari Super Elang Jawa.Itu merupakan kemenangan kedua Malut United musim ini. Selain dua kemenangan, Laskar Kie Raha juga mencatatkan tiga hasil imbang dan dua kekalahan dalam tujuh pertandingan yang mereka jalani usai promosi dari kasta kedua.Bukan cuma catatan jumlah kemenangan, hasil imbang, dan kekalahannya saja, jumlah gol dan kebobolan Malut United juga sama persis dengan Arema. Anak asuh pelatih Imran Nahumarury tersebut mencetak lima gol dan kebobolan tujuh kali.Sebelum FIFA Matchday Oktober, baik Malut United maupun Arema sama-sama mengoleksi sembilan poin. Bedanya, Arema sedikit ‘lebih beruntung’ dengan menempati peringkat 10, sedangkan Malut United di bawahnya persis.',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.black,
-                      fontWeight: FontWeight.normal,
-                    ),
-                    textAlign:
-                        TextAlign.justify, // Mengatur teks menjadi justify
-                  ),
-                ],
-              ),
-            ),
-
-            // Konten lain
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Inilah Rekam Jejak Malut United Sebelum Bertemu Arema',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.left,
-                  ),
-                  SizedBox(height: 16),
-                  Image.asset(
-                    'assets/gambar9.png', // Ganti dengan path gambar yang Anda gunakan
-                    width: double.infinity,
-                    height: 200,
-                    fit: BoxFit.cover,
-                  ),
-                  SizedBox(height: 20),
-                  Text(
-                    'Berita Lainnya',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  NewsItem(
-                    title:
-                        'Shin Tae-yong Ungkap Alasan Timnas Indonesia Kalah dari Ukraina',
-                    imageUrl:
-                        'https://example.com/news1.jpg', // Replace with actual image URL
-                  ),
-                  NewsItem(
-                    title:
-                        'Timnas Indonesia U-17 Kalah dari Maroko di Piala Dunia U-17',
-                    imageUrl:
-                        'https://example.com/news2.jpg', // Replace with actual image URL
-                  ),
-                ],
-              ),
-            ),
+                onPressed: () async {
+                  // Perbarui status bookmark di Firestore dan UI
+                  await updateBookmarkStatus();
+                },
+              );
+            }),
           ],
         ),
+        centerTitle: true,
       ),
-      // Bottom Navigation Bar
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.explore),
-            label: 'Information',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bookmark),
-            label: 'Bookmark',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.confirmation_number), // Material Icons untuk tiket
-            label: 'Ticket',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.grey,
-        onTap: _onItemTapped,
-      ),
-    );
-  }
-}
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Tampilkan judul artikel dengan align justify
+              Text(
+                articleData['judul_artikel'] ?? 'No Title',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.justify,
+              ),
+              SizedBox(height: 20),
 
-class NewsItem extends StatelessWidget {
-  final String title;
-  final String imageUrl;
+              // Tampilkan nama pengunggah dan tanggal upload bersampingan
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.account_circle, size: 16, color: Colors.grey),
+                      SizedBox(width: 4),
+                      Text(articleData['nama_upload'] ?? 'Unknown'),
+                    ],
+                  ),
+                  Text(
+                    'Uploaded on: $formattedDate',
+                    style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                  ),
+                ],
+              ),
+              SizedBox(height: 10),
 
-  const NewsItem({Key? key, required this.title, required this.imageUrl})
-      : super(key: key);
+              // Garis lurus hitam di bawah nama dan tanggal
+              Divider(
+                color: Colors.black,
+                thickness: 1,
+              ),
+              SizedBox(height: 20),
 
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        children: [
-          Image.asset(
-            'assets/gambar2.jpeg',
-            width: 100,
-            height: 60,
-            fit: BoxFit.cover,
+              // Tampilkan gambar jika ada
+              articleData['gambar_url'] != null
+                  ? SizedBox(
+                      width: double.infinity,
+                      child: Image.network(
+                        articleData['gambar_url'],
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                  : Container(
+                      height: 200,
+                      width: double.infinity,
+                      color: Colors.grey[300],
+                      child: Center(child: Text('No Image Available'))),
+              SizedBox(height: 20),
+
+              // Tampilkan konten atau deskripsi artikel dengan justify
+              Text(
+                articleData['isi_artikel'] ?? 'No content available.',
+                style: TextStyle(fontSize: 16),
+                textAlign: TextAlign.justify,
+              ),
+            ],
           ),
-          SizedBox(width: 16),
-          Expanded(
-            child: Text(
-              title,
-              style: TextStyle(fontSize: 16),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

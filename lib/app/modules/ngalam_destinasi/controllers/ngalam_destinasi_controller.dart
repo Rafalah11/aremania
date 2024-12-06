@@ -1,23 +1,53 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 
 class NgalamDestinasiController extends GetxController {
-  //TODO: Implement NgalamDestinasiController
+  // Using RxMap to observe changes to bookmark status
+  var bookmarkStatus = <String, bool>{}.obs;
 
-  final count = 0.obs;
   @override
   void onInit() {
     super.onInit();
+    // Load initial bookmark states
+    loadBookmarkStatus();
   }
 
-  @override
-  void onReady() {
-    super.onReady();
+  void loadBookmarkStatus() async {
+    // Example to load bookmark status from Firestore or local storage
+    // Here, you would fetch saved bookmarks and update bookmarkStatus
+    var querySnapshot =
+        await FirebaseFirestore.instance.collection('bookmarks').get();
+
+    for (var doc in querySnapshot.docs) {
+      bookmarkStatus[doc.id] = true; // Assuming all docs are bookmarked
+    }
   }
 
-  @override
-  void onClose() {
-    super.onClose();
+void toggleBookmark(String articleId) async {
+  if (bookmarkStatus[articleId] == true) {
+    // Hapus bookmark
+    bookmarkStatus[articleId] = false;
+    await FirebaseFirestore.instance
+        .collection('bookmarks')
+        .doc(articleId)
+        .delete();
+  } else {
+    // Tambah bookmark
+    bookmarkStatus[articleId] = true;
+    var articleSnapshot = await FirebaseFirestore.instance
+        .collection('Informasi')
+        .doc(articleId)
+        .get();
+    if (articleSnapshot.exists) {
+      FirebaseFirestore.instance
+          .collection('bookmarks')
+          .doc(articleId)
+          .set(articleSnapshot.data()!);
+    }
   }
+  
+  // Update state secara eksplisit
+  bookmarkStatus.refresh();
+}
 
-  void increment() => count.value++;
 }

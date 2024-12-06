@@ -1,36 +1,42 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:get/get.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:myapp/app/routes/app_pages.dart';
 
-import 'package:myapp/app/modules/home/views/home_view.dart';
-
-void main() {
-  runApp(HalamanAnimasiAwalView());
-}
-
-class HalamanAnimasiAwalView extends StatelessWidget {
+class HalamanAnimasiAwalView extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: SplashScreen(),
-    );
-  }
+  _HalamanAnimasiAwalViewState createState() => _HalamanAnimasiAwalViewState();
 }
 
-class SplashScreen extends StatefulWidget {
-  @override
-  _SplashScreenState createState() => _SplashScreenState();
-}
-
-class _SplashScreenState extends State<SplashScreen> {
+class _HalamanAnimasiAwalViewState extends State<HalamanAnimasiAwalView> {
   @override
   void initState() {
     super.initState();
-    // Timer untuk memindahkan ke halaman berikutnya setelah 3 detik
-    Timer(Duration(seconds: 5), () {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => HomeScreen()),
-      );
-    });
+
+    // Tunggu selama 5 detik untuk animasi
+    Timer(Duration(seconds: 5), _navigateBasedOnAuth);
+  }
+
+  // Fungsi untuk menavigasi berdasarkan status autentikasi pengguna
+  void _navigateBasedOnAuth() async {
+
+    // Tunggu status autentikasi
+    User? user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      // Jika pengguna sudah login, arahkan ke home atau admin
+      if (user.email == 'admin@example.com') {
+        // Arahkan ke halaman admin
+        Get.offAllNamed(Routes.MANAGEMENT_ADMIN);
+      } else {
+        // Arahkan ke halaman home
+        Get.offAllNamed(Routes.HOME);
+      }
+    } else {
+      // Jika pengguna belum login, arahkan ke halaman login
+      Get.offAllNamed(Routes.HOME);
+    }
   }
 
   @override
@@ -43,20 +49,6 @@ class _SplashScreenState extends State<SplashScreen> {
           width: 200, // Sesuaikan ukuran logo jika perlu
           fit: BoxFit.contain,
         ),
-      ),
-    );
-  }
-}
-
-class HomePage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Beranda'),
-      ),
-      body: Center(
-        child: Text('Ini adalah halaman utama setelah splash screen'),
       ),
     );
   }

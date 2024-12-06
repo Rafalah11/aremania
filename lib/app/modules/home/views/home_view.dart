@@ -1,9 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
+import 'package:intl/intl.dart';
 import 'package:myapp/app/modules/Favorite/views/favorite_view.dart';
 import 'package:myapp/app/modules/home/controllers/home_controller.dart';
 import 'package:myapp/app/modules/ngalam_terbaru/views/ngalam_terbaru_view.dart';
+import 'package:myapp/app/modules/readdetailartikel/views/readdetailartikel_view.dart';
 import 'package:myapp/app/modules/ticket/views/ticket_view.dart';
 import 'package:myapp/app/routes/app_pages.dart';
 
@@ -20,6 +22,17 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   int _selectedMenuIndex = 0;
   final HomeController homeController123 = Get.put(HomeController());
+  TextEditingController _searchController =
+      TextEditingController(); // Controller pencarian
+  List<DocumentSnapshot> _newsItems = []; // Menyimpan dokumen berita
+  List<DocumentSnapshot> _filteredNewsItems =
+      []; // Menyimpan hasil filter pencarian
+  @override
+  void initState() {
+    super.initState(); // Panggil fungsi untuk mengambil data bookmarks
+    _searchController
+        .addListener(_filterNews); // Menambahkan listener untuk pencarian
+  }
 
   // Menu Titles
   final List<String> _menuTitles = [
@@ -110,6 +123,35 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  void _filterNews() {
+    String query =
+        _searchController.text.toLowerCase(); // Ambil query pencarian
+    print("Pencarian: $query"); // Debugging: tampilkan kata kunci pencarian
+
+    if (query.isEmpty) {
+      // Jika pencarian kosong, tampilkan semua artikel
+      setState(() {
+        _filteredNewsItems = List.from(_newsItems); // Kembalikan semua item
+      });
+    } else {
+      // Jika ada query pencarian, filter artikel berdasarkan judul
+      setState(() {
+        _filteredNewsItems = _newsItems.where((newsItem) {
+          String title = (newsItem['judul_artikel'] ?? '')
+              .toLowerCase(); // Periksa field judul
+          bool containsQuery =
+              title.contains(query); // Pencocokan kata kunci di judul artikel
+          print(
+              "Artikel: $title, Pencarian cocok: $containsQuery"); // Debugging: cek pencocokan
+          return containsQuery;
+        }).toList();
+      });
+    }
+
+    print(
+        "Jumlah hasil pencarian: ${_filteredNewsItems.length}"); // Debugging: tampilkan hasil pencarian
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -163,8 +205,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 Text("Hari ini, 13 Okt 2024"),
                 SizedBox(height: 20),
 
-                // Search Box (Pencarian)
+// Search Box (Pencarian)
                 TextField(
+                  controller: _searchController,
                   decoration: InputDecoration(
                     prefixIcon: Icon(Icons.search),
                     hintText: "Pencarian...",
@@ -173,55 +216,42 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 ),
-                SizedBox(height: 20),
 
                 SingleChildScrollView(
-                  scrollDirection:
-                      Axis.horizontal, // Enable horizontal scrolling
+                  scrollDirection: Axis.horizontal,
                   child: Row(
                     children: List.generate(_menuTitles.length, (index) {
-                      bool isSelected = _selectedMenuIndex ==
-                          index; // Check if the tab is selected
-                      return Row(
-                        children: [
-                          GestureDetector(
-                            onTap: () => _onMenuTapped(index),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: isSelected
-                                    ? (index == 0
-                                        ? Color.fromARGB(255, 12, 0, 247)
-                                        : Colors.grey[300])
-                                    : Colors.grey[
-                                        300], // Gray background for other tabs
-                                borderRadius: BorderRadius.circular(
-                                    8), // Rounded corners for individual tabs
-                              ),
-                              padding: EdgeInsets.symmetric(
-                                  vertical: 10,
-                                  horizontal: 20), // Padding for tabs
-                              child: Text(
-                                _menuTitles[index],
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: isSelected
-                                      ? Colors.white
-                                      : Colors
-                                          .black, // White for selected tab text
-                                ),
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8.0, vertical: 15),
+                        child: InkWell(
+                          onTap: () => _onMenuTapped(index),
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                                vertical: 12.0, horizontal: 24.0),
+                            decoration: BoxDecoration(
+                              color: _selectedMenuIndex == index
+                                  ? Colors.blue
+                                  : Colors.grey[300],
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                            child: Text(
+                              _menuTitles[index],
+                              style: TextStyle(
+                                color: _selectedMenuIndex == index
+                                    ? Colors.white
+                                    : Colors.black,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
-                          SizedBox(width: 10), // Add space between items
-                        ],
+                        ),
                       );
                     }),
                   ),
                 ),
 
-                SizedBox(height: 20),
-
-                // Tabs dan konten Berita Terbaru
+// Tabs dan konten Berita Terbaru
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -232,123 +262,46 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
                 SizedBox(height: 10),
-                // Berita Terbaru Cards
+
+// Berita Terbaru Cards - Memodifikasi agar menampilkan hasil pencarian
                 Container(
                   height: 250, // Sesuaikan tinggi sesuai kebutuhan
-                  child: ListView(
-                    scrollDirection:
-                        Axis.horizontal, // Set scrolling horizontal
-                    children: [
-                      // Card pertama
-                      Container(
-                        width: 200, // Set width untuk setiap card
-                        child: Card(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Image.asset('assets/gambar1.jpeg',
-                                  fit: BoxFit.cover,
-                                  height: 120,
-                                  width: double.infinity),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "Rekam Jejak Malut United, Sama Persis Dengan Pencapaian Arema",
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    SizedBox(height: 5),
-                                    Row(
-                                      children: [
-                                        Icon(Icons.remove_red_eye, size: 12),
-                                        SizedBox(width: 5),
-                                        Text("14 detik yang lalu"),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 10), // Jarak antar Card
+                  child: StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('Home')
+                        .where('kategori', isEqualTo: 'beritaterbaru')
+                        .orderBy('tanggal_upload', descending: true)
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return Center(child: CircularProgressIndicator());
+                      }
 
-                      // Card kedua
-                      Container(
-                        width: 200,
-                        child: Card(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Image.asset('assets/gambar2.jpeg',
-                                  fit: BoxFit.cover,
-                                  height: 120,
-                                  width: double.infinity),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "Jadwal Arema di Liga 1 2024–2025 Pekan 8",
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    SizedBox(height: 5),
-                                    Row(
-                                      children: [
-                                        Icon(Icons.remove_red_eye, size: 12),
-                                        SizedBox(width: 5),
-                                        Text("2 jam yang lalu"),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      Container(
-                        width: 200,
-                        child: Card(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Image.asset('assets/gambar3.jpg',
-                                  fit: BoxFit.cover,
-                                  height: 120,
-                                  width: double.infinity),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "Jadwal Arema di Liga 1 2024–2025 Pekan 8",
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    SizedBox(height: 5),
-                                    Row(
-                                      children: [
-                                        Icon(Icons.remove_red_eye, size: 12),
-                                        SizedBox(width: 5),
-                                        Text("2 jam yang lalu"),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
+                      if (snapshot.data!.docs.isEmpty) {
+                        return Center(child: Text('No Articles Available'));
+                      }
+
+                      // Filter berita berdasarkan pencarian
+                      String query = _searchController.text.toLowerCase();
+                      List<DocumentSnapshot> filteredDocs =
+                          snapshot.data!.docs.where((doc) {
+                        String title =
+                            (doc['judul_artikel'] ?? '').toLowerCase();
+                        return title.contains(
+                            query); // Pencocokan judul artikel dengan query pencarian
+                      }).toList();
+
+                      // Menampilkan hasil pencarian atau semua artikel jika tidak ada pencarian
+                      return ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: filteredDocs.length,
+                        itemBuilder: (context, index) {
+                          final articleData = filteredDocs[index];
+                          return _buildArticleCard(
+                              articleData); // Menampilkan artikel
+                        },
+                      );
+                    },
                   ),
                 ),
 
@@ -365,102 +318,45 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 SizedBox(height: 10),
                 // Trending Cards
-                Row(
-                  children: [
-                    Expanded(
-                      child: Card(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Image.asset(
-                              'assets/gambar4.jpg',
-                              fit: BoxFit.cover,
-                              height: 150, // Atur tinggi gambar agar konsisten
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Arema FC Perkuat Lini Serang, Rekrut Striker Asing Jelang Putaran ...",
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
-                                    maxLines: 2, // Membatasi jumlah baris teks
-                                    overflow: TextOverflow
-                                        .ellipsis, // Tambahkan ellipsis jika teks melebihi batas
-                                  ),
-                                  SizedBox(height: 5),
-                                  Row(
-                                    children: [
-                                      Icon(Icons.remove_red_eye, size: 12),
-                                      SizedBox(width: 5),
-                                      Text("Berita Arema"),
-                                    ],
-                                  ),
-                                  SizedBox(height: 5),
-                                  Row(
-                                    children: [
-                                      Icon(Icons.circle, size: 12),
-                                      SizedBox(width: 5),
-                                      Text("Senin, 4 Jun 24"),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 10),
-                    Expanded(
-                      child: Card(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Image.asset(
-                              'assets/gambar5.jpg',
-                              fit: BoxFit.cover,
-                              height: 150, // Atur tinggi gambar agar konsisten
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "5 Fakta Menarik Wiliam Marcilio, Mastro Arema Dari Rio de Janeiro",
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
-                                    maxLines: 2, // Membatasi jumlah baris teks
-                                    overflow: TextOverflow
-                                        .ellipsis, // Tambahkan ellipsis jika teks melebihi batas
-                                  ),
-                                  SizedBox(height: 5),
-                                  Row(
-                                    children: [
-                                      Icon(Icons.remove_red_eye, size: 12),
-                                      SizedBox(width: 5),
-                                      Text("Focus"),
-                                    ],
-                                  ),
-                                  SizedBox(height: 5),
-                                  Row(
-                                    children: [
-                                      Icon(Icons.circle, size: 12),
-                                      SizedBox(width: 5),
-                                      Text("Senin, 4 Jun 24"),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
+                Container(
+                  height: 250, // Sesuaikan tinggi sesuai kebutuhan
+                  child: StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('Home')
+                        .where('kategori', isEqualTo: 'trending')
+                        .orderBy('tanggal_upload', descending: true)
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return Center(child: CircularProgressIndicator());
+                      }
+
+                      if (snapshot.data!.docs.isEmpty) {
+                        return Center(child: Text('No Articles Available'));
+                      }
+
+                      // Filter berita berdasarkan pencarian
+                      String query = _searchController.text.toLowerCase();
+                      List<DocumentSnapshot> filteredDocs =
+                          snapshot.data!.docs.where((doc) {
+                        String title =
+                            (doc['judul_artikel'] ?? '').toLowerCase();
+                        return title.contains(
+                            query); // Pencocokan judul artikel dengan query pencarian
+                      }).toList();
+
+                      // Menampilkan hasil pencarian atau semua artikel jika tidak ada pencarian
+                      return ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: filteredDocs.length,
+                        itemBuilder: (context, index) {
+                          final articleData = filteredDocs[index];
+                          return _buildArticleCard(
+                              articleData); // Menampilkan artikel
+                        },
+                      );
+                    },
+                  ),
                 ),
 
                 SizedBox(height: 20),
@@ -476,104 +372,46 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 SizedBox(height: 10),
                 // Berita Terbaru Cards
-                Row(
-                  children: [
-                    Expanded(
-                      child: Card(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Image.asset(
-                              'assets/gambar7.jpeg',
-                              fit: BoxFit.cover,
-                              height: 150, // Atur tinggi gambar agar konsisten
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Jadwal Arema di Liga 1 2024-2025 Pekan 8",
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
-                                    maxLines: 2, // Membatasi jumlah baris teks
-                                    overflow: TextOverflow
-                                        .ellipsis, // Tambahkan ellipsis jika teks melebihi batas
-                                  ),
-                                  SizedBox(height: 5),
-                                  Row(
-                                    children: [
-                                      Icon(Icons.remove_red_eye, size: 12),
-                                      SizedBox(width: 5),
-                                      Text("Arema Day"),
-                                    ],
-                                  ),
-                                  SizedBox(height: 5),
-                                  Row(
-                                    children: [
-                                      Icon(Icons.circle, size: 12),
-                                      SizedBox(width: 5),
-                                      Text("Senin, 4 Jun 24"),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 10),
-                    Expanded(
-                      child: Card(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Image.asset(
-                              'assets/gambar8.jpeg',
-                              fit: BoxFit.cover,
-                              height: 150, // Atur tinggi gambar agar konsisten
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Hasil Liga 1 2024-2025 PSIS Semarang vs Arema, 26 September",
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
-                                    maxLines: 2, // Membatasi jumlah baris teks
-                                    overflow: TextOverflow
-                                        .ellipsis, // Tambahkan ellipsis jika teks melebihi batas
-                                  ),
-                                  SizedBox(height: 5),
-                                  Row(
-                                    children: [
-                                      Icon(Icons.remove_red_eye, size: 12),
-                                      SizedBox(width: 5),
-                                      Text("Arema Day"),
-                                    ],
-                                  ),
-                                  SizedBox(height: 5),
-                                  Row(
-                                    children: [
-                                      Icon(Icons.circle, size: 12),
-                                      SizedBox(width: 5),
-                                      Text("Senin, 4 Jun 24"),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                Container(
+                  height: 250, // Sesuaikan tinggi sesuai kebutuhan
+                  child: StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('Home')
+                        .where('kategori', isEqualTo: 'aremaday')
+                        .orderBy('tanggal_upload', descending: true)
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return Center(child: CircularProgressIndicator());
+                      }
 
+                      if (snapshot.data!.docs.isEmpty) {
+                        return Center(child: Text('No Articles Available'));
+                      }
+
+                      // Filter berita berdasarkan pencarian
+                      String query = _searchController.text.toLowerCase();
+                      List<DocumentSnapshot> filteredDocs =
+                          snapshot.data!.docs.where((doc) {
+                        String title =
+                            (doc['judul_artikel'] ?? '').toLowerCase();
+                        return title.contains(
+                            query); // Pencocokan judul artikel dengan query pencarian
+                      }).toList();
+
+                      // Menampilkan hasil pencarian atau semua artikel jika tidak ada pencarian
+                      return ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: filteredDocs.length,
+                        itemBuilder: (context, index) {
+                          final articleData = filteredDocs[index];
+                          return _buildArticleCard(
+                              articleData); // Menampilkan artikel
+                        },
+                      );
+                    },
+                  ),
+                ),
                 SizedBox(height: 20),
                 // Tabs dan konten Berita Terbaru
                 Row(
@@ -585,104 +423,45 @@ class _HomeScreenState extends State<HomeScreen> {
                     TextButton(onPressed: () {}, child: Text("Lihat Semua")),
                   ],
                 ),
-                SizedBox(height: 10),
-                // Berita Terbaru Cards
-                Row(
-                  children: [
-                    Expanded(
-                      child: Card(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Image.asset(
-                              'assets/gambar9.png',
-                              fit: BoxFit.cover,
-                              height: 150, // Atur tinggi gambar agar konsisten
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Presidium Aremania Buka Lebar Pintu Sekretariat Untuk",
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
-                                    maxLines: 2, // Membatasi jumlah baris teks
-                                    overflow: TextOverflow
-                                        .ellipsis, // Tambahkan ellipsis jika teks melebihi batas
-                                  ),
-                                  SizedBox(height: 5),
-                                  Row(
-                                    children: [
-                                      Icon(Icons.remove_red_eye, size: 12),
-                                      SizedBox(width: 5),
-                                      Text("Aremania"),
-                                    ],
-                                  ),
-                                  SizedBox(height: 5),
-                                  Row(
-                                    children: [
-                                      Icon(Icons.circle, size: 12),
-                                      SizedBox(width: 5),
-                                      Text("Senin, 4 Jun 24"),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 10),
-                    Expanded(
-                      child: Card(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Image.asset(
-                              'assets/gambar10.jpg',
-                              fit: BoxFit.cover,
-                              height: 150, // Atur tinggi gambar agar konsisten
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Hadiri Doa Bersama 2 Tahun Tragedi Kanjuruhan, Begini",
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
-                                    maxLines: 2, // Membatasi jumlah baris teks
-                                    overflow: TextOverflow
-                                        .ellipsis, // Tambahkan ellipsis jika teks melebihi batas
-                                  ),
-                                  SizedBox(height: 5),
-                                  Row(
-                                    children: [
-                                      Icon(Icons.remove_red_eye, size: 12),
-                                      SizedBox(width: 5),
-                                      Text("Aremanita"),
-                                    ],
-                                  ),
-                                  SizedBox(height: 5),
-                                  Row(
-                                    children: [
-                                      Icon(Icons.circle, size: 12),
-                                      SizedBox(width: 5),
-                                      Text("Senin, 4 Jun 24"),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
+                Container(
+                  height: 250, // Sesuaikan tinggi sesuai kebutuhan
+                  child: StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('Home')
+                        .where('kategori', isEqualTo: 'aremania')
+                        .orderBy('tanggal_upload', descending: true)
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return Center(child: CircularProgressIndicator());
+                      }
+
+                      if (snapshot.data!.docs.isEmpty) {
+                        return Center(child: Text('No Articles Available'));
+                      }
+
+                      // Filter berita berdasarkan pencarian
+                      String query = _searchController.text.toLowerCase();
+                      List<DocumentSnapshot> filteredDocs =
+                          snapshot.data!.docs.where((doc) {
+                        String title =
+                            (doc['judul_artikel'] ?? '').toLowerCase();
+                        return title.contains(
+                            query); // Pencocokan judul artikel dengan query pencarian
+                      }).toList();
+
+                      // Menampilkan hasil pencarian atau semua artikel jika tidak ada pencarian
+                      return ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: filteredDocs.length,
+                        itemBuilder: (context, index) {
+                          final articleData = filteredDocs[index];
+                          return _buildArticleCard(
+                              articleData); // Menampilkan artikel
+                        },
+                      );
+                    },
+                  ),
                 ),
               ],
             ),
@@ -736,6 +515,76 @@ class _HomeScreenState extends State<HomeScreen> {
                 ? Colors.white
                 : Colors.blueAccent,
             fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildArticleCard(DocumentSnapshot articleData) {
+    return GestureDetector(
+      onTap: () {
+        Get.to(() => ReadDetailArtikelView(articleId: articleData.id));
+      },
+      child: Container(
+        width: 200, // Set width untuk setiap card
+        margin: EdgeInsets.only(right: 8), // Jarak antar card
+        child: Card(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              articleData['gambar_url'] != null
+                  ? Image.network(
+                      articleData['gambar_url'],
+                      fit: BoxFit.cover,
+                      height: 120,
+                      width: double.infinity,
+                    )
+                  : Container(
+                      color: Colors.grey[300],
+                      height: 120,
+                      width: double.infinity,
+                      child: Center(child: Text('No Image')),
+                    ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      articleData['judul_artikel'] ?? 'No Title',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    SizedBox(height: 5),
+                    Row(
+                      children: [
+                        Icon(Icons.account_circle, size: 12),
+                        SizedBox(width: 5),
+                        Text(
+                          articleData?['nama_upload'] ?? 'Unknown Author',
+                          style: TextStyle(color: Colors.black, fontSize: 18),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 5),
+                    Row(
+                      children: [
+                        Icon(Icons.remove_red_eye, size: 12),
+                        SizedBox(width: 5),
+                        Text(
+                          articleData['tanggal_upload'] != null
+                              ? DateFormat('dd-MM-yyyy').format(
+                                  articleData['tanggal_upload'].toDate())
+                              : 'No Date',
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),

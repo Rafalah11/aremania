@@ -52,6 +52,14 @@ abstract class Routes {
   static const LAPORKAN_MASALAH = _Paths.LAPORKAN_MASALAH;
   static const FAQ = _Paths.FAQ;
   static const ADMIN_INFORMASI = _Paths.ADMIN_INFORMASI;
+  static const READDETAILARTIKEL = _Paths.READDETAILARTIKEL;
+  static const READ_FAVORITE = _Paths.READ_FAVORITE;
+  static const TRANSAKSI_TICKET = _Paths.TRANSAKSI_TICKET;
+  static const MANAGEMENT_ADMIN = _Paths.MANAGEMENT_ADMIN;
+  static const ADMIN_HOME = _Paths.ADMIN_HOME;
+  static const ADMIN_TIKET = _Paths.ADMIN_TIKET;
+  static const ADMIN_TRANSAKSI_TIKET = _Paths.ADMIN_TRANSAKSI_TIKET;
+  static const TICKET_SAYA = _Paths.TICKET_SAYA;
 }
 
 abstract class _Paths {
@@ -105,4 +113,12 @@ abstract class _Paths {
   static const LAPORKAN_MASALAH = '/laporkan-masalah';
   static const FAQ = '/faq';
   static const ADMIN_INFORMASI = '/admin-informasi';
+  static const READDETAILARTIKEL = '/readdetailartikel';
+  static const READ_FAVORITE = '/read-favorite';
+  static const TRANSAKSI_TICKET = '/transaksi-ticket';
+  static const MANAGEMENT_ADMIN = '/management-admin';
+  static const ADMIN_HOME = '/admin-home';
+  static const ADMIN_TIKET = '/admin-tiket';
+  static const ADMIN_TRANSAKSI_TIKET = '/admin-transaksi-tiket';
+  static const TICKET_SAYA = '/ticket-saya';
 }

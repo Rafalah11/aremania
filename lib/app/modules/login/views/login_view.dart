@@ -112,8 +112,8 @@ class _LoginViewState extends State<LoginView> {
                   SizedBox(height: 20),
                   ElevatedButton.icon(
                     onPressed: () {},
-                    icon: Image.asset(
-                      '', // Ganti dengan URL icon Google Anda
+                    icon: Image.network(
+                      'https://firebasestorage.googleapis.com/v0/b/mobilemateri-16b83.appspot.com/o/images%2Fgoogle.png?alt=media&token=b0e29128-2ee3-40e8-9869-d7b1e0e37db0', // Ganti dengan URL icon Google Anda
                       height: 24,
                     ),
                     label: Text(

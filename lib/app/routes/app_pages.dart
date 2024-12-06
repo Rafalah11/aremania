@@ -1,6 +1,4 @@
 import 'package:get/get.dart';
-import 'package:myapp/app/modules/admin_informasi/bindings/admin_informasiBinding.dart';
-import 'package:myapp/app/modules/admin_informasi/views/adminInformasi_view.dart';
 
 import '../modules/FAQ/bindings/faq_binding.dart';
 import '../modules/FAQ/views/faq_view.dart';
@@ -8,6 +6,16 @@ import '../modules/Favorite/bindings/favorite_binding.dart';
 import '../modules/Favorite/views/favorite_view.dart';
 import '../modules/News_page/bindings/news_page_binding.dart';
 import '../modules/News_page/views/news_page_view.dart';
+import '../modules/ReadFavorite/bindings/read_favorite_binding.dart';
+import '../modules/ReadFavorite/views/read_favorite_view.dart';
+import '../modules/admin_home/bindings/admin_home_binding.dart';
+import '../modules/admin_home/views/admin_home_view.dart';
+import '../modules/admin_informasi/bindings/admin_informasiBinding.dart';
+import '../modules/admin_informasi/views/adminInformasi_view.dart';
+import '../modules/admin_tiket/bindings/admin_tiket_binding.dart';
+import '../modules/admin_tiket/views/admin_tiket_view.dart';
+import '../modules/admin_transaksi_tiket/bindings/admin_transaksi_tiket_binding.dart';
+import '../modules/admin_transaksi_tiket/views/admin_transaksi_tiket_view.dart';
 import '../modules/arema_aremajunior/bindings/arema_aremajunior_binding.dart';
 import '../modules/arema_aremajunior/views/arema_aremajunior_view.dart';
 import '../modules/arema_aremaputri/bindings/arema_aremaputri_binding.dart';
@@ -51,6 +59,8 @@ import '../modules/laporkan_masalah/bindings/laporkan_masalah_binding.dart';
 import '../modules/laporkan_masalah/views/laporkan_masalah_view.dart';
 import '../modules/login/bindings/login_binding.dart';
 import '../modules/login/views/login_view.dart';
+import '../modules/management_admin/bindings/management_admin_binding.dart';
+import '../modules/management_admin/views/management_admin_view.dart';
 import '../modules/ngalam_destinasi/bindings/ngalam_destinasi_binding.dart';
 import '../modules/ngalam_destinasi/views/ngalam_destinasi_view.dart';
 import '../modules/ngalam_infopenting/bindings/ngalam_infopenting_binding.dart';
@@ -81,10 +91,16 @@ import '../modules/read_berita_terbaru/bindings/read_berita_terbaru_binding.dart
 import '../modules/read_berita_terbaru/views/read_berita_terbaru_view.dart';
 import '../modules/read_trending/bindings/read_trending_binding.dart';
 import '../modules/read_trending/views/read_trending_view.dart';
+import '../modules/readdetailartikel/bindings/readdetailartikel_binding.dart';
+import '../modules/readdetailartikel/views/readdetailartikel_view.dart';
 import '../modules/rincian_ticket/bindings/rincian_ticket_binding.dart';
 import '../modules/rincian_ticket/views/rincian_ticket_view.dart';
 import '../modules/ticket/bindings/ticket_binding.dart';
 import '../modules/ticket/views/ticket_view.dart';
+import '../modules/ticket_saya/bindings/ticket_saya_binding.dart';
+import '../modules/ticket_saya/views/ticket_saya_view.dart';
+import '../modules/transaksi_ticket/bindings/transaksi_ticket_binding.dart';
+import '../modules/transaksi_ticket/views/transaksi_ticket_view.dart';
 import '../modules/trending_semua/bindings/trending_semua_binding.dart';
 import '../modules/trending_semua/views/trending_semua_view.dart';
 import '../modules/ubah_kata_sandi/bindings/ubah_kata_sandi_binding.dart';
@@ -280,7 +296,9 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.RINCIAN_TICKET,
-      page: () => RincianTicketView(),
+      page: () => RincianTicketView(
+        docId: '',
+      ),
       binding: RincianTicketBinding(),
     ),
     GetPage(
@@ -359,6 +377,50 @@ class AppPages {
       name: _Paths.ADMIN_INFORMASI,
       page: () => AdminFormPage(),
       binding: AdminInformasiBinding(),
+    ),
+    GetPage(
+      name: _Paths.READDETAILARTIKEL,
+      page: () => ReadDetailArtikelView(
+        articleId: '',
+      ),
+      binding: ReaddetailartikelBinding(),
+    ),
+    GetPage(
+      name: _Paths.READ_FAVORITE,
+      page: () => ReadFavoriteView(),
+      binding: ReadFavoriteBinding(),
+    ),
+    GetPage(
+      name: _Paths.TRANSAKSI_TICKET,
+      page: () => TransaksiTicketView(
+        docId1: '',
+      ),
+      binding: TransaksiTicketBinding(),
+    ),
+    GetPage(
+      name: _Paths.MANAGEMENT_ADMIN,
+      page: () => ManagementAdminView(),
+      binding: ManagementAdminBinding(),
+    ),
+    GetPage(
+      name: _Paths.ADMIN_HOME,
+      page: () => AdminHomeView(),
+      binding: AdminHomeBinding(),
+    ),
+    GetPage(
+      name: _Paths.ADMIN_TIKET,
+      page: () => AdminTiketView(),
+      binding: AdminTiketBinding(),
+    ),
+    GetPage(
+      name: _Paths.ADMIN_TRANSAKSI_TIKET,
+      page: () => const AdminTransaksiTiketView(),
+      binding: AdminTransaksiTiketBinding(),
+    ),
+    GetPage(
+      name: _Paths.TICKET_SAYA,
+      page: () => const TicketSayaView(),
+      binding: TicketSayaBinding(),
     ),
   ];
 }

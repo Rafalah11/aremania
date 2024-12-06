@@ -47,31 +47,40 @@ class AuthController extends GetxController {
         password: password,
       );
 
-      // Cek status verifikasi email
-      if (userCredential.user?.emailVerified ?? false) {
-        // Jika email sudah diverifikasi, simpan status login di SharedPreferences
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('token',
-            'your_token_value'); // atau simpan tanda autentikasi lainnya
+      // Menampilkan UID di debug console
+      print(
+          'Logged in user UID: ${userCredential.user?.uid}'); // Ini yang Anda butuhkan
 
-        Get.snackbar('Success', 'Login successful',
-            backgroundColor: Colors.green);
-
-        // Jika berhasil login, arahkan ke HOME
-        Get.offAllNamed(Routes.HOME);
+      // Cek apakah email adalah admin
+      if (email == 'admin@example.com' && password == '123456') {
+        // Jika admin, langsung masuk ke halaman admin
+        Get.offAllNamed(Routes.MANAGEMENT_ADMIN);
       } else {
-        // Jika email belum diverifikasi, beri tahu pengguna
-        Get.snackbar(
-          'Verification Needed',
-          'Please verify your email to log in. A verification email has been sent.',
-          backgroundColor: Colors.orange,
-        );
+        // Cek status verifikasi email untuk pengguna biasa
+        if (userCredential.user?.emailVerified ?? false) {
+          // Jika email sudah diverifikasi, simpan status login di SharedPreferences
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('token', 'your_token_value');
 
-        // Kirim ulang email verifikasi
-        await userCredential.user?.sendEmailVerification();
+          Get.snackbar('Success', 'Login successful',
+              backgroundColor: Colors.green);
 
-        // Logout agar sesi tidak disimpan
-        await _auth.signOut();
+          // Jika berhasil login, arahkan ke HOME
+          Get.offAllNamed(Routes.HOME);
+        } else {
+          // Jika email belum diverifikasi, beri tahu pengguna
+          Get.snackbar(
+            'Verification Needed',
+            'Please verify your email to log in. A verification email has been sent.',
+            backgroundColor: Colors.orange,
+          );
+
+          // Kirim ulang email verifikasi
+          await userCredential.user?.sendEmailVerification();
+
+          // Logout agar sesi tidak disimpan
+          await _auth.signOut();
+        }
       }
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {

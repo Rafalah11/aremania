@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 
 class TransaksiTicketController extends GetxController {
-  //TODO: Implement TicketController
+  //TODO: Implement TransaksiTicketController
 
   final count = 0.obs;
   @override
