@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
@@ -78,13 +79,6 @@ class _NgalamTerbaruViewState extends State<NgalamTerbaruView> {
     } else if (index == 4) {
       Get.to(() => NgalamInfopentingView());
     }
-  }
-
-  // Tambahkan ini untuk memastikan sinkronisasi data setiap kali kembali ke halaman ini
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _controller.reloadBookmarkStatus(); // Reload status bookmark
   }
 
   @override
@@ -330,82 +324,96 @@ class _NgalamTerbaruViewState extends State<NgalamTerbaruView> {
                 return ListView.builder(
                   itemCount: articles.length,
                   itemBuilder: (context, index) {
-                    // Ambil data artikel dari snapshot
                     final articleData =
                         articles[index].data() as Map<String, dynamic>;
-
-                    // Mengonversi timestamp ke tanggal
                     String formattedDate = DateFormat('yyyy-MM-dd')
                         .format(articleData['tanggal_upload'].toDate());
+                    String articleId = articles[index].id;
 
-                    // Status bookmark untuk ikon
-                    bool isBookmarked = articleData['isBookmarked'] ?? false;
+                    return Obx(() {
+                      // Ambil status bookmark dari bookmarkStatus dengan ID artikel
+                      bool isBookmarked =
+                          _controller.bookmarkStatus[articleId] ?? false;
 
-                    return ListTile(
-                      title: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              articleData['judul_artikel'] ?? 'No Title',
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(fontWeight: FontWeight.bold),
+                      return ListTile(
+                        title: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                articleData['judul_artikel'] ?? 'No Title',
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
                             ),
-                          ),
-                          IconButton(
-                            icon: Icon(
-                              isBookmarked
-                                  ? Icons.bookmark
-                                  : Icons.bookmark_border,
-                              color: isBookmarked ? Colors.blue : Colors.grey,
-                              size: 24,
+                            IconButton(
+                              icon: Icon(
+                                isBookmarked
+                                    ? Icons.bookmark
+                                    : Icons.bookmark_border,
+                                color: isBookmarked ? Colors.blue : Colors.grey,
+                                size: 24,
+                              ),
+                              onPressed: () {
+                                var currentUser =
+                                    FirebaseAuth.instance.currentUser;
+                                if (currentUser == null) {
+                                  // Jika belum login, arahkan ke halaman login
+                                  Get.toNamed(Routes.HALAMAN_LOGIN);
+                                  return;
+                                }
+                                _controller.toggleBookmark(articleId);
+                              },
                             ),
-                            onPressed: () {
-                              // Panggil toggleBookmark untuk mengubah status bookmark artikel
-                              _controller.toggleBookmark(articles[index].id);
+                          ],
+                        ),
+                        subtitle: Row(
+                          children: [
+                            Icon(Icons.account_circle,
+                                size: 16, color: Colors.grey),
+                            SizedBox(width: 4),
+                            Text(articleData['nama_upload'] ?? 'Unknown'),
+                            SizedBox(width: 10),
+                            Icon(Icons.access_time,
+                                size: 16, color: Colors.grey),
+                            SizedBox(width: 4),
+                            Text(formattedDate),
+                          ],
+                        ),
+                        leading: articleData['gambar_url'] != null
+                            ? SizedBox(
+                                width: 115,
+                                height: 150,
+                                child: Image.network(
+                                  articleData['gambar_url'],
+                                  fit: BoxFit.cover,
+                                ),
+                              )
+                            : SizedBox(
+                                width: 115,
+                                height: 150,
+                                child: Container(
+                                  color: Colors.grey[300],
+                                  child:
+                                      Center(child: Text('No Image Available')),
+                                ),
+                              ),
+                        onTap: () {
+                          // Ambil ID dokumen dan seluruh data artikel
+                          String articleId = articles[index].id;
+                          var articleData = articles[index].data();
+
+                          // Kirim ID dan data artikel ke halaman detail
+                          Get.toNamed(
+                            Routes.NGALAM_READ_TERBARU,
+                            arguments: {
+                              'id': articleId, // Mengirimkan ID dokumen
+                              'data': articleData, // Mengirimkan data dokumen
                             },
-                          ),
-                        ],
-                      ),
-                      subtitle: Row(
-                        children: [
-                          Icon(Icons.account_circle,
-                              size: 16, color: Colors.grey),
-                          SizedBox(width: 4),
-                          Text(articleData['nama_upload'] ?? 'Unknown'),
-                          SizedBox(width: 10),
-                          Icon(Icons.access_time, size: 16, color: Colors.grey),
-                          SizedBox(width: 4),
-                          Text(formattedDate),
-                        ],
-                      ),
-                      leading: articleData['gambar_url'] != null
-                          ? SizedBox(
-                              width: 115,
-                              height: 150,
-                              child: Image.network(
-                                articleData['gambar_url'],
-                                fit: BoxFit.cover,
-                              ),
-                            )
-                          : SizedBox(
-                              width: 115,
-                              height: 150,
-                              child: Container(
-                                color: Colors.grey[300],
-                                child:
-                                    Center(child: Text('No Image Available')),
-                              ),
-                            ),
-                      onTap: () {
-                        // Kirim seluruh data artikel ke halaman detail
-                        Get.toNamed(
-                          Routes.NGALAM_READ_TERBARU,
-                          arguments: articles[index]
-                              .data(), // Mengirim seluruh data dokumen
-                        );
-                      },
-                    );
+                          );
+                        },
+                      );
+                    });
                   },
                 );
               },

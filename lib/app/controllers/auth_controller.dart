@@ -1,12 +1,16 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:myapp/app/modules/halaman_informasi_pribadi/controllers/halaman_informasi_pribadi_controller.dart';
 import 'package:myapp/app/modules/halaman_login/views/halaman_login_view.dart';
+import 'package:myapp/app/modules/ngalam_terbaru/controllers/ngalam_terbaru_controller.dart';
 import 'package:myapp/app/routes/app_pages.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthController extends GetxController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final NgalamTerbaruController ngalamTerbaruController =
+      Get.find<NgalamTerbaruController>(); // Inisialisasi controller
   RxBool isLoading = false.obs;
 
   Stream<User?> get streamAuthStatus => _auth.authStateChanges();
@@ -48,8 +52,7 @@ class AuthController extends GetxController {
       );
 
       // Menampilkan UID di debug console
-      print(
-          'Logged in user UID: ${userCredential.user?.uid}'); // Ini yang Anda butuhkan
+      print('Logged in user UID: ${userCredential.user?.uid}');
 
       // Cek apakah email adalah admin
       if (email == 'admin@example.com' && password == '123456') {
@@ -64,6 +67,17 @@ class AuthController extends GetxController {
 
           Get.snackbar('Success', 'Login successful',
               backgroundColor: Colors.green);
+
+          var currentUser = FirebaseAuth.instance.currentUser;
+          if (currentUser != null) {
+            // Muat status bookmark setelah login
+            ngalamTerbaruController.loadBookmarkStatus();
+          }
+
+          // Panggil loadUserData untuk memuat data pengguna
+          final HalamanInformasiPribadiController
+              halamanInformasiPribadiController = Get.find();
+          halamanInformasiPribadiController.loadUserData();
 
           // Jika berhasil login, arahkan ke HOME
           Get.offAllNamed(Routes.HOME);
@@ -105,6 +119,9 @@ class AuthController extends GetxController {
     // Hapus token dari SharedPreferences
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('token');
+
+    // Bersihkan status bookmark
+    ngalamTerbaruController.bookmarkStatus.clear();
 
     // Arahkan ke halaman login
     Get.offAllNamed(Routes.HOME);

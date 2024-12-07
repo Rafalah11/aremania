@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
@@ -50,8 +51,19 @@ class _FavoriteView extends State<FavoriteView> {
   // }
   Future<void> _fetchBookmarks() async {
     try {
+      // Ambil UID pengguna yang sedang login
+      var currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser == null) {
+        // Jika pengguna belum login, arahkan ke halaman login
+        Get.toNamed(Routes.LOGIN);
+        return;
+      }
+
+      // Ambil data bookmark berdasarkan UID pengguna
       QuerySnapshot snapshot = await FirebaseFirestore.instance
           .collection('bookmarks')
+          .doc(currentUser.uid) // Gunakan UID pengguna
+          .collection('userBookmarks')
           .orderBy('tanggal_upload', descending: true)
           .get();
 

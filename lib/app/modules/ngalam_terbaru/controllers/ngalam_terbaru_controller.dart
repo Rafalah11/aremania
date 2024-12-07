@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
+import 'package:myapp/app/routes/app_pages.dart';
 
 class NgalamTerbaruController extends GetxController {
   // Using RxMap to observe changes to bookmark status
@@ -12,60 +14,82 @@ class NgalamTerbaruController extends GetxController {
     loadBookmarkStatus();
   }
 
-  void reloadBookmarkStatus() async {
-    var articlesSnapshot =
-        await FirebaseFirestore.instance.collection('Informasi').get();
-
-    for (var doc in articlesSnapshot.docs) {
-      bookmarkStatus[doc.id] = doc['isBookmarked'] ?? false;
-    }
-  }
-
   void loadBookmarkStatus() async {
-    var bookmarksSnapshot =
-        await FirebaseFirestore.instance.collection('bookmarks').get();
+    var currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) return; // Pastikan pengguna sudah login
 
-    // Clear existing status and rebuild from bookmarks collection
-    bookmarkStatus.clear();
-    for (var doc in bookmarksSnapshot.docs) {
-      bookmarkStatus[doc.id] = true;
+    try {
+      // Ambil data bookmarks berdasarkan UID pengguna
+      var bookmarksSnapshot = await FirebaseFirestore.instance
+          .collection('bookmarks')
+          .doc(currentUser.uid)
+          .collection('userBookmarks')
+          .get();
+
+      bookmarkStatus.clear(); // Kosongkan status yang ada
+      for (var doc in bookmarksSnapshot.docs) {
+        bookmarkStatus[doc.id] = true; // Set status bookmark
+      }
+    } catch (e) {
+      print('Error loading bookmark status: $e');
     }
   }
 
   void toggleBookmark(String articleId) async {
-    if (bookmarkStatus[articleId] == true) {
-      // Ubah status bookmark menjadi false dan hapus dari koleksi bookmarks
-      bookmarkStatus[articleId] = false;
-      await FirebaseFirestore.instance
-          .collection('bookmarks')
-          .doc(articleId)
-          .delete();
+    // Check if user is logged in
+    var currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) {
+      // If not logged in, navigate to login page
+      Get.toNamed(Routes.LOGIN);
+      return;
+    }
 
-      // Update status isBookmarked menjadi false di koleksi 'Informasi'
-      await FirebaseFirestore.instance
-          .collection('Informasi')
-          .doc(articleId)
-          .update({'isBookmarked': false});
-    } else {
-      // Ubah status bookmark menjadi true dan tambahkan ke koleksi bookmarks
-      bookmarkStatus[articleId] = true;
-      var articleSnapshot = await FirebaseFirestore.instance
-          .collection('Informasi')
-          .doc(articleId)
-          .get();
-      if (articleSnapshot.exists) {
-        // Tambahkan data artikel + status bookmark ke koleksi bookmarks
-        FirebaseFirestore.instance.collection('bookmarks').doc(articleId).set({
-          ...articleSnapshot.data()!, // Salin semua data dari dokumen asli
-          'isBookmarked': true, // Tambahkan status bookmark
-        });
+    // Proceed with bookmark process
+    try {
+      if (bookmarkStatus[articleId] == true) {
+        // Change bookmark status to false and delete from bookmarks
+        bookmarkStatus[articleId] = false;
+        await FirebaseFirestore.instance
+            .collection('bookmarks')
+            .doc(currentUser.uid)
+            .collection('userBookmarks')
+            .doc(articleId)
+            .delete();
 
-        // Update status isBookmarked menjadi true di koleksi 'Informasi'
+        // Update status isBookmarked to false in 'Informasi' collection
         await FirebaseFirestore.instance
             .collection('Informasi')
             .doc(articleId)
-            .update({'isBookmarked': true});
+            .update({'isBookmarked': false});
+      } else {
+        // Change bookmark status to true and add to bookmarks
+        bookmarkStatus[articleId] = true;
+        var articleSnapshot = await FirebaseFirestore.instance
+            .collection('Informasi')
+            .doc(articleId)
+            .get();
+        if (articleSnapshot.exists) {
+          // Add article data + bookmark status to bookmarks collection
+          await FirebaseFirestore.instance
+              .collection('bookmarks')
+              .doc(currentUser.uid)
+              .collection('userBookmarks')
+              .doc(articleId)
+              .set({
+            ...articleSnapshot.data()!,
+            'isBookmarked': true,
+          });
+
+          // Update status isBookmarked to true in 'Informasi' collection
+          await FirebaseFirestore.instance
+              .collection('Informasi')
+              .doc(articleId)
+              .update({'isBookmarked': true});
+        }
       }
+    } catch (e) {
+      print('Error toggling bookmark: $e');
+      // Handle error appropriately
     }
   }
 }

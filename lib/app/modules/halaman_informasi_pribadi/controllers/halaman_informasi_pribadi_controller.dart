@@ -85,7 +85,9 @@ class HalamanInformasiPribadiController extends GetxController {
       tanggalLahir.value = doc['tanggal_lahir'] ?? '';
       nomorHandphone.value = doc['nomor_handphone'] ?? '';
       email.value = doc['email'] ?? '';
+      print('Data pengguna berhasil dimuat: $nama, $email, $photoUrl');
     } else {
+      print('Dokumen pengguna tidak ditemukan');
       Get.to(HalamanEditInformasiPribadiView(userId: userId, isNewUser: true));
     }
   }
