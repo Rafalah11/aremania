@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:myapp/app/modules/halaman_informasi_pribadi/views/halaman_edit_informasi_pribadi_view.dart';
@@ -132,8 +133,24 @@ class HalamanInformasiPribadiController extends GetxController {
         'email': email.value,
       });
       print('Data berhasil disimpan.');
+
+      // Tambahkan snackbar setelah data berhasil disimpan
+      Get.snackbar(
+        "Sukses",
+        "Profil berhasil diperbarui!",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
     } catch (e) {
       print('Error menyimpan data: $e');
+      Get.snackbar(
+        "Error",
+        "Gagal menyimpan profil: $e",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     }
   }
 }
