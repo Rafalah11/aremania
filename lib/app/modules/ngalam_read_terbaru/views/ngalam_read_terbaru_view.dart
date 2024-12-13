@@ -24,11 +24,16 @@ class NgalamReadTerbaruView extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Menampilkan kategori artikel
-            Text(isiArtikel['kategori'] ?? 'No Category'),
-            SizedBox(width: 10),
+            // Spacer untuk memastikan jarak ke kiri
+            Spacer(),
+            // Menampilkan kategori artikel di tengah
+            Text(
+              isiArtikel['kategori'] ?? 'No Category',
+              style: TextStyle(fontSize: 25), // Sesuaikan gaya teks jika perlu
+            ),
+            Spacer(),
             // Membungkus IconButton dengan Obx untuk status reaktif
             Obx(() {
               bool isBookmarked = controller.bookmarkStatus[idArtikel] ?? false;

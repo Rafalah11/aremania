@@ -8,6 +8,8 @@ import 'package:myapp/app/modules/ngalam_terbaru/views/ngalam_terbaru_view.dart'
 import 'package:myapp/app/modules/readdetailartikel/views/readdetailartikel_view.dart';
 import 'package:myapp/app/modules/ticket/views/ticket_view.dart';
 import 'package:myapp/app/routes/app_pages.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 void main() {
   runApp(HomeScreen());
@@ -32,6 +34,37 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState(); // Panggil fungsi untuk mengambil data bookmarks
     _searchController
         .addListener(_filterNews); // Menambahkan listener untuk pencarian
+    _speech = stt.SpeechToText();
+  }
+
+  // Speech to Text variables
+  late stt.SpeechToText _speech;
+  bool _isListening = false;
+
+  void _startListening() async {
+    bool available = await _speech.initialize(
+      onStatus: (status) => print("Speech Status: $status"),
+      onError: (error) => print("Speech Error: $error"),
+    );
+    if (available) {
+      setState(() {
+        _isListening = true;
+      });
+      _speech.listen(onResult: (result) {
+        setState(() {
+          _searchController.text = result.recognizedWords;
+        });
+      });
+    } else {
+      print("Speech recognition tidak tersedia");
+    }
+  }
+
+  void _stopListening() {
+    setState(() {
+      _isListening = false;
+    });
+    _speech.stop();
   }
 
   // Menu Titles
@@ -152,6 +185,14 @@ class _HomeScreenState extends State<HomeScreen> {
         "Jumlah hasil pencarian: ${_filteredNewsItems.length}"); // Debugging: tampilkan hasil pencarian
   }
 
+  Future<void> checkMicrophonePermission() async {
+    var status = await Permission.microphone.status;
+    if (!status.isGranted) {
+      // Jika izin belum diberikan, minta izin kepada pengguna
+      await Permission.microphone.request();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -205,12 +246,19 @@ class _HomeScreenState extends State<HomeScreen> {
                 Text("Hari ini, 13 Okt 2024"),
                 SizedBox(height: 20),
 
-// Search Box (Pencarian)
                 TextField(
                   controller: _searchController,
                   decoration: InputDecoration(
                     prefixIcon: Icon(Icons.search),
                     hintText: "Pencarian...",
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _isListening ? Icons.mic : Icons.mic_none,
+                        color: _isListening ? Colors.red : Colors.grey,
+                      ),
+                      onPressed:
+                          _isListening ? _stopListening : _startListening,
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25),
                     ),
