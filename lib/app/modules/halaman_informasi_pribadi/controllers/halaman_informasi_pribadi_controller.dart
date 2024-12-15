@@ -153,4 +153,27 @@ class HalamanInformasiPribadiController extends GetxController {
       );
     }
   }
+
+  Future<void> pickImageFromCamera(String userId) async {
+    try {
+      final XFile? image = await _picker.pickImage(source: ImageSource.camera);
+      if (image != null) {
+        await uploadProfileImage(File(image.path), userId);
+
+        // Berikan jeda untuk pembaruan
+        await Future.delayed(Duration(milliseconds: 500));
+        photoUrl.refresh();
+
+        // Tampilkan snackbar
+        Get.snackbar(
+            "Sukses", "Foto profil berhasil diambil dari kamera dan diunggah!");
+
+        // Kembali ke halaman sebelumnya
+        Get.back();
+      }
+    } catch (e) {
+      print('Error mengambil foto dari kamera: $e');
+      Get.snackbar("Error", "Gagal mengambil foto dari kamera: $e");
+    }
+  }
 }

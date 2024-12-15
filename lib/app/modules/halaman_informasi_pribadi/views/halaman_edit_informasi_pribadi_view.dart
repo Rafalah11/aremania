@@ -19,42 +19,50 @@ class HalamanEditInformasiPribadiView extends StatelessWidget {
         title: Text(isNewUser ? 'Isi Data Awal' : 'Edit Profile'),
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            Get.back();
-          },
+          onPressed: () => Get.back(),
         ),
       ),
       body: ListView(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         children: [
           Center(
             child: GestureDetector(
-              onTap: () => controller.pickProfileImage(userId),
+              onTap: () => _showImageSourceDialog(context),
               child: Obx(() => CircleAvatar(
                     radius: 50,
                     backgroundImage: controller.photoUrl.value.isNotEmpty
                         ? NetworkImage(controller.photoUrl.value)
-                        : AssetImage('assets/gambar1.jpeg') as ImageProvider,
+                        : const AssetImage('assets/gambar1.jpeg')
+                            as ImageProvider,
                     child: Align(
                       alignment: Alignment.bottomRight,
-                      child: Icon(
-                        Icons.camera_alt,
-                        color: Colors.white,
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          color: Colors.black54,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Padding(
+                          padding: EdgeInsets.all(4.0),
+                          child: Icon(
+                            Icons.camera_alt,
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
                     ),
                   )),
             ),
           ),
-          SizedBox(height: 20), // Ruang kosong sebelum form
+          const SizedBox(height: 20), // Ruang kosong sebelum form
           _buildTextField('Nama', controller.nama),
           _buildTextField('Jenis Kelamin', controller.jenisKelamin),
           _buildTextField('Tanggal Lahir', controller.tanggalLahir),
           _buildTextField('No. Handphone', controller.nomorHandphone),
           _buildTextField('Email', controller.email),
-          SizedBox(height: 20), // Ruang kosong sebelum tombol
+          const SizedBox(height: 20), // Ruang kosong sebelum tombol
           ElevatedButton(
-            onPressed: () {
-              controller.saveDataToFirestore(userId);
+            onPressed: () async {
+              await controller.saveDataToFirestore(userId);
               if (isNewUser) {
                 Get.back();
               }
@@ -72,19 +80,48 @@ class HalamanEditInformasiPribadiView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: TextStyle(fontSize: 16)),
+          Text(title, style: const TextStyle(fontSize: 16)),
           Obx(() => TextField(
-                onChanged: (value) {
-                  controllerValue.value = value;
-                },
+                onChanged: (value) => controllerValue.value = value,
                 decoration: InputDecoration(
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
                   hintText: 'Masukkan $title',
-                  labelText: controllerValue.value,
+                  labelText: controllerValue.value.isNotEmpty ? title : null,
                 ),
               )),
         ],
       ),
+    );
+  }
+
+  void _showImageSourceDialog(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text('Ambil Foto dari Kamera'),
+                onTap: () {
+                  Navigator.pop(context);
+                  controller.pickImageFromCamera(userId);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Pilih Foto dari Galeri'),
+                onTap: () {
+                  Navigator.pop(context);
+                  controller.pickProfileImage(userId);
+                },
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
