@@ -3,17 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:myapp/app/modules/Favorite/views/favorite_view.dart';
+import 'package:myapp/app/modules/Halaman_AremaDay/views/halaman_arema_day_view.dart';
+import 'package:myapp/app/modules/Halaman_Aremania/views/halaman_aremania_view.dart';
+import 'package:myapp/app/modules/Halaman_Berita_Terbaru/views/halaman_berita_terbaru_view.dart';
+import 'package:myapp/app/modules/Halaman_Trending/views/halaman_trending_view.dart';
 import 'package:myapp/app/modules/home/controllers/home_controller.dart';
 import 'package:myapp/app/modules/ngalam_terbaru/views/ngalam_terbaru_view.dart';
-import 'package:myapp/app/modules/readdetailartikel/views/readdetailartikel_view.dart';
 import 'package:myapp/app/modules/ticket/views/ticket_view.dart';
 import 'package:myapp/app/routes/app_pages.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
-
-void main() {
-  runApp(HomeScreen());
-}
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -127,28 +126,32 @@ class _HomeScreenState extends State<HomeScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => HomeScreen()), // Replace with your page
+              builder: (context) =>
+                  HalamanBeritaTerbaruView()), // Replace with your page
         );
         break;
       case 2:
         Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => HomeScreen()), // Replace with your page
+              builder: (context) =>
+                  HalamanTrendingView()), // Replace with your page
         );
         break;
       case 3:
         Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => HomeScreen()), // Replace with your page
+              builder: (context) =>
+                  HalamanAremaDayView()), // Replace with your page
         );
         break;
       case 4:
         Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => HomeScreen()), // Replace with your page
+              builder: (context) =>
+                  HalamanAremaniaView()), // Replace with your page
         );
         break;
       default:
@@ -210,7 +213,11 @@ class _HomeScreenState extends State<HomeScreen> {
           centerTitle: false,
           actions: [
             IconButton(
-              icon: Icon(Icons.person, color: Colors.grey),
+              icon: Icon(
+                Icons.person,
+                color: Colors.grey,
+                size: 35,
+              ),
               onPressed: () async {
                 await homeController123.checkLoginStatus(); // Cek status login
                 if (homeController123.isLoggedIn.value) {
@@ -236,14 +243,33 @@ class _HomeScreenState extends State<HomeScreen> {
                     Text("Welcome!",
                         style: TextStyle(
                             fontSize: 24, fontWeight: FontWeight.bold)),
-                    IconButton(
-                      icon: Icon(Icons.notifications,
-                          color: Colors.grey), // Icon lonceng di kanan
-                      onPressed: () {},
-                    ),
+                    // IconButton(
+                    //   icon: Icon(Icons.notifications,
+                    //       color: Colors.grey), // Icon lonceng di kanan
+                    //   onPressed: () {},
+                    // ),
                   ],
                 ),
-                Text("Hari ini, 13 Okt 2024"),
+                SizedBox(height: 10),
+                // Tanggal yang diperbarui secara real-time
+                StreamBuilder<DateTime>(
+                  stream: Stream.periodic(Duration(seconds: 1),
+                      (_) => DateTime.now()), // Update setiap detik
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return CircularProgressIndicator(); // Menunggu data pertama
+                    }
+                    DateTime currentTime = snapshot.data!;
+                    String formattedDate =
+                        DateFormat('EEEE, dd MMMM yyyy').format(currentTime);
+
+                    return Text(
+                      "Hari ini, $formattedDate",
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    );
+                  },
+                ),
                 SizedBox(height: 20),
 
                 TextField(
@@ -306,14 +332,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     Text("Berita Terbaru",
                         style: TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold)),
-                    TextButton(onPressed: () {}, child: Text("Lihat Semua")),
+                    // TextButton(onPressed: () {}, child: Text("Lihat Semua")),
                   ],
                 ),
                 SizedBox(height: 10),
 
 // Berita Terbaru Cards - Memodifikasi agar menampilkan hasil pencarian
+                // Pada bagian kode StreamBuilder:
                 Container(
-                  height: 250, // Sesuaikan tinggi sesuai kebutuhan
+                  height: 290, // Sesuaikan tinggi sesuai kebutuhan
                   child: StreamBuilder<QuerySnapshot>(
                     stream: FirebaseFirestore.instance
                         .collection('Home')
@@ -361,13 +388,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     Text("Trending",
                         style: TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold)),
-                    TextButton(onPressed: () {}, child: Text("Lihat Semua")),
+                    // TextButton(onPressed: () {}, child: Text("Lihat Semua")),
                   ],
                 ),
                 SizedBox(height: 10),
                 // Trending Cards
                 Container(
-                  height: 250, // Sesuaikan tinggi sesuai kebutuhan
+                  height: 290, // Sesuaikan tinggi sesuai kebutuhan
                   child: StreamBuilder<QuerySnapshot>(
                     stream: FirebaseFirestore.instance
                         .collection('Home')
@@ -415,13 +442,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     Text("Arema Day",
                         style: TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold)),
-                    TextButton(onPressed: () {}, child: Text("Lihat Semua")),
+                    // TextButton(onPressed: () {}, child: Text("Lihat Semua")),
                   ],
                 ),
                 SizedBox(height: 10),
                 // Berita Terbaru Cards
                 Container(
-                  height: 250, // Sesuaikan tinggi sesuai kebutuhan
+                  height: 290, // Sesuaikan tinggi sesuai kebutuhan
                   child: StreamBuilder<QuerySnapshot>(
                     stream: FirebaseFirestore.instance
                         .collection('Home')
@@ -468,11 +495,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     Text("Aremania / nita",
                         style: TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold)),
-                    TextButton(onPressed: () {}, child: Text("Lihat Semua")),
+                    // TextButton(onPressed: () {}, child: Text("Lihat Semua")),
                   ],
                 ),
                 Container(
-                  height: 250, // Sesuaikan tinggi sesuai kebutuhan
+                  height: 290, // Sesuaikan tinggi sesuai kebutuhan
                   child: StreamBuilder<QuerySnapshot>(
                     stream: FirebaseFirestore.instance
                         .collection('Home')
@@ -569,70 +596,260 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // Perbaikan pada fungsi _buildArticleCard
+  // Widget _buildArticleCard(DocumentSnapshot articleData) {
+  //   return GestureDetector(
+  //     onTap: () async {
+  //       // Delay sebelum pindah halaman
+  //       await Future.delayed(Duration(milliseconds: 200));
+
+  //       setState(() {
+  //         _gradientStartColor =
+  //             Colors.orange.withOpacity(0.6); // Warna gradien mulai
+  //         _gradientEndColor = const Color.fromARGB(255, 0, 149, 255)
+  //             .withOpacity(0.3); // Warna gradien akhir
+  //       });
+  //       // Menunggu beberapa detik dan kemudian kembalikan ke warna semula
+  //       await Future.delayed(Duration(milliseconds: 200));
+  //       setState(() {
+  //         // Kembalikan warna ke warna semula
+  //         _gradientStartColor = const Color.fromARGB(255, 0, 17, 47)
+  //             .withOpacity(0.6); // Warna awal
+  //         _gradientEndColor = const Color.fromARGB(255, 0, 140, 255)
+  //             .withOpacity(0.3); // Warna awal
+  //       });
+
+  //       String articleId = articleData.id; // Ambil ID artikel
+  //       var articleDetails = articleData.data(); // Ambil data artikel
+
+  //       // Kirim ID dan data artikel ke halaman NGALAM_READ_TERBARU
+  //       Get.toNamed(
+  //         Routes.READDETAILARTIKEL,
+  //         arguments: {
+  //           'id': articleId, // Mengirimkan ID artikel
+  //           'data': articleDetails, // Mengirimkan data artikel
+  //         },
+  //       );
+  //     },
+  //     child: AnimatedContainer(
+  //       duration: Duration(milliseconds: 300), // Durasi animasi border
+  //       width: 240, // Set width untuk setiap card
+  //       margin: EdgeInsets.only(right: 9), // Jarak antar card
+  //       child: Card(
+  //         elevation: 8, // Memberikan efek shadow pada card
+  //         shape: RoundedRectangleBorder(
+  //           borderRadius:
+  //               BorderRadius.circular(15), // Sudut melengkung untuk Card luar
+  //         ),
+  //         child: ClipRRect(
+  //           borderRadius:
+  //               BorderRadius.circular(15), // Sudut melengkung untuk Card dalam
+  //           child: Container(
+  //             decoration: BoxDecoration(
+  //               gradient: LinearGradient(
+  //                 colors: [
+  //                   _gradientStartColor,
+  //                   _gradientEndColor,
+  //                 ], // Efek gradasi dengan warna yang berubah
+  //                 begin: Alignment.topLeft,
+  //                 end: Alignment.bottomRight,
+  //               ),
+  //               borderRadius: BorderRadius.circular(
+  //                   15), // Sudut melengkung untuk Card dalam
+  //             ),
+  //             child: Column(
+  //               crossAxisAlignment: CrossAxisAlignment.start,
+  //               children: [
+  //                 articleData['gambar_url'] != null
+  //                     ? Image.network(
+  //                         articleData['gambar_url'],
+  //                         fit: BoxFit.cover,
+  //                         height: 150,
+  //                         width: double.infinity,
+  //                       )
+  //                     : Container(
+  //                         color: Colors.grey[300],
+  //                         height: 120,
+  //                         width: double.infinity,
+  //                         child: Center(child: Text('No Image')),
+  //                       ),
+  //                 Padding(
+  //                   padding: const EdgeInsets.all(8.0),
+  //                   child: Column(
+  //                     crossAxisAlignment: CrossAxisAlignment.start,
+  //                     children: [
+  //                       Text(
+  //                         articleData['judul_artikel'] ?? 'No Title',
+  //                         style: TextStyle(
+  //                           fontWeight: FontWeight.w900,
+  //                           fontSize: 20,
+  //                           color: Colors.white, // Warna teks putih
+  //                         ),
+  //                         maxLines: 2,
+  //                         overflow: TextOverflow.ellipsis,
+  //                       ),
+  //                       SizedBox(height: 5),
+  //                       Row(
+  //                         children: [
+  //                           Icon(Icons.account_circle,
+  //                               size: 12, color: Colors.white),
+  //                           SizedBox(width: 5),
+  //                           Text(
+  //                             articleData['nama_upload'] ?? 'Unknown Author',
+  //                             style:
+  //                                 TextStyle(color: Colors.white, fontSize: 17),
+  //                           ),
+  //                         ],
+  //                       ),
+  //                       SizedBox(height: 5),
+  //                       Row(
+  //                         children: [
+  //                           Icon(Icons.remove_red_eye,
+  //                               size: 12, color: Colors.white),
+  //                           SizedBox(width: 5),
+  //                           Text(
+  //                             articleData['tanggal_upload'] != null
+  //                                 ? DateFormat('dd MMMM yyyy').format(articleData[
+  //                                         'tanggal_upload']
+  //                                     .toDate()) // Menampilkan tanggal, bulan dan tahun
+  //                                 : 'No Date',
+  //                             style:
+  //                                 TextStyle(color: Colors.white, fontSize: 16),
+  //                           ),
+  //                         ],
+  //                       ),
+  //                     ],
+  //                   ),
+  //                 ),
+  //               ],
+  //             ),
+  //           ),
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
   Widget _buildArticleCard(DocumentSnapshot articleData) {
     return GestureDetector(
-      onTap: () {
-        Get.to(() => ReadDetailArtikelView(articleId: articleData.id));
+      onTap: () async {
+        String articleId = articleData.id; // Ambil ID artikel
+        var articleDetails = articleData.data(); // Ambil data artikel
+
+        // Kirim ID dan data artikel ke halaman NGALAM_READ_TERBARU
+        Get.toNamed(
+          Routes.READDETAILARTIKEL,
+          arguments: {
+            'id': articleId, // Mengirimkan ID artikel
+            'data': articleDetails, // Mengirimkan data artikel
+          },
+        );
       },
-      child: Container(
-        width: 200, // Set width untuk setiap card
-        margin: EdgeInsets.only(right: 8), // Jarak antar card
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 300), // Durasi animasi border
+        width: 330, // Set width untuk setiap card
+        margin: EdgeInsets.only(right: 9), // Jarak antar card
         child: Card(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              articleData['gambar_url'] != null
-                  ? Image.network(
-                      articleData['gambar_url'],
-                      fit: BoxFit.cover,
-                      height: 120,
-                      width: double.infinity,
-                    )
-                  : Container(
-                      color: Colors.grey[300],
-                      height: 120,
-                      width: double.infinity,
-                      child: Center(child: Text('No Image')),
-                    ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      articleData['judul_artikel'] ?? 'No Title',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    SizedBox(height: 5),
-                    Row(
-                      children: [
-                        Icon(Icons.account_circle, size: 12),
-                        SizedBox(width: 5),
-                        Text(
-                          articleData?['nama_upload'] ?? 'Unknown Author',
-                          style: TextStyle(color: Colors.black, fontSize: 18),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 5),
-                    Row(
-                      children: [
-                        Icon(Icons.remove_red_eye, size: 12),
-                        SizedBox(width: 5),
-                        Text(
-                          articleData['tanggal_upload'] != null
-                              ? DateFormat('dd-MM-yyyy').format(
-                                  articleData['tanggal_upload'].toDate())
-                              : 'No Date',
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+          elevation: 8, // Memberikan efek shadow pada card
+          shape: RoundedRectangleBorder(
+            borderRadius:
+                BorderRadius.circular(15), // Sudut melengkung untuk Card luar
+          ),
+          child: ClipRRect(
+            borderRadius:
+                BorderRadius.circular(15), // Sudut melengkung untuk Card dalam
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(
+                    15), // Sudut melengkung untuk Card dalam
               ),
-            ],
+              child: Stack(
+                children: [
+                  // Gambar akan menutupi seluruh card dan diberi transparansi
+                  articleData['gambar_url'] != null
+                      ? Positioned.fill(
+                          child: Image.network(
+                            articleData['gambar_url'],
+                            fit: BoxFit
+                                .cover, // Gambar mengisi seluruh area card
+                            color: const Color.fromARGB(0, 0, 0, 0)
+                                .withOpacity(0), // Menambahkan transparansi
+                            colorBlendMode: BlendMode
+                                .darken, // Membuat gambar lebih gelap dengan transparansi
+                          ),
+                        )
+                      : Positioned.fill(
+                          child: Container(
+                            color: Colors.grey[300],
+                            child: Center(child: Text('No Image')),
+                          ),
+                        ),
+                  // Lapisan semi-transparan di atas gambar agar teks lebih terlihat
+                  Positioned.fill(
+                    child: Container(
+                      color:
+                          Colors.black.withOpacity(0.4), // Transparansi hitam
+                    ),
+                  ),
+                  // Teks berada di atas gambar
+                  Positioned(
+                    bottom: 10,
+                    left: 10,
+                    right: 10,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            articleData['judul_artikel'] ?? 'No Title',
+                            style: TextStyle(
+                              fontFamily: 'Montserrat', // Gunakan Montserrat
+                              fontWeight:
+                                  FontWeight.w900, // Gunakan Black (tertebal)
+                              fontSize: 20,
+                              color: Colors
+                                  .white, // Sesuaikan dengan warna teks yang diinginkan
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          SizedBox(height: 5),
+                          Row(
+                            children: [
+                              Icon(Icons.account_circle,
+                                  size: 12, color: Colors.white),
+                              SizedBox(width: 5),
+                              Text(
+                                articleData['nama_upload'] ?? 'Unknown Author',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 17),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 5),
+                          Row(
+                            children: [
+                              Icon(Icons.remove_red_eye,
+                                  size: 12, color: Colors.white),
+                              SizedBox(width: 5),
+                              Text(
+                                articleData['tanggal_upload'] != null
+                                    ? DateFormat('dd MMMM yyyy').format(
+                                        articleData['tanggal_upload']
+                                            .toDate()) // Menampilkan tanggal, bulan dan tahun
+                                    : 'No Date',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 16),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),

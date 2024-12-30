@@ -89,7 +89,7 @@ class _NgalamTerbaruViewState extends State<NgalamTerbaruView> {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          'Ngalam',
+          'Eksplorasi Ngalam',
           style: TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.bold,
@@ -167,12 +167,19 @@ class _NgalamTerbaruViewState extends State<NgalamTerbaruView> {
 
                   return GestureDetector(
                     onTap: () {
-                      // Kirim seluruh data artikel ke halaman detail
-                      Get.toNamed(
-                        Routes.NGALAM_READ_TERBARU,
-                        arguments: articleData
-                            ?.data(), // Mengirim seluruh data dokumen
-                      );
+                      // Pastikan data artikel tidak null sebelum dikirim
+                      if (articleData != null) {
+                        Get.toNamed(
+                          Routes.NGALAM_READ_TERBARU,
+                          arguments: {
+                            'id': latestId, // Mengirimkan ID artikel terbaru
+                            'data': articleData
+                                .data(), // Mengirimkan data artikel sebagai Map<String, dynamic>
+                          },
+                        );
+                      } else {
+                        Get.snackbar('Error', 'Data artikel tidak tersedia');
+                      }
                     },
                     child: Container(
                       height: 200, // Set tinggi untuk gambar

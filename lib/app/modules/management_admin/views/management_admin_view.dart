@@ -36,7 +36,7 @@ class ManagementAdminView extends GetView<ManagementAdminController> {
         children: [
           // Bagian 1: Artikel Home
           buildListTile(
-            title: "Artikel Home",
+            title: "Tambah Artikel Home",
             onTap: () {
               // Navigasi ke halaman Management Admin Home
               Get.toNamed(Routes.ADMIN_HOME);
@@ -44,7 +44,7 @@ class ManagementAdminView extends GetView<ManagementAdminController> {
           ),
           // Bagian 2: Artikel Informasi
           buildListTile(
-            title: "Artikel Informasi",
+            title: "Tambah Artikel Informasi",
             onTap: () {
               // Navigasi ke halaman Management Admin Informasi
               Get.toNamed(Routes.ADMIN_INFORMASI);
@@ -52,7 +52,7 @@ class ManagementAdminView extends GetView<ManagementAdminController> {
           ),
           // Bagian 3: Tiket
           buildListTile(
-            title: "Tiket",
+            title: "Tambah Data Tiket",
             onTap: () {
               // Navigasi ke halaman Management Admin Tiket
               Get.toNamed(Routes.ADMIN_TIKET);
@@ -60,10 +60,17 @@ class ManagementAdminView extends GetView<ManagementAdminController> {
           ),
           // Bagian 4: Pembelian Tiket
           buildListTile(
-            title: "Pembelian Tiket",
+            title: "Data Pembelian Tiket",
             onTap: () {
               // Navigasi ke halaman Management Admin Pembelian Tiket
               Get.toNamed(Routes.ADMIN_TRANSAKSI_TIKET);
+            },
+          ),
+          buildListTile(
+            title: "Data Kursi Pada Setiap Tiket",
+            onTap: () {
+              // Navigasi ke halaman Management Admin Pembelian Tiket
+              Get.toNamed(Routes.ADMIN_KURSI_TIKET);
             },
           ),
         ],

@@ -6,7 +6,8 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
-import 'package:myapp/app/routes/app_pages.dart'; // Ganti dengan import yang sesuai
+import 'package:myapp/app/modules/admin_tiket/controllers/admin_tiket_controller.dart';
+import 'package:myapp/app/routes/app_pages.dart';
 
 class AdminTiketView extends StatefulWidget {
   @override
@@ -15,50 +16,15 @@ class AdminTiketView extends StatefulWidget {
 
 class AdminTiketViewState extends State<AdminTiketView> {
   final _formKey = GlobalKey<FormState>();
-
-  // Variabel untuk menyimpan data input
-  String? dana,
-      deskripsi,
-      gopay,
-      hargaTribunTimurUtaraSelatan,
-      hargaVipBaratSelatan;
-  String? hargaVipUtama,
-      ovo,
-      pertandingan,
-      shopeepay,
-      tempat,
-      timAway,
-      timHome,
-      transferBank;
-  DateTime? waktu;
-  XFile? gambar; // Gambar yang akan diupload ke Firebase Storage
-
+  final AdminTiketController _controller = AdminTiketController();
   final picker = ImagePicker();
   final dateFormat = DateFormat('yyyy-MM-dd HH:mm');
-
-  // Controllers untuk form fields
-  final TextEditingController danaController = TextEditingController();
-  final TextEditingController deskripsiController = TextEditingController();
-  final TextEditingController gopayController = TextEditingController();
-  final TextEditingController hargaTribunTimurUtaraSelatanController =
-      TextEditingController();
-  final TextEditingController hargaVipBaratSelatanController =
-      TextEditingController();
-  final TextEditingController hargaVipUtamaController = TextEditingController();
-  final TextEditingController ovoController = TextEditingController();
-  final TextEditingController pertandinganController = TextEditingController();
-  final TextEditingController shopeepayController = TextEditingController();
-  final TextEditingController tempatController = TextEditingController();
-  final TextEditingController timAwayController = TextEditingController();
-  final TextEditingController timHomeController = TextEditingController();
-  final TextEditingController transferBankController = TextEditingController();
-  final TextEditingController waktuController = TextEditingController();
 
   // Fungsi untuk memilih gambar
   void _pickImage() async {
     final selectedImage = await picker.pickImage(source: ImageSource.gallery);
     setState(() {
-      gambar = selectedImage;
+      _controller.gambar = selectedImage;
     });
   }
 
@@ -94,46 +60,45 @@ class AdminTiketViewState extends State<AdminTiketView> {
 
       if (selectedTime != null) {
         setState(() {
-          waktu = DateTime(
+          _controller.waktu = DateTime(
             selectedDate.year,
             selectedDate.month,
             selectedDate.day,
             selectedTime.hour,
             selectedTime.minute,
           );
-          waktuController.text = dateFormat.format(waktu!);
+          _controller.waktuController.text =
+              dateFormat.format(_controller.waktu!);
         });
       }
     }
   }
 
-  // Fungsi submit untuk memasukkan data ke Firestore
-  // Fungsi submit untuk memasukkan data ke Firestore
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
+      // Menyimpan semua data form ke dalam controller
+      _formKey.currentState!.save();
+
       // Cek apakah ada input yang masih kosong
-      if (danaController.text.isEmpty ||
-          deskripsiController.text.isEmpty ||
-          gopayController.text.isEmpty ||
-          hargaTribunTimurUtaraSelatanController.text.isEmpty ||
-          hargaVipBaratSelatanController.text.isEmpty ||
-          hargaVipUtamaController.text.isEmpty ||
-          ovoController.text.isEmpty ||
-          pertandinganController.text.isEmpty ||
-          shopeepayController.text.isEmpty ||
-          tempatController.text.isEmpty ||
-          timAwayController.text.isEmpty ||
-          timHomeController.text.isEmpty ||
-          transferBankController.text.isEmpty ||
-          waktu == null) {
-        // Tampilkan snackbar jika ada input yang kosong
+      if (_controller.danaController.text.isEmpty ||
+          _controller.deskripsiController.text.isEmpty ||
+          _controller.gopayController.text.isEmpty ||
+          _controller.ovoController.text.isEmpty ||
+          _controller.shopeepayController.text.isEmpty ||
+          _controller.tempatController.text.isEmpty ||
+          _controller.timAwayController.text.isEmpty ||
+          _controller.timHomeController.text.isEmpty ||
+          _controller.transferBankController.text.isEmpty ||
+          _controller.waktu == null ||
+          _controller.jenisTiketCount == null ||
+          _controller.jenisTiketNames.isEmpty ||
+          _controller.jenisTiketPrices.isEmpty ||
+          _controller.jenisTiketSeats.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Textfield tidak Boleh Ada Yang Kosong')),
         );
         return;
       }
-
-      _formKey.currentState!.save();
 
       // Ambil user_id dari Firebase Authentication
       String? userId = FirebaseAuth.instance.currentUser?.uid;
@@ -146,48 +111,42 @@ class AdminTiketViewState extends State<AdminTiketView> {
       }
 
       // Upload gambar ke Firebase Storage
-      String? imageUrl = await _uploadImage(gambar);
+      String? imageUrl = await _uploadImage(_controller.gambar);
 
-      // Masukkan data dan URL gambar ke dalam Firestore pada collection 'ticket'
+      // Menyimpan data tiket dan kursi ke Firestore
       await FirebaseFirestore.instance.collection('ticket').add({
-        'dana': dana,
-        'deskripsi': deskripsi,
-        'gopay': gopay,
-        'harga_tribun_timur_utara_selatan': hargaTribunTimurUtaraSelatan,
-        'harga_vip_barat_selatan': hargaVipBaratSelatan,
-        'harga_vip_utama': hargaVipUtama,
-        'ovo': ovo,
-        'pertandingan': pertandingan,
-        'shopeepay': shopeepay,
-        'tempat': tempat,
-        'tim_away': timAway,
-        'tim_home': timHome,
-        'transfer_bank': transferBank,
-        'waktu': waktu,
+        'dana': _controller.danaController.text,
+        'deskripsi': _controller.deskripsiController.text,
+        'gopay': _controller.gopayController.text,
+        'ovo': _controller.ovoController.text,
+        'shopeepay': _controller.shopeepayController.text,
+        'tempat': _controller.tempatController.text,
+        'tim_away': _controller.timAwayController.text,
+        'tim_home': _controller.timHomeController.text,
+        'transfer_bank': _controller.transferBankController.text,
+        'waktu': _controller.waktu,
         'gambar_url': imageUrl,
-        'user_id': userId, // Menambahkan user_id
-      });
+        'jenis_tiket':
+            List.generate(_controller.jenisTiketNames.length, (index) {
+          // Ambil nama jenis tiket
+          String ticketName = _controller.jenisTiketNames[index];
 
-      // Setelah data ditambahkan ke koleksi 'ticket', salin data ke koleksi 'transaksi_ticket_valid'
-      await FirebaseFirestore.instance
-          .collection('transaksi_ticket_valid')
-          .add({
-        'dana': dana,
-        'deskripsi': deskripsi,
-        'gopay': gopay,
-        'harga_tribun_timur_utara_selatan': hargaTribunTimurUtaraSelatan,
-        'harga_vip_barat_selatan': hargaVipBaratSelatan,
-        'harga_vip_utama': hargaVipUtama,
-        'ovo': ovo,
-        'pertandingan': pertandingan,
-        'shopeepay': shopeepay,
-        'tempat': tempat,
-        'tim_away': timAway,
-        'tim_home': timHome,
-        'transfer_bank': transferBank,
-        'waktu': waktu,
-        'gambar_url': imageUrl,
-        'user_id': userId, // Menambahkan user_id
+          // Generate kursi berdasarkan jumlah kursi untuk jenis tiket tersebut
+          List<Map<String, dynamic>> kursiList = [];
+          for (int i = 0; i < _controller.jenisTiketSeats[index]; i++) {
+            kursiList.add({
+              'id': 'kursi_${i + 1}', // Id kursi mengikuti nomor kursi
+              'status': 'Available', // Status kursi
+              'harga': _controller.jenisTiketPrices[index], // Harga kursi
+            });
+          }
+
+          // Return data jenis tiket dalam format yang diinginkan
+          return {
+            ticketName: kursiList, // Menggunakan nama jenis tiket sebagai key
+          };
+        }),
+        'user_id': userId,
       });
 
       // Tampilkan notifikasi sukses
@@ -197,31 +156,24 @@ class AdminTiketViewState extends State<AdminTiketView> {
 
       // Reset form dan variabel setelah submit
       _formKey.currentState!.reset();
-      danaController.clear();
-      deskripsiController.clear();
-      gopayController.clear();
-      hargaTribunTimurUtaraSelatanController.clear();
-      hargaVipBaratSelatanController.clear();
-      hargaVipUtamaController.clear();
-      ovoController.clear();
-      pertandinganController.clear();
-      shopeepayController.clear();
-      tempatController.clear();
-      timAwayController.clear();
-      timHomeController.clear();
-      transferBankController.clear();
-      waktuController.clear();
+      _controller.danaController.clear();
+      _controller.deskripsiController.clear();
+      _controller.gopayController.clear();
+      _controller.ovoController.clear();
+      _controller.shopeepayController.clear();
+      _controller.tempatController.clear();
+      _controller.timAwayController.clear();
+      _controller.timHomeController.clear();
+      _controller.transferBankController.clear();
+      _controller.waktuController.clear();
       setState(() {
-        gambar = null;
-        waktu = null;
+        _controller.gambar = null;
+        _controller.waktu = null;
+        _controller.jenisTiketNames.clear(); // Pastikan list ini kosong
+        _controller.jenisTiketPrices.clear(); // Pastikan list ini kosong
+        _controller.jenisTiketSeats.clear(); // Pastikan list ini kosong
       });
     }
-  }
-
-  // Fungsi untuk logout
-  Future<void> _logout() async {
-    await FirebaseAuth.instance.signOut(); // Melakukan logout dari Firebase
-    Get.offAllNamed(Routes.HOME); // Mengarahkan ke halaman login
   }
 
   @override
@@ -242,92 +194,132 @@ class AdminTiketViewState extends State<AdminTiketView> {
           padding: EdgeInsets.all(16.0),
           children: [
             TextFormField(
-              controller: danaController,
-              decoration: InputDecoration(labelText: 'Dana'),
-              onSaved: (value) => dana = value,
-            ),
-            TextFormField(
-              controller: deskripsiController,
-              decoration: InputDecoration(labelText: 'Deskripsi'),
-              onSaved: (value) => deskripsi = value,
-              maxLines: 5,
-            ),
-            TextFormField(
-              controller: gopayController,
-              decoration: InputDecoration(labelText: 'Gopay'),
-              onSaved: (value) => gopay = value,
-            ),
-            TextFormField(
-              controller: hargaTribunTimurUtaraSelatanController,
-              decoration: InputDecoration(
-                  labelText: 'Harga Tribun Timur Utara Selatan'),
-              onSaved: (value) => hargaTribunTimurUtaraSelatan = value,
-            ),
-            TextFormField(
-              controller: hargaVipBaratSelatanController,
-              decoration: InputDecoration(labelText: 'Harga VIP Barat Selatan'),
-              onSaved: (value) => hargaVipBaratSelatan = value,
-            ),
-            TextFormField(
-              controller: hargaVipUtamaController,
-              decoration: InputDecoration(labelText: 'Harga VIP Utama'),
-              onSaved: (value) => hargaVipUtama = value,
-            ),
-            TextFormField(
-              controller: ovoController,
-              decoration: InputDecoration(labelText: 'Ovo'),
-              onSaved: (value) => ovo = value,
-            ),
-            TextFormField(
-              controller: pertandinganController,
-              decoration: InputDecoration(labelText: 'Pertandingan'),
-              onSaved: (value) => pertandingan = value,
-            ),
-            TextFormField(
-              controller: shopeepayController,
-              decoration: InputDecoration(labelText: 'ShopeePay'),
-              onSaved: (value) => shopeepay = value,
-            ),
-            TextFormField(
-              controller: tempatController,
-              decoration: InputDecoration(labelText: 'Tempat'),
-              onSaved: (value) => tempat = value,
-            ),
-            TextFormField(
-              controller: timAwayController,
+              controller: _controller.timAwayController,
               decoration: InputDecoration(labelText: 'Tim Away'),
-              onSaved: (value) => timAway = value,
             ),
             TextFormField(
-              controller: timHomeController,
+              controller: _controller.timHomeController,
               decoration: InputDecoration(labelText: 'Tim Home'),
-              onSaved: (value) => timHome = value,
             ),
             TextFormField(
-              controller: transferBankController,
+              controller: _controller.tempatController,
+              decoration: InputDecoration(labelText: 'Tempat'),
+            ),
+            ElevatedButton(
+              onPressed: () => _selectDate(context),
+              child: Text(_controller.waktu == null
+                  ? 'Pilih Waktu'
+                  : 'Waktu Terpilih: ${_controller.waktu}'),
+            ),
+            TextField(
+              controller: _controller.deskripsiController,
+              decoration: InputDecoration(
+                labelText: 'Deskripsi',
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 5,
+              keyboardType: TextInputType.multiline,
+            ),
+            // Jenis Tiket Input
+            TextFormField(
+              controller: _controller.jenisTiketController,
+              decoration: InputDecoration(labelText: 'Jenis Tiket'),
+              keyboardType: TextInputType.number,
+              onChanged: (value) {
+                setState(() {
+                  _controller.jenisTiketCount = int.tryParse(value);
+                });
+              },
+            ),
+            // Dinamis form untuk nama, harga tiket, dan jumlah kursi
+            if (_controller.jenisTiketCount != null)
+              ...List.generate(
+                _controller.jenisTiketCount!,
+                (index) {
+                  return Column(
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              decoration: InputDecoration(
+                                labelText: 'Nama Jenis Tiket ${index + 1}',
+                              ),
+                              onSaved: (value) {
+                                _controller.jenisTiketNames.add(value!);
+                              },
+                            ),
+                          ),
+                          SizedBox(width: 16),
+                          Expanded(
+                            child: TextFormField(
+                              decoration: InputDecoration(
+                                labelText: 'Harga Tiket ${index + 1}',
+                              ),
+                              keyboardType: TextInputType.number,
+                              onSaved: (value) {
+                                _controller.jenisTiketPrices
+                                    .add(double.parse(value!));
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      // Input untuk jumlah kursi yang tersedia
+                      TextFormField(
+                        decoration: InputDecoration(
+                          labelText:
+                              'Jumlah Kursi untuk Jenis Tiket ${index + 1}',
+                        ),
+                        keyboardType: TextInputType.number,
+                        onSaved: (value) {
+                          _controller.jenisTiketSeats.add(int.parse(value!));
+                        },
+                      ),
+                    ],
+                  );
+                },
+              ),
+            // Input untuk dana, ovo, gopay, shopeepay, transfer_bank
+            TextFormField(
+              controller: _controller.danaController,
+              decoration: InputDecoration(labelText: 'Dana'),
+            ),
+            TextFormField(
+              controller: _controller.ovoController,
+              decoration: InputDecoration(labelText: 'Ovo'),
+            ),
+            TextFormField(
+              controller: _controller.gopayController,
+              decoration: InputDecoration(labelText: 'Gopay'),
+            ),
+            TextFormField(
+              controller: _controller.shopeepayController,
+              decoration: InputDecoration(labelText: 'Shopeepay'),
+            ),
+            TextFormField(
+              controller: _controller.transferBankController,
               decoration: InputDecoration(labelText: 'Transfer Bank'),
-              onSaved: (value) => transferBank = value,
             ),
-            TextFormField(
-              controller: waktuController,
-              decoration: InputDecoration(labelText: 'Waktu'),
-              readOnly: true,
-              onTap: () => _selectDate(context),
-            ),
-            SizedBox(height: 20),
             ElevatedButton(
               onPressed: _pickImage,
-              child: Text(gambar == null ? 'Pilih Gambar' : 'Gambar Terpilih'),
+              child: Text(_controller.gambar == null
+                  ? 'Pilih Gambar'
+                  : 'Gambar Terpilih'),
             ),
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: _submitForm,
               child: Text('Tambah Tiket'),
             ),
-            SizedBox(height: 20), // Jarak tambahan ke bawah
           ],
         ),
       ),
     );
+  }
+
+  void _logout() async {
+    await FirebaseAuth.instance.signOut();
+    Get.offAllNamed(Routes.LOGIN);
   }
 }

@@ -1,9 +1,38 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 
-class AdminTransaksiTiketView extends StatelessWidget {
+class AdminTransaksiTiketView extends StatefulWidget {
   const AdminTransaksiTiketView({super.key});
+
+  @override
+  _AdminTransaksiTiketViewState createState() =>
+      _AdminTransaksiTiketViewState();
+}
+
+class _AdminTransaksiTiketViewState extends State<AdminTransaksiTiketView> {
+  String searchQuery = ''; // Menyimpan query pencarian
+  List<QueryDocumentSnapshot> filteredTransaksiList =
+      []; // Daftar transaksi yang sudah difilter
+
+  // Fungsi untuk memfilter transaksi berdasarkan query pencarian
+  List<QueryDocumentSnapshot> filterTransaksi(
+      List<QueryDocumentSnapshot> transaksiList) {
+    if (searchQuery.isEmpty) {
+      return transaksiList; // Kembalikan semua data jika tidak ada pencarian
+    } else {
+      return transaksiList.where((transaksi) {
+        String name = transaksi['name'].toString().toLowerCase();
+        String email = transaksi['email'].toString().toLowerCase();
+        String id = transaksi.id.toLowerCase();
+
+        // Pencarian berdasarkan input pada name, email, dan id transaksi
+        return name.contains(searchQuery.toLowerCase()) ||
+            email.contains(searchQuery.toLowerCase()) ||
+            id.contains(searchQuery.toLowerCase());
+      }).toList();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -14,98 +43,197 @@ class AdminTransaksiTiketView extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: StreamBuilder<QuerySnapshot>(
-          stream: FirebaseFirestore.instance
-              .collection(
-                  'transaksi_ticket') // Mengambil data dari Firestore collection 'transaksi_ticket'
-              .snapshots(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-              return const Center(
-                child: Text('Tidak ada transaksi tiket tersedia.',
-                    style: TextStyle(fontSize: 20)),
-              );
-            }
-
-            final transaksiList = snapshot.data!.docs;
-            return ListView.builder(
-              itemCount: transaksiList.length,
-              itemBuilder: (context, index) {
-                var transaksi = transaksiList[index];
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: GestureDetector(
-                    onTap: () => _showApprovalDialog(context, transaksi),
-                    child: Card(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      elevation: 5,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Email: ${transaksi['email']}',
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 16),
-                            ),
-                            const SizedBox(height: 8),
-                            Text('Name: ${transaksi['name']}',
-                                style: const TextStyle(fontSize: 14)),
-                            const SizedBox(height: 8),
-                            Text(
-                                'Payment Method: ${transaksi['payment_method']}',
-                                style: const TextStyle(fontSize: 14)),
-                            const SizedBox(height: 8),
-                            Text('Jenis Tiket: ${transaksi['jenis_ticket']}',
-                                style: const TextStyle(fontSize: 14)),
-                            const SizedBox(height: 8),
-                            Text('Phone: ${transaksi['phone']}',
-                                style: const TextStyle(fontSize: 14)),
-                            const SizedBox(height: 8),
-                            Text('Ticket Count: ${transaksi['ticket_count']}',
-                                style: const TextStyle(fontSize: 14)),
-                            const SizedBox(height: 8),
-                            Text('Total Price: Rp ${transaksi['total_price']}',
-                                style: const TextStyle(
-                                    fontSize: 14, fontWeight: FontWeight.bold)),
-                            const SizedBox(height: 8),
-                            Text(
-                                'Timestamp: ${_formatTimestamp(transaksi['timestamp'])}'),
-                            const SizedBox(height: 16),
-                            if (transaksi['payment_proof'] != null)
-                              Image.network(
-                                transaksi['payment_proof'],
-                                height: 200,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
-                              ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                );
+        child: Column(
+          children: [
+            // Kolom pencarian
+            TextField(
+              onChanged: (value) {
+                setState(() {
+                  searchQuery = value;
+                });
               },
-            );
-          },
+              decoration: const InputDecoration(
+                labelText: 'Cari transaksi',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.search),
+              ),
+            ),
+            const SizedBox(height: 16),
+            // StreamBuilder untuk menampilkan data tiket
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('transactions')
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return const Center(
+                      child: Text(
+                        'Tidak ada transaksi tiket tersedia.',
+                        style: TextStyle(fontSize: 20),
+                      ),
+                    );
+                  }
+
+                  final transaksiList = snapshot.data!.docs;
+                  // Mengambil data yang sudah difilter
+                  filteredTransaksiList = filterTransaksi(transaksiList);
+
+                  return ListView.builder(
+                    itemCount: filteredTransaksiList.length,
+                    itemBuilder: (context, index) {
+                      var transaksi = filteredTransaksiList[index];
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: GestureDetector(
+                          onTap: () => _showApprovalDialog(context, transaksi),
+                          child: Card(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            elevation: 5,
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  GestureDetector(
+                                    onTap: () => _showImageDialog(
+                                      context,
+                                      transaksi['payment_proof'],
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: Image.network(
+                                        transaksi['payment_proof'],
+                                        height: 150,
+                                        width: double.infinity,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Email: ${transaksi['email']}',
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text('Name: ${transaksi['name']}',
+                                      style: const TextStyle(fontSize: 14)),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                      'Payment Method: ${transaksi['payment_method']}',
+                                      style: const TextStyle(fontSize: 14)),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                      'Jenis Tiket: ${transaksi['jenis_ticket']}',
+                                      style: const TextStyle(fontSize: 14)),
+                                  const SizedBox(height: 8),
+                                  Text('Phone: ${transaksi['phone']}',
+                                      style: const TextStyle(fontSize: 14)),
+                                  const SizedBox(height: 8),
+                                  const Text(
+                                    'Ticket Data:',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  if (transaksi['ticket_data'] != null)
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children:
+                                          (transaksi['ticket_data'] as Map)
+                                              .entries
+                                              .map((entry) {
+                                        return Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children:
+                                              (entry.value as List).map((item) {
+                                            return Text(
+                                              '${entry.key}: ID: ${item['id']}, Harga: ${item['harga']}, Status: ${item['status']}',
+                                              style:
+                                                  const TextStyle(fontSize: 14),
+                                            );
+                                          }).toList(),
+                                        );
+                                      }).toList(),
+                                    )
+                                  else
+                                    const Text('Tidak ada data tiket'),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Tanggal: ${DateFormat('dd-MM-yyyy').format(transaksi['timestamp']?.toDate() ?? DateTime.now())}',
+                                    style: const TextStyle(fontSize: 14),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Waktu: ${DateFormat('HH:mm:ss').format(transaksi['timestamp']?.toDate() ?? DateTime.now())}',
+                                    style: const TextStyle(fontSize: 14),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Total Price: ${transaksi['total_price'] ?? 0}',
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14),
+                                  ),
+                                  Text(
+                                    'ID Transaksi: ${transaksi.id}',
+                                    style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  // Fungsi untuk memformat timestamp
-  String _formatTimestamp(Timestamp timestamp) {
-    DateTime date = timestamp.toDate();
-    return "${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute}";
+  void _showImageDialog(BuildContext context, String imageUrl) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          child: Container(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.network(imageUrl, fit: BoxFit.contain),
+                const SizedBox(height: 8),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Menutup dialog
+                  },
+                  child: const Text('TUTUP'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
-  // Fungsi untuk menampilkan dialog konfirmasi dan mengirimkan email
   void _showApprovalDialog(BuildContext context, var transaksi) {
     showDialog(
       context: context,
@@ -120,42 +248,28 @@ class AdminTransaksiTiketView extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () {
-                // Menutup dialog
-                Navigator.of(context).pop();
+                Navigator.of(context).pop(); // Menutup dialog (Kembali)
               },
-              child: const Text('TIDAK'),
+              child: const Text('KEMBALI'),
             ),
             TextButton(
               onPressed: () async {
-                // 1. Pindahkan data transaksi ke koleksi 'transaksi_ticket_valid'
+                // Tidak setuju, mengubah status kursi menjadi "Available"
+                await _updateTicketStatus(transaksi, 'Available');
+                Navigator.of(context).pop(); // Menutup dialog (Tidak Setuju)
+              },
+              child: const Text('TIDAK SETUJU'),
+            ),
+            TextButton(
+              onPressed: () async {
+                // Setuju, mengubah status kursi menjadi "Booked" dan memindahkan transaksi
+                await _updateTicketStatus(transaksi, 'Booked');
                 await _moveToValidCollection(transaksi);
-
-                // 2. Hapus transaksi dari koleksi 'transaksi_ticket'
                 await FirebaseFirestore.instance
-                    .collection('transaksi_ticket')
+                    .collection('transactions')
                     .doc(transaksi.id)
                     .delete();
-
-                // 3. Generate QR Code
-                String qrCodeData = await _generateQRCode(transaksi['email']);
-
-                // 4. Kirim email ke pengguna
-                await _sendEmail(
-                  transaksi['email'],
-                  transaksi['name'],
-                  transaksi['jenis_ticket'],
-                  qrCodeData,
-                );
-
-                // Menutup dialog setelah email dikirim
-                Navigator.of(context).pop();
-
-                // Tampilkan notifikasi sukses
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                      content: Text(
-                          'QR Code berhasil dikirim ke ${transaksi['email']}')),
-                );
+                Navigator.of(context).pop(); // Menutup dialog (Setuju)
               },
               child: const Text('SETUJU'),
             ),
@@ -165,54 +279,77 @@ class AdminTransaksiTiketView extends StatelessWidget {
     );
   }
 
-  Future<void> _moveToValidCollection(var transaksi) async {
-    try {
-      // Ambil UID dari Firebase Auth
-      String? uid = FirebaseAuth.instance.currentUser?.uid;
+  Future<void> _updateTicketStatus(var transaksi, String status) async {
+    // Loop melalui setiap jenis tiket yang ada di transaksi
+    for (var jenisTiket in transaksi['ticket_data'].keys) {
+      // Loop setiap kursi di dalam jenis tiket
+      for (var ticket in transaksi['ticket_data'][jenisTiket]) {
+        var ticketId = ticket['id']; // ID kursi yang dipilih user
 
-      if (uid == null) {
-        print("No user is logged in. Cannot add UID.");
-        return;
+        // Ambil data dari koleksi 'ticket'
+        var ticketRef =
+            await FirebaseFirestore.instance.collection('ticket').get();
+
+        bool found = false;
+
+        for (var ticketDoc in ticketRef.docs) {
+          var ticketData = ticketDoc.data() as Map<String, dynamic>;
+
+          // Cari jenis_tiket yang sesuai
+          for (var jenis in ticketData['jenis_tiket']) {
+            if (jenis.containsKey(jenisTiket)) {
+              // Cari kursi dengan ID yang cocok
+              var kursiList = jenis[jenisTiket];
+              var kursi = kursiList.firstWhere(
+                (kursus) => kursus['id'] == ticketId,
+                orElse: () => null,
+              );
+
+              if (kursi != null) {
+                // Update status kursi menjadi 'Booked'
+                kursi['status'] = status;
+                found = true;
+
+                // Simpan perubahan ke Firestore
+                await ticketDoc.reference.update({
+                  'jenis_tiket': ticketData['jenis_tiket'],
+                });
+
+                print(
+                    'Status kursi dengan ID $ticketId berhasil diperbarui menjadi $status.');
+                break;
+              }
+            }
+          }
+
+          if (found) break;
+        }
+
+        if (!found) {
+          print(
+              "Kursi dengan ID $ticketId tidak ditemukan di koleksi 'ticket'.");
+        }
       }
-
-      // Tambahkan UID ke dalam data transaksi yang dipindahkan
-      await FirebaseFirestore.instance
-          .collection('transaksi_ticket_valid')
-          .add({
-        'uid': uid, // Menambahkan UID ke dalam data transaksi
-        'email': transaksi['email'],
-        'name': transaksi['name'],
-        'payment_method': transaksi['payment_method'],
-        'jenis_ticket': transaksi['jenis_ticket'],
-        'phone': transaksi['phone'],
-        'ticket_count': transaksi['ticket_count'],
-        'total_price': transaksi['total_price'],
-        'timestamp': transaksi['timestamp'],
-        'payment_proof': transaksi['payment_proof'],
-      });
-
-      print("Data successfully moved to transaksi_ticket_valid collection.");
-    } catch (e) {
-      print("Error while moving data: $e");
     }
   }
 
-  // Fungsi untuk menghasilkan QR Code
-  Future<String> _generateQRCode(String data) async {
-    String qrData = 'TICKET-${DateTime.now().millisecondsSinceEpoch}-$data';
+  Future<void> _moveToValidCollection(var transaksi) async {
+    try {
+      // Tambahkan data ke koleksi transaksi_ticket_valid
+      await FirebaseFirestore.instance.collection('transaksi_ticket_valid').add(
+            transaksi
+                .data(), // Menggunakan .data() untuk mengambil seluruh data
+          );
+      print("Data successfully added to transaksi_ticket_valid collection.");
 
-    // Generate QR Code menggunakan QrImage
-    return qrData; // Tidak perlu menampilkan QR Code langsung di sini, hanya mengembalikan data
-  }
-
-  // Fungsi untuk mengirimkan email
-  Future<void> _sendEmail(
-      String email, String name, String ticketType, String qrCodeData) async {
-    // Implementasi pengiriman email menggunakan API seperti SendGrid, Mailgun, atau lainnya
-    print('Sending email to $email');
-    print('Subject: Tiket Transaksi - $name');
-    print(
-        'Body: Nama: $name\nJenis Tiket: $ticketType\nQR Code Data: $qrCodeData');
-    // Implementasikan pengiriman email sesuai dengan API yang Anda pilih
+      // Tambahkan data ke koleksi history_ticket
+      await FirebaseFirestore.instance.collection('history_ticket').add(
+            transaksi
+                .data(), // Menggunakan .data() untuk mengambil seluruh data
+          );
+      print("Data successfully added to history_ticket collection.");
+    } catch (e) {
+      print("Error while moving data: $e");
+    }
   }
 }

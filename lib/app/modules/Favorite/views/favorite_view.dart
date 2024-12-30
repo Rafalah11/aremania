@@ -187,7 +187,6 @@ class _FavoriteView extends State<FavoriteView> {
     String date = DateFormat('dd MMMM yyyy').format(timestamp.toDate());
     String imagePath = articleSnapshot['gambar_url'] ??
         'https://example.com/default-image.png';
-    String docId = articleSnapshot.id;
 
     return GestureDetector(
       onTap: () {

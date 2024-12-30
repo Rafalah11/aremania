@@ -60,6 +60,16 @@ abstract class Routes {
   static const ADMIN_TIKET = _Paths.ADMIN_TIKET;
   static const ADMIN_TRANSAKSI_TIKET = _Paths.ADMIN_TRANSAKSI_TIKET;
   static const TICKET_SAYA = _Paths.TICKET_SAYA;
+  static const TRANSAKSI_TRANSAKSI_TICKET = _Paths.TRANSAKSI_TRANSAKSI_TICKET;
+  static const HALAMAN_HISTORY_TICKET = _Paths.HALAMAN_HISTORY_TICKET;
+  static const ADMIN_KURSI_TIKET = _Paths.ADMIN_KURSI_TIKET;
+  static const ADMIN_MANAGEMENT_KURSI = _Paths.ADMIN_MANAGEMENT_KURSI;
+  static const CONNECTION = _Paths.CONNECTION;
+  static const NO_CONNECTION = _Paths.NO_CONNECTION;
+  static const HALAMAN_BERITA_TERBARU = _Paths.HALAMAN_BERITA_TERBARU;
+  static const HALAMAN_TRENDING = _Paths.HALAMAN_TRENDING;
+  static const HALAMAN_AREMA_DAY = _Paths.HALAMAN_AREMA_DAY;
+  static const HALAMAN_AREMANIA = _Paths.HALAMAN_AREMANIA;
 }
 
 abstract class _Paths {
@@ -121,4 +131,14 @@ abstract class _Paths {
   static const ADMIN_TIKET = '/admin-tiket';
   static const ADMIN_TRANSAKSI_TIKET = '/admin-transaksi-tiket';
   static const TICKET_SAYA = '/ticket-saya';
+  static const TRANSAKSI_TRANSAKSI_TICKET = '/transaksi-transaksi-ticket';
+  static const HALAMAN_HISTORY_TICKET = '/halaman-history-ticket';
+  static const ADMIN_KURSI_TIKET = '/admin-kursi-tiket';
+  static const ADMIN_MANAGEMENT_KURSI = '/admin-management-kursi';
+  static const CONNECTION = '/connection';
+  static const NO_CONNECTION = '/NoConnectionView';
+  static const HALAMAN_BERITA_TERBARU = '/halaman-berita-terbaru';
+  static const HALAMAN_TRENDING = '/halaman-trending';
+  static const HALAMAN_AREMA_DAY = '/halaman-arema-day';
+  static const HALAMAN_AREMANIA = '/halaman-aremania';
 }

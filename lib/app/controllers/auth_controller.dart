@@ -55,7 +55,7 @@ class AuthController extends GetxController {
       print('Logged in user UID: ${userCredential.user?.uid}');
 
       // Cek apakah email adalah admin
-      if (email == 'admin@example.com' && password == '123456') {
+      if (email == 'admin@gmail.com' && password == '123456') {
         // Jika admin, langsung masuk ke halaman admin
         Get.offAllNamed(Routes.MANAGEMENT_ADMIN);
       } else {

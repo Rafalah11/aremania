@@ -1,13 +1,14 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:myapp/app/modules/Favorite/views/favorite_view.dart';
+import 'package:myapp/app/modules/halaman_history_ticket/views/halaman_history_ticket_view.dart';
 import 'package:myapp/app/modules/home/views/home_view.dart';
 import 'package:myapp/app/modules/login/views/login_view.dart';
 import 'package:myapp/app/modules/ngalam_terbaru/views/ngalam_terbaru_view.dart';
-import 'package:myapp/app/modules/rincian_ticket/views/rincian_ticket_view.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
-import 'package:myapp/app/modules/ticket_saya/views/ticket_saya_view.dart'; // For formatting date and time
+import 'package:myapp/app/modules/ticket_saya/views/ticket_saya_view.dart';
+import 'package:myapp/app/modules/transaksi_ticket/views/transaksi_ticket_view.dart'; // For formatting date and time
 
 class Ticket_View extends StatefulWidget {
   @override
@@ -110,7 +111,7 @@ class _TicketPageState extends State<Ticket_View> {
                         ),
                         SizedBox(width: 12),
                         Text(
-                          "Cek Jadwal Pertandingan",
+                          "CEK TIKET ANDA",
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 20,
@@ -121,46 +122,91 @@ class _TicketPageState extends State<Ticket_View> {
                     ),
                     SizedBox(height: 16),
                     Text(
-                      "Jangan Lewatkan Pertandingan Terbesar Musin Ini!",
+                      "Tiket Pertandingan yang Sudah Anda Miliki Dan Riwayat Tiket-tiket yang sudah anda beli",
                       style: TextStyle(
                         color: Colors.white.withOpacity(0.9),
                         fontSize: 16,
                       ),
+                      textAlign: TextAlign.justify,
                     ),
-                    SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: () {
-                        // Navigasi ke halaman TiketSayaView ketika tombol diklik
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => TicketSayaView()),
-                        );
-                      },
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            "Lihat Tiket Anda",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(height: 20),
+                        ElevatedButton(
+                          onPressed: () {
+                            // Navigasi ke halaman TiketSayaView ketika tombol diklik
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => TicketSayaView(),
+                              ),
+                            );
+                          },
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                "Lihat Tiket Anda",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              SizedBox(width: 8),
+                              Icon(Icons.arrow_forward),
+                            ],
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: Color(0xFF1A237E),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          SizedBox(width: 8),
-                          Icon(Icons.arrow_forward),
-                        ],
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: Color(0xFF1A237E),
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
                         ),
-                      ),
-                    ),
+                        SizedBox(
+                            height:
+                                12), // Spasi antara tombol pertama dan kedua
+                        ElevatedButton(
+                          onPressed: () {
+                            // Navigasi ke halaman HalamanHistoryTicket ketika tombol diklik
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    HalamanHistoryTicketView(), // Halaman tujuan
+                              ),
+                            );
+                          },
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                "Tiket yang pernah dibeli",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              SizedBox(width: 8),
+                              Icon(Icons.arrow_forward),
+                            ],
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: Color(0xFF1A237E),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
                   ],
                 ),
               ),
@@ -205,7 +251,10 @@ class _TicketPageState extends State<Ticket_View> {
                             imagePath: ticket['gambar_url'],
                             waktu: ticket['waktu'],
                             tempat: ticket['tempat'],
-                            docId: docId, // Kirimkan docId yang benar
+                            docId: docId, // Pass document ID
+                            deskripsi: ticket['deskripsi'], // Add this line
+                            timAway: ticket['tim_away'], // Add this line
+                            timHome: ticket['tim_home'], // Add this line
                           );
                         },
                       );
@@ -244,122 +293,207 @@ class _TicketPageState extends State<Ticket_View> {
     );
   }
 
-  Widget matchCard(
-      {required String imagePath,
-      required Timestamp waktu,
-      required String tempat,
-      required String docId}) {
+  Widget matchCard({
+    required String imagePath,
+    required Timestamp waktu,
+    required String tempat,
+    required String docId,
+    required String deskripsi,
+    required String timAway,
+    required String timHome,
+  }) {
     final time = DateFormat('HH:mm').format(waktu.toDate());
     final date = DateFormat('dd MMMM yyyy').format(waktu.toDate());
 
-    return Container(
-      margin: EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-            child: Image.network(
-              imagePath,
-              height: 200,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+    return GestureDetector(
+      onTap: () {
+        // Ketika gambar atau kartu pertandingan di klik, tampilkan dialog informasi
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Detail Pertandingan'),
+              content: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
-                    SizedBox(width: 8),
-                    Text(
-                      "$time • $date",
-                      style: TextStyle(
-                        color: Colors.grey[800],
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 8),
-                Row(
-                  children: [
-                    Icon(Icons.location_on_outlined,
-                        size: 16, color: Colors.grey[600]),
-                    SizedBox(width: 8),
-                    Text(
-                      tempat,
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          // Mengecek apakah pengguna sudah login
-                          User? user = FirebaseAuth.instance.currentUser;
+                    // Menampilkan gambar tiket
+                    Image.network(imagePath),
+                    SizedBox(height: 16),
 
-                          if (user == null) {
-                            // Jika pengguna belum login, arahkan ke halaman login
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => LoginView()),
-                            );
-                          } else {
-                            // Jika pengguna sudah login, lanjutkan ke halaman rincian tiket
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => RincianTicketView(
-                                    docId: docId), // Kirim ID dokumen
-                              ),
-                            );
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xFF2D3250),
-                          padding: EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                    // Kotak pertama: Menampilkan jadwal pertandingan
+                    Container(
+                      padding: EdgeInsets.all(16),
+                      margin: EdgeInsets.only(top: 8),
+                      decoration: BoxDecoration(
+                        color: Color(0xFFF3F3F3),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Pertandingan: $timAway VS $timHome",
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
                           ),
-                        ),
-                        child: Text(
-                          "Lihat Detail",
-                          style: TextStyle(
-                            color: Colors.white, // Paksa warna putih untuk teks
-                            fontWeight: FontWeight
-                                .bold, // Opsi: untuk menambahkan gaya tebal
+                          SizedBox(height: 8),
+                          Text(
+                            "Pukul: $time",
+                            style: TextStyle(fontSize: 16),
                           ),
-                        ),
+                          SizedBox(height: 8),
+                          Text(
+                            "Waktu: $date",
+                            style: TextStyle(fontSize: 16),
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            "Tempat: $tempat",
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 16),
+
+                    // Kotak kedua: Menampilkan deskripsi
+                    Container(
+                      padding: EdgeInsets.all(16),
+                      margin: EdgeInsets.only(top: 8),
+                      decoration: BoxDecoration(
+                        color: Color(0xFFF3F3F3),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        deskripsi,
+                        style: TextStyle(fontSize: 16),
+                        textAlign: TextAlign.justify,
                       ),
                     ),
                   ],
-                )
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Tutup'),
+                ),
               ],
+            );
+          },
+        );
+      },
+      child: Container(
+        margin: EdgeInsets.only(bottom: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: Offset(0, 4),
             ),
-          ),
-        ],
+          ],
+        ),
+        child: Column(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+              child: Image.network(
+                imagePath,
+                height: 200,
+                width: double.infinity,
+                fit: BoxFit.cover,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.access_time,
+                          size: 16, color: Colors.grey[600]),
+                      SizedBox(width: 8),
+                      Text(
+                        "$time • $date",
+                        style: TextStyle(
+                          color: Colors.grey[800],
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Icon(Icons.location_on_outlined,
+                          size: 16, color: Colors.grey[600]),
+                      SizedBox(width: 8),
+                      Text(
+                        tempat,
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            // Logic to navigate to ticket view
+                            User? user = FirebaseAuth.instance.currentUser;
+
+                            if (user == null) {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => LoginView()),
+                              );
+                            } else {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => TransaksiTicketView(
+                                    docId1: docId,
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xFF2D3250),
+                            padding: EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: Text(
+                            "Beli Tiket",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

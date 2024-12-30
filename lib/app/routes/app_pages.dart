@@ -1,17 +1,27 @@
 import 'package:get/get.dart';
 
+import '../modules/Admin_Management_Kursi/bindings/admin_management_kursi_binding.dart';
+import '../modules/Admin_Management_Kursi/views/admin_management_kursi_view.dart';
 import '../modules/FAQ/bindings/faq_binding.dart';
 import '../modules/FAQ/views/faq_view.dart';
 import '../modules/Favorite/bindings/favorite_binding.dart';
 import '../modules/Favorite/views/favorite_view.dart';
-import '../modules/News_page/bindings/news_page_binding.dart';
-import '../modules/News_page/views/news_page_view.dart';
+import '../modules/Halaman_AremaDay/bindings/halaman_arema_day_binding.dart';
+import '../modules/Halaman_AremaDay/views/halaman_arema_day_view.dart';
+import '../modules/Halaman_Aremania/bindings/halaman_aremania_binding.dart';
+import '../modules/Halaman_Aremania/views/halaman_aremania_view.dart';
+import '../modules/Halaman_Berita_Terbaru/bindings/halaman_berita_terbaru_binding.dart';
+import '../modules/Halaman_Berita_Terbaru/views/halaman_berita_terbaru_view.dart';
+import '../modules/Halaman_Trending/bindings/halaman_trending_binding.dart';
+import '../modules/Halaman_Trending/views/halaman_trending_view.dart';
 import '../modules/ReadFavorite/bindings/read_favorite_binding.dart';
 import '../modules/ReadFavorite/views/read_favorite_view.dart';
 import '../modules/admin_home/bindings/admin_home_binding.dart';
 import '../modules/admin_home/views/admin_home_view.dart';
 import '../modules/admin_informasi/bindings/admin_informasiBinding.dart';
 import '../modules/admin_informasi/views/adminInformasi_view.dart';
+import '../modules/admin_kursi_tiket/bindings/admin_kursi_tiket_binding.dart';
+import '../modules/admin_kursi_tiket/views/admin_kursi_tiket_view.dart';
 import '../modules/admin_tiket/bindings/admin_tiket_binding.dart';
 import '../modules/admin_tiket/views/admin_tiket_view.dart';
 import '../modules/admin_transaksi_tiket/bindings/admin_transaksi_tiket_binding.dart';
@@ -36,10 +46,15 @@ import '../modules/aremaday_semua/bindings/aremaday_semua_binding.dart';
 import '../modules/aremaday_semua/views/aremaday_semua_view.dart';
 import '../modules/aremania_semua/bindings/aremania_semua_binding.dart';
 import '../modules/aremania_semua/views/aremania_semua_view.dart';
+import '../modules/connection/bindings/connection_binding.dart';
+import '../modules/connection/views/connection_view.dart';
+import '../modules/connection/views/no_connection_view.dart';
 import '../modules/halaman_animasi_awal/bindings/halaman_animasi_awal_binding.dart';
 import '../modules/halaman_animasi_awal/views/halaman_animasi_awal_view.dart';
 import '../modules/halaman_daftar/bindings/halaman_daftar_binding.dart';
 import '../modules/halaman_daftar/views/halaman_daftar_view.dart';
+import '../modules/halaman_history_ticket/bindings/halaman_history_ticket_binding.dart';
+import '../modules/halaman_history_ticket/views/halaman_history_ticket_view.dart';
 import '../modules/halaman_informasi_pribadi/bindings/halaman_informasi_pribadi_binding.dart';
 import '../modules/halaman_informasi_pribadi/views/halaman_edit_informasi_pribadi_view.dart';
 import '../modules/halaman_informasi_pribadi/views/halaman_informasi_pribadi_view.dart';
@@ -69,14 +84,6 @@ import '../modules/ngalam_kuliner/bindings/ngalam_kuliner_binding.dart';
 import '../modules/ngalam_kuliner/views/ngalam_kuliner_view.dart';
 import '../modules/ngalam_malangan/bindings/ngalam_malangan_binding.dart';
 import '../modules/ngalam_malangan/views/ngalam_malangan_view.dart';
-import '../modules/ngalam_read_destinasi/bindings/ngalam_read_destinasi_binding.dart';
-import '../modules/ngalam_read_destinasi/views/ngalam_read_destinasi_view.dart';
-import '../modules/ngalam_read_info_penting/bindings/ngalam_read_info_penting_binding.dart';
-import '../modules/ngalam_read_info_penting/views/ngalam_read_info_penting_view.dart';
-import '../modules/ngalam_read_malangan/bindings/ngalam_read_malangan_binding.dart';
-import '../modules/ngalam_read_malangan/views/ngalam_read_malangan_view.dart';
-import '../modules/ngalam_read_malangankuliner/bindings/ngalam_read_malangankuliner_binding.dart';
-import '../modules/ngalam_read_malangankuliner/views/ngalam_read_malangankuliner_view.dart';
 import '../modules/ngalam_read_terbaru/bindings/ngalam_read_terbaru_binding.dart';
 import '../modules/ngalam_read_terbaru/views/ngalam_read_terbaru_view.dart';
 import '../modules/ngalam_terbaru/bindings/ngalam_terbaru_binding.dart';
@@ -155,11 +162,6 @@ class AppPages {
       binding: HomeBinding(),
     ),
     GetPage(
-      name: _Paths.NEWS_PAGE,
-      page: () => NewsPage(),
-      binding: NewsPageBinding(),
-    ),
-    GetPage(
       name: _Paths.TRENDING_SEMUA,
       page: () => TrendingSemuaView(),
       binding: TrendingSemuaBinding(),
@@ -203,26 +205,6 @@ class AppPages {
       name: _Paths.NGALAM_READ_TERBARU,
       page: () => NgalamReadTerbaruView(),
       binding: NgalamReadTerbaruBinding(),
-    ),
-    GetPage(
-      name: _Paths.NGALAM_READ_DESTINASI,
-      page: () => NgalamReadDestinasiView(),
-      binding: NgalamReadDestinasiBinding(),
-    ),
-    GetPage(
-      name: _Paths.NGALAM_READ_MALANGAN,
-      page: () => NgalamReadMalanganView(),
-      binding: NgalamReadMalanganBinding(),
-    ),
-    GetPage(
-      name: _Paths.NGALAM_READ_MALANGANKULINER,
-      page: () => NgalamReadMalangankulinerView(),
-      binding: NgalamReadMalangankulinerBinding(),
-    ),
-    GetPage(
-      name: _Paths.NGALAM_READ_INFO_PENTING,
-      page: () => NgalamReadInfoPentingView(),
-      binding: NgalamReadInfoPentingBinding(),
     ),
     GetPage(
       name: _Paths.AREMA_READ_EDITORIAL,
@@ -380,9 +362,7 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.READDETAILARTIKEL,
-      page: () => ReadDetailArtikelView(
-        articleId: '',
-      ),
+      page: () => ReadDetailArtikelView(),
       binding: ReaddetailartikelBinding(),
     ),
     GetPage(
@@ -421,6 +401,53 @@ class AppPages {
       name: _Paths.TICKET_SAYA,
       page: () => const TicketSayaView(),
       binding: TicketSayaBinding(),
+    ),
+    GetPage(
+      name: _Paths.HALAMAN_HISTORY_TICKET,
+      page: () => const HalamanHistoryTicketView(),
+      binding: HalamanHistoryTicketBinding(),
+    ),
+    GetPage(
+      name: _Paths.ADMIN_KURSI_TIKET,
+      page: () => AdminKursiTiketView(),
+      binding: AdminKursiTiketBinding(),
+    ),
+    GetPage(
+      name: _Paths.ADMIN_MANAGEMENT_KURSI,
+      page: () => AdminManagementKursiView(
+        docId1: '',
+      ),
+      binding: AdminManagementKursiBinding(),
+    ),
+    GetPage(
+      name: _Paths.CONNECTION,
+      page: () => const ConnectionView(),
+      binding: ConnectionBinding(),
+    ),
+    GetPage(
+      name: _Paths.NO_CONNECTION,
+      page: () => const NoConnectionView(),
+      binding: ConnectionBinding(),
+    ),
+    GetPage(
+      name: _Paths.HALAMAN_BERITA_TERBARU,
+      page: () => HalamanBeritaTerbaruView(),
+      binding: HalamanBeritaTerbaruBinding(),
+    ),
+    GetPage(
+      name: _Paths.HALAMAN_TRENDING,
+      page: () => HalamanTrendingView(),
+      binding: HalamanTrendingBinding(),
+    ),
+    GetPage(
+      name: _Paths.HALAMAN_AREMA_DAY,
+      page: () => HalamanAremaDayView(),
+      binding: HalamanAremaDayBinding(),
+    ),
+    GetPage(
+      name: _Paths.HALAMAN_AREMANIA,
+      page: () => HalamanAremaniaView(),
+      binding: HalamanAremaniaBinding(),
     ),
   ];
 }

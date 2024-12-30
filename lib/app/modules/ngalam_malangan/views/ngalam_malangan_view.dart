@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
@@ -10,7 +11,6 @@ import 'package:myapp/app/modules/ngalam_infopenting/views/ngalam_infopenting_vi
 import 'package:myapp/app/modules/ngalam_kuliner/views/ngalam_kuliner_view.dart';
 import 'package:myapp/app/modules/ngalam_malangan/controllers/ngalam_malangan_controller.dart';
 import 'package:myapp/app/modules/ngalam_read_terbaru/views/ngalam_read_terbaru_view.dart';
-import 'package:myapp/app/modules/ngalam_terbaru/controllers/ngalam_terbaru_controller.dart';
 import 'package:myapp/app/modules/ticket/views/ticket_view.dart';
 import 'package:myapp/app/modules/ngalam_terbaru/views/ngalam_terbaru_view.dart';
 import 'package:myapp/app/routes/app_pages.dart';
@@ -41,8 +41,6 @@ class _NgalamMalanganViewState extends State<NgalamMalanganView> {
   int _selectedMenuIndex = 2;
   final NgalamMalanganController _controller =
       Get.put(NgalamMalanganController());
-  final NgalamTerbaruController _controllerterbaru =
-      Get.put(NgalamTerbaruController());
   final List<String> _menuTitles = [
     'Terbaru',
     'Destinasi',
@@ -116,7 +114,7 @@ class _NgalamMalanganViewState extends State<NgalamMalanganView> {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          'Ngalam',
+          'Eksplorasi Ngalam',
           style: TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.bold,
@@ -145,11 +143,12 @@ class _NgalamMalanganViewState extends State<NgalamMalanganView> {
           StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
                 .collection('Informasi')
-                .orderBy('tanggal_upload',
-                    descending: true) // Mengambil dokumen terbaru
+                .where('kategori', isEqualTo: 'ngalam')
+                .where('sub_kategori', isEqualTo: 'malangan')
+                .orderBy('tanggal_upload', descending: true)
                 .snapshots(),
             builder: (context, snapshot) {
-              if (!snapshot.hasData) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
                 return Container(
                   height: 100,
                   child: Center(child: CircularProgressIndicator()),
@@ -168,13 +167,16 @@ class _NgalamMalanganViewState extends State<NgalamMalanganView> {
                 );
               }
 
+              // Ambil id_artikel terbaru
+              String latestId = latestArticleDoc['id_artikel'];
+
               // Ambil detail artikel berdasarkan id_artikel terbaru
               return StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
                     .collection('Informasi')
-                    .where('kategori', isEqualTo: 'ngalam')
-                    .where('sub_kategori', isEqualTo: 'malangan')
-                    .orderBy('tanggal_upload', descending: true)
+                    .where('id_artikel',
+                        isEqualTo:
+                            latestId) // Mengambil detail berdasarkan id_artikel terbaru
                     .snapshots(),
                 builder: (context, articleSnapshot) {
                   if (!articleSnapshot.hasData) {
@@ -190,12 +192,19 @@ class _NgalamMalanganViewState extends State<NgalamMalanganView> {
 
                   return GestureDetector(
                     onTap: () {
-                      // Kirim seluruh data artikel ke halaman detail
-                      Get.toNamed(
-                        Routes.NGALAM_READ_TERBARU,
-                        arguments: articleData
-                            ?.data(), // Mengirim seluruh data dokumen
-                      );
+                      // Pastikan data artikel tidak null sebelum dikirim
+                      if (articleData != null) {
+                        Get.toNamed(
+                          Routes.NGALAM_READ_TERBARU,
+                          arguments: {
+                            'id': latestId, // Mengirimkan ID artikel terbaru
+                            'data': articleData
+                                .data(), // Mengirimkan data artikel sebagai Map<String, dynamic>
+                          },
+                        );
+                      } else {
+                        Get.snackbar('Error', 'Data artikel tidak tersedia');
+                      }
                     },
                     child: Container(
                       height: 200, // Set tinggi untuk gambar
@@ -354,78 +363,85 @@ class _NgalamMalanganViewState extends State<NgalamMalanganView> {
                     // Mengonversi timestamp ke tanggal
                     String formattedDate = DateFormat('yyyy-MM-dd')
                         .format(articleData['tanggal_upload'].toDate());
+                    String articleId = articles[index].id;
 
-                    return ListTile(
-                      title: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              articleData['judul_artikel'] ?? 'No Title',
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                          IconButton(
-                            icon: Obx(() => Icon(
-                                  _controllerterbaru.bookmarkStatus[
-                                              articles[index].id] ==
-                                          true
-                                      ? Icons.bookmark
-                                      : Icons.bookmark_border,
-                                  color: _controllerterbaru.bookmarkStatus[
-                                              articles[index].id] ==
-                                          true
-                                      ? Colors.blue
-                                      : Colors.grey,
-                                  size: 24,
-                                )),
-                            onPressed: () {
-                              // Pastikan untuk memanggil toggleBookmark dengan artikel ID yang benar
-                              _controllerterbaru.toggleBookmark(articles[index]
-                                  .id); // Pass articleId (String)
-                            },
-                          ),
-                        ],
-                      ),
-                      subtitle: Row(
-                        children: [
-                          Icon(Icons.account_circle,
-                              size: 16, color: Colors.grey),
-                          SizedBox(width: 4),
-                          Text(articleData['nama_upload'] ?? 'Unknown'),
-                          SizedBox(width: 10),
-                          Icon(Icons.access_time, size: 16, color: Colors.grey),
-                          SizedBox(width: 4),
-                          Text(formattedDate),
-                        ],
-                      ),
-                      leading: articleData['gambar_url'] != null
-                          ? SizedBox(
-                              width: 115,
-                              height: 150,
-                              child: Image.network(
-                                articleData['gambar_url'],
-                                fit: BoxFit.cover,
+                    return Obx(() {
+                      // Ambil status bookmark dari bookmarkStatus dengan ID artikel
+                      bool isBookmarked =
+                          _controller.bookmarkStatus[articleId] ?? false;
+
+                      return ListTile(
+                        title: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                articleData['judul_artikel'] ?? 'No Title',
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(fontWeight: FontWeight.bold),
                               ),
-                            )
-                          : SizedBox(
-                              width: 115,
-                              height: 150,
-                              child: Container(
-                                  color: Colors.grey[300],
-                                  child: Center(
-                                      child: Text('No Image Available'))),
                             ),
-                      onTap: () {
-                        // Kirim seluruh data artikel ke halaman detail
-                        Get.toNamed(
-                          Routes.NGALAM_READ_TERBARU,
-                          arguments: articles[index]
-                              .data(), // Mengirim seluruh data dokumen
-                        );
-                      },
-                    );
+                            IconButton(
+                              icon: Icon(
+                                isBookmarked
+                                    ? Icons.bookmark
+                                    : Icons.bookmark_border,
+                                color: isBookmarked ? Colors.blue : Colors.grey,
+                                size: 24,
+                              ),
+                              onPressed: () {
+                                var currentUser =
+                                    FirebaseAuth.instance.currentUser;
+                                if (currentUser == null) {
+                                  // Jika belum login, arahkan ke halaman login
+                                  Get.toNamed(Routes.HALAMAN_LOGIN);
+                                  return;
+                                }
+                                _controller.toggleBookmark(articleId);
+                              },
+                            ),
+                          ],
+                        ),
+                        subtitle: Row(
+                          children: [
+                            Icon(Icons.account_circle,
+                                size: 16, color: Colors.grey),
+                            SizedBox(width: 4),
+                            Text(articleData['nama_upload'] ?? 'Unknown'),
+                            SizedBox(width: 10),
+                            Icon(Icons.access_time,
+                                size: 16, color: Colors.grey),
+                            SizedBox(width: 4),
+                            Text(formattedDate),
+                          ],
+                        ),
+                        leading: articleData['gambar_url'] != null
+                            ? SizedBox(
+                                width: 115,
+                                height: 150,
+                                child: Image.network(
+                                  articleData['gambar_url'],
+                                  fit: BoxFit.cover,
+                                ),
+                              )
+                            : SizedBox(
+                                width: 115,
+                                height: 150,
+                                child: Container(
+                                    color: Colors.grey[300],
+                                    child: Center(
+                                        child: Text('No Image Available'))),
+                              ),
+                        onTap: () {
+                          // Kirim seluruh data artikel ke halaman detail
+                          Get.toNamed(
+                            Routes.NGALAM_READ_TERBARU,
+                            arguments: articles[index]
+                                .data(), // Mengirim seluruh data dokumen
+                          );
+                        },
+                      );
+                    });
                   },
                 );
               },

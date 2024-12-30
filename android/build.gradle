@@ -1,11 +1,13 @@
 buildscript {
+    ext.kotlin_version = '1.9.0' // Perbarui versi Kotlin
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.4.1' // Ganti dengan versi yang sesuai
-        classpath 'com.google.gms:google-services:4.3.14' // Plugin Google Services
+        classpath 'com.android.tools.build:gradle:8.1.1'
+        classpath 'com.google.gms:google-services:4.3.14'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.0" // Perbarui versi Kotlin
     }
 }
 

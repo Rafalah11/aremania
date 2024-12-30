@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
@@ -157,12 +158,19 @@ class _NewsPageState extends State<AremadaySemuaView> {
 
                   return GestureDetector(
                     onTap: () {
-                      // Kirim seluruh data artikel ke halaman detail
-                      Get.toNamed(
-                        Routes.NGALAM_READ_TERBARU,
-                        arguments: articleData
-                            ?.data(), // Mengirim seluruh data dokumen
-                      );
+                      // Pastikan data artikel tidak null sebelum dikirim
+                      if (articleData != null) {
+                        Get.toNamed(
+                          Routes.NGALAM_READ_TERBARU,
+                          arguments: {
+                            'id': latestId, // Mengirimkan ID artikel terbaru
+                            'data': articleData
+                                .data(), // Mengirimkan data artikel sebagai Map<String, dynamic>
+                          },
+                        );
+                      } else {
+                        Get.snackbar('Error', 'Data artikel tidak tersedia');
+                      }
                     },
                     child: Container(
                       height: 200, // Set tinggi untuk gambar
@@ -266,7 +274,7 @@ class _NewsPageState extends State<AremadaySemuaView> {
                   .collection('Informasi')
                   .where('kategori', isEqualTo: 'nasional')
                   .where('sub_kategori', isEqualTo: 'nasional')
-                  .snapshots(),
+                  .snapshots(includeMetadataChanges: true),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
                   return Center(child: CircularProgressIndicator());
@@ -280,90 +288,101 @@ class _NewsPageState extends State<AremadaySemuaView> {
                 return ListView.builder(
                   itemCount: articles.length,
                   itemBuilder: (context, index) {
-                    // Ambil data artikel dari snapshot
                     final articleData =
                         articles[index].data() as Map<String, dynamic>;
-
-                    // Mengonversi timestamp ke tanggal
                     String formattedDate = DateFormat('yyyy-MM-dd')
                         .format(articleData['tanggal_upload'].toDate());
+                    String articleId = articles[index].id;
 
-                    return ListTile(
-                      title: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              articleData['judul_artikel'] ?? 'No Title',
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                          IconButton(
-                            icon: Obx(() => Icon(
-                                  _controller.bookmarkStatus[
-                                              articles[index].id] ==
-                                          true
-                                      ? Icons.bookmark
-                                      : Icons.bookmark_border,
-                                  color: _controller.bookmarkStatus[
-                                              articles[index].id] ==
-                                          true
-                                      ? Colors.blue
-                                      : Colors.grey,
-                                  size: 24,
-                                )),
-                            onPressed: () {
-                              // Pastikan untuk memanggil toggleBookmark dengan artikel ID yang benar
-                              _controller.toggleBookmark(articles[index]
-                                  .id); // Pass articleId (String)
-                            },
-                          ),
-                        ],
-                      ),
-                      subtitle: Row(
-                        children: [
-                          Icon(Icons.account_circle,
-                              size: 16, color: Colors.grey),
-                          SizedBox(width: 4),
-                          Text(articleData['nama_upload'] ?? 'Unknown'),
-                          SizedBox(width: 10),
-                          Icon(Icons.access_time, size: 16, color: Colors.grey),
-                          SizedBox(width: 4),
-                          Text(formattedDate),
-                        ],
-                      ),
-                      leading: articleData['gambar_url'] != null
-                          ? SizedBox(
-                              width: 115,
-                              height: 150,
-                              child: Image.network(
-                                articleData['gambar_url'],
-                                fit: BoxFit.cover,
+                    return Obx(() {
+                      // Ambil status bookmark dari bookmarkStatus dengan ID artikel
+                      bool isBookmarked =
+                          _controller.bookmarkStatus[articleId] ?? false;
+
+                      return ListTile(
+                        title: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                articleData['judul_artikel'] ?? 'No Title',
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(fontWeight: FontWeight.bold),
                               ),
-                            )
-                          : SizedBox(
-                              width: 115,
-                              height: 150,
-                              child: Container(
-                                  color: Colors.grey[300],
-                                  child: Center(
-                                      child: Text('No Image Available'))),
                             ),
-                      onTap: () {
-                        // Kirim seluruh data artikel ke halaman detail
-                        Get.toNamed(
-                          Routes.NGALAM_READ_TERBARU,
-                          arguments: articles[index]
-                              .data(), // Mengirim seluruh data dokumen
-                        );
-                      },
-                    );
+                            IconButton(
+                              icon: Icon(
+                                isBookmarked
+                                    ? Icons.bookmark
+                                    : Icons.bookmark_border,
+                                color: isBookmarked ? Colors.blue : Colors.grey,
+                                size: 24,
+                              ),
+                              onPressed: () {
+                                var currentUser =
+                                    FirebaseAuth.instance.currentUser;
+                                if (currentUser == null) {
+                                  // Jika belum login, arahkan ke halaman login
+                                  Get.toNamed(Routes.HALAMAN_LOGIN);
+                                  return;
+                                }
+                                _controller.toggleBookmark(articleId);
+                              },
+                            ),
+                          ],
+                        ),
+                        subtitle: Row(
+                          children: [
+                            Icon(Icons.account_circle,
+                                size: 16, color: Colors.grey),
+                            SizedBox(width: 4),
+                            Text(articleData['nama_upload'] ?? 'Unknown'),
+                            SizedBox(width: 10),
+                            Icon(Icons.access_time,
+                                size: 16, color: Colors.grey),
+                            SizedBox(width: 4),
+                            Text(formattedDate),
+                          ],
+                        ),
+                        leading: articleData['gambar_url'] != null
+                            ? SizedBox(
+                                width: 115,
+                                height: 150,
+                                child: Image.network(
+                                  articleData['gambar_url'],
+                                  fit: BoxFit.cover,
+                                ),
+                              )
+                            : SizedBox(
+                                width: 115,
+                                height: 150,
+                                child: Container(
+                                  color: Colors.grey[300],
+                                  child:
+                                      Center(child: Text('No Image Available')),
+                                ),
+                              ),
+                        onTap: () {
+                          // Ambil ID dokumen dan seluruh data artikel
+                          String articleId = articles[index].id;
+                          var articleData = articles[index].data();
+
+                          // Kirim ID dan data artikel ke halaman detail
+                          Get.toNamed(
+                            Routes.NGALAM_READ_TERBARU,
+                            arguments: {
+                              'id': articleId, // Mengirimkan ID dokumen
+                              'data': articleData, // Mengirimkan data dokumen
+                            },
+                          );
+                        },
+                      );
+                    });
                   },
                 );
               },
             ),
-          ),
+          )
         ],
       ),
       // Bottom Navigation Bar

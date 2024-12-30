@@ -27,184 +27,339 @@ class _TicketPageState extends State<TransaksiTicketView> {
   final TextEditingController _phoneController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
   File? _paymentProofImage;
-
-  // Fungsi untuk mengambil gambar dari galeri
-
-  Future<void> _pickImage() async {
-    // Membuka dialog file picker untuk memilih gambar
-    final XFile? pickedFile =
-        await _picker.pickImage(source: ImageSource.gallery);
-
-    if (pickedFile != null) {
-      setState(() {
-        _paymentProofImage =
-            File(pickedFile.path); // Simpan path gambar yang dipilih
-      });
-    } else {
-      // Jika tidak ada gambar yang dipilih, set null
-      setState(() {
-        _paymentProofImage = null;
-      });
-    }
-  }
-
-  // Fungsi untuk meng-upload bukti pembayaran
-  Future<void> _savePaymentProof() async {
-    if (_paymentProofImage != null) {
-      // Lakukan logika penyimpanan gambar di sini (misalnya upload ke Firebase Storage)
-      // Misalnya: String imageUrl = await uploadToFirebaseStorage(_paymentProofImage);
-      // Kemudian simpan URL gambar ke Firestore sebagai bukti pembayaran
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Pilih gambar bukti pembayaran!"),
-          backgroundColor: Colors.red[400],
-          behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          margin: EdgeInsets.all(10),
-        ),
-      );
-    }
-  }
+  String? _transactionId;
 
   int _selectedIndex = 3;
-  final List<String> _ticketTypes = ['VVIP', 'VIP', 'TRIBUN'];
-  String _selectedTicketType = 'VVIP';
-  String? _selectedSeat;
-  final Set<String> _selectedSeats = {}; // Store the selected seats
-  final Set<String> _verifiedSeats = {}; // Store seats being verified (abu-abu)
-  // Data kursi
-  final Map<String, List<String>> _seats = {
-    'VVIP': List.generate(50, (index) => 'VVIP-${index + 1}'),
-    'VIP': List.generate(150, (index) => 'VIP-${index + 1}'),
-    'TRIBUN': List.generate(800, (index) => 'TRIBUN-${index + 1}'),
-  };
+  List<String> _ticketTypes = [];
+  String _selectedTicketType = '';
+  Map<String, List<String>> _selectedSeatsByType = {};
 
-  // Kursi yang sudah dipesan
-  final Set<String> _bookedSeats = {};
+  // List<Map<String, dynamic>> _selectedSeats = [];
+  Map<String, List<Map<String, dynamic>>> _seats = {};
+  List<Map<String, dynamic>> jenisTiketList = [];
 
-  int _startIndex = 0; // Indeks awal rentang kursi
-  int _endIndex = 50; // Indeks akhir rentang kursi
   final int _seatsPerPage = 50; // Menampilkan 50 kursi per halaman
 
-// Fungsi untuk memuat kursi berikutnya
-  void _loadNextSeats() {
-    setState(() {
-      if (_endIndex < _seats[_selectedTicketType]!.length) {
-        _startIndex = _endIndex;
-        _endIndex =
-            (_endIndex + _seatsPerPage) > _seats[_selectedTicketType]!.length
-                ? _seats[_selectedTicketType]!.length
-                : _endIndex + _seatsPerPage;
-      }
-    });
-  }
+  int _currentSeatPage = 0;
 
-// Fungsi untuk memuat kursi sebelumnya
-  void _loadPreviousSeats() {
-    setState(() {
-      if (_startIndex > 0) {
-        _endIndex = _startIndex;
-        _startIndex =
-            (_startIndex - _seatsPerPage) < 0 ? 0 : _startIndex - _seatsPerPage;
-      }
-    });
-  }
-
-  int _ticketPrice = 0;
+  double _ticketPrice = 0.0;
+  // Tambahkan Map untuk menyimpan total harga per jenis tiket
+  Map<String, double> _totalPriceByType = {};
 
   late DocumentSnapshot ticketDoc; // Ticket document snapshot
   late String _paymentMethod = ''; // Stores the selected payment method
-  late String _paymentDetails =
-      ''; // Stores the payment details (account number/phone)
-
-  int get _totalPrice {
-    Map<String, int> ticketPrices = {
-      'VVIP': 100000,
-      'VIP': 75000,
-      'TRIBUN': 50000,
-    };
-    return ticketPrices[_selectedTicketType]! * _selectedSeats.length;
-  }
-
-  void _onSeatSelect(String seat) {
-    if (_bookedSeats.contains(seat) || _verifiedSeats.contains(seat)) {
-      return; // Do not allow selecting booked or verifying seats
-    }
-
-    setState(() {
-      if (_selectedSeats.contains(seat)) {
-        _selectedSeats.remove(seat);
-      } else {
-        if (_selectedSeats.length < 5) {
-          _selectedSeats.add(seat);
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text("1 akun hanya dibatasi 5 tiket"),
-              backgroundColor: Colors.red[400],
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
-              margin: EdgeInsets.all(10),
-            ),
-          );
-        }
-      }
-    });
-  }
+  late String _paymentDetails = '';
+  double _totalPrice = 0.0;
+  bool _loading = true;
 
   @override
   void initState() {
     super.initState();
-    _fetchTicketData();
+    _fetchTicketData(); // Ambil data tiket saat initState
   }
 
   Future<void> _fetchTicketData() async {
     try {
-      DocumentSnapshot ticketSnapshot = await FirebaseFirestore.instance
+      final docSnapshot = await FirebaseFirestore.instance
           .collection('ticket')
           .doc(widget.docId1)
           .get();
 
-      if (ticketSnapshot.exists) {
+      final ticketData = docSnapshot.data();
+      print('Ticket Data: $ticketData'); // Debugging: Check the received data
+
+      if (ticketData != null && ticketData['jenis_tiket'] != null) {
+        final fetchedJenisTiketList =
+            List<Map<String, dynamic>>.from(ticketData['jenis_tiket']);
+        print(
+            'Jenis Tiket: $fetchedJenisTiketList'); // Debugging: Check jenis_tiket
+
         setState(() {
-          ticketDoc = ticketSnapshot;
-          _updateTicketPrice();
+          // Save ticket data into state
+          jenisTiketList = fetchedJenisTiketList;
+          _ticketTypes =
+              jenisTiketList.map((e) => e.keys.first as String).toList();
+          _seats = {
+            for (var tiket in jenisTiketList)
+              tiket.keys.first:
+                  List<Map<String, dynamic>>.from(tiket[tiket.keys.first]),
+          };
+
+          // Set default ticket type if available
+          _selectedTicketType =
+              _ticketTypes.isNotEmpty ? _ticketTypes.first : '';
+
+          // Update ticket price based on selected ticket type
+          if (_selectedTicketType.isNotEmpty) {
+            final selectedTicket = jenisTiketList.firstWhere(
+              (e) => e.keys.first == _selectedTicketType,
+              orElse: () {
+                return {'name': '', 'harga': 0.0, 'kursi': []};
+              },
+            );
+
+            // Ambil data kursi dari jenis tiket yang dipilih
+            final ticketTypeData = selectedTicket[_selectedTicketType];
+
+            // Jika data kursi ada dan tidak kosong
+            if (ticketTypeData != null && ticketTypeData.isNotEmpty) {
+              // Ambil harga tiket dari kursi pertama
+              _ticketPrice = (ticketTypeData[0]['harga'] as num).toDouble();
+            } else {
+              _ticketPrice = 0.0; // Set default jika tidak ada harga
+            }
+
+            print(
+                'Ticket Price: $_ticketPrice'); // Debugging: Check ticket price
+          }
+
+          _totalPrice = _ticketPrice * _selectedSeatsByType.length;
+          _loading = false;
         });
       } else {
-        print("Ticket data not found in Firestore");
+        setState(() {
+          _loading = false;
+        });
       }
     } catch (e) {
-      print("Error fetching ticket data: $e");
+      print('Error fetching ticket data: $e');
+      setState(() {
+        _loading = false;
+      });
     }
   }
 
-  void _updateTicketPrice() {
-    switch (_selectedTicketType) {
-      case 'VVIP':
-        _ticketPrice = 320000;
-        break;
-      case 'VIP':
-        _ticketPrice = 200000;
-        break;
-      case 'TRIBUN':
-        _ticketPrice = 100000;
-        break;
-      default:
-        _ticketPrice = 0;
+  @override
+  Widget build(BuildContext context) {
+    if (_loading) {
+      return Center(child: CircularProgressIndicator());
     }
-  }
 
-  int? _parsePrice(String price) {
-    try {
-      String sanitizedPrice = price.replaceAll('.', '').replaceAll(',', '.');
-      return double.tryParse(sanitizedPrice)?.toInt();
-    } catch (e) {
-      print("Error parsing price: $e");
-      return null;
-    }
+    return Scaffold(
+      backgroundColor: Color(0xFFF5F5F7),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios_new, color: Color(0xFF2D3250)),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          'Transaksi Tiket',
+          style: TextStyle(
+            color: Color(0xFF2D3250),
+            fontSize: 24,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Kontak Detail Section
+              _buildSectionTitle('Kontak Detail', Icons.person_outline),
+              SizedBox(height: 16),
+              _buildTextField(
+                  _nameController, 'Nama Lengkap', '', Icons.person_outline),
+              SizedBox(height: 16),
+              _buildTextField(_emailController, 'Alamat Email', '',
+                  Icons.email_outlined, TextInputType.emailAddress),
+              SizedBox(height: 16),
+              _buildTextField(_phoneController, 'No Telepon', '',
+                  Icons.phone_outlined, TextInputType.phone),
+              SizedBox(height: 32),
+
+              // Detail Tiket Section
+              _buildSectionTitle(
+                  'Detail Tiket', Icons.confirmation_number_outlined),
+              SizedBox(height: 16),
+
+              _buildTicketDropdown(),
+              SizedBox(height: 16),
+
+              // Kursi Section
+              _buildSeatsSection(),
+              SizedBox(height: 16),
+
+              // Harga Section
+              _buildPriceSection(),
+
+              // Bagian metode pembayaran (sudah ada di kode sebelumnya)
+              SizedBox(height: 32),
+              _buildSectionTitle('Metode Pembayaran', Icons.payment),
+              SizedBox(height: 16),
+
+              Container(
+                padding: EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    DropdownButton<String>(
+                      value: _paymentMethod.isEmpty ? null : _paymentMethod,
+                      onChanged: (String? newMethod) async {
+                        setState(() {
+                          _paymentMethod = newMethod!;
+                        });
+
+                        // Ambil data dari Firestore berdasarkan metode pembayaran yang dipilih
+                        final docSnapshot = await FirebaseFirestore.instance
+                            .collection('ticket')
+                            .doc(widget.docId1)
+                            .get();
+                        final ticketData = docSnapshot.data();
+
+                        if (ticketData != null) {
+                          setState(() {
+                            // Update detail pembayaran sesuai metode yang dipilih
+                            if (_paymentMethod == 'OVO') {
+                              _paymentDetails = ticketData['ovo'] ?? '';
+                            } else if (_paymentMethod == 'Dana') {
+                              _paymentDetails = ticketData['dana'] ?? '';
+                            } else if (_paymentMethod == 'Transfer Bank') {
+                              _paymentDetails =
+                                  ticketData['transfer_bank'] ?? '';
+                            } else if (_paymentMethod == 'Gopay') {
+                              _paymentDetails = ticketData['gopay'] ?? '';
+                            } else if (_paymentMethod == 'ShopeePay') {
+                              _paymentDetails = ticketData['shopeepay'] ?? '';
+                            }
+                          });
+                        }
+                      },
+                      items: [
+                        'Transfer Bank',
+                        'Dana',
+                        'ShopeePay',
+                        'OVO',
+                        'Gopay',
+                      ].map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
+                    ),
+                    SizedBox(height: 16),
+                    if (_paymentMethod.isNotEmpty) ...[
+                      Text('Pembayaran melalui $_paymentMethod:'),
+                      SizedBox(height: 8),
+                      Text(_paymentDetails, style: TextStyle(fontSize: 16)),
+                    ],
+                  ],
+                ),
+              ),
+
+              SizedBox(height: 32),
+              // Bukti pembayaran
+              _buildSectionTitle('Bukti Pembayaran', Icons.upload_file),
+              SizedBox(height: 16),
+              Container(
+                padding: EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: _pickImage,
+                      icon: Icon(Icons.photo),
+                      label: Text('Pilih Bukti Pembayaran Gambar'),
+                      style: ElevatedButton.styleFrom(
+                        padding:
+                            EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    _paymentProofImage != null
+                        ? Image.file(
+                            _paymentProofImage!,
+                            height: 150,
+                            fit: BoxFit.cover,
+                          )
+                        : Text(
+                            'Belum ada gambar dipilih',
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 32),
+              Center(
+                child: ElevatedButton(
+                  onPressed: _saveTicketData,
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(vertical: 12, horizontal: 40),
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Text(
+                    'Lanjutkan Pembayaran',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+
+      // Bottom Navigation Bar
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.explore),
+            label: 'Information',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.bookmark),
+            label: 'Bookmark',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.confirmation_number),
+            label: 'Ticket',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.blue,
+        unselectedItemColor: Colors.grey,
+        onTap: _onItemTapped,
+      ),
+    );
   }
 
   // Method to handle the change of the payment method
@@ -250,12 +405,14 @@ class _TicketPageState extends State<TransaksiTicketView> {
   }
 
   Future<void> _saveTicketData() async {
-    // Pastikan semua data terisi dengan benar sebelum menyimpan
+    // Validasi input
     if (_nameController.text.isEmpty ||
         _emailController.text.isEmpty ||
         _phoneController.text.isEmpty ||
-        _selectedSeats.isEmpty ||
-        _selectedTicketType.isEmpty) {
+        _selectedSeatsByType.isEmpty ||
+        _selectedTicketType.isEmpty ||
+        _paymentMethod.isEmpty ||
+        _paymentProofImage == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("Lengkapi data sebelum melakukan pembayaran!"),
@@ -269,21 +426,71 @@ class _TicketPageState extends State<TransaksiTicketView> {
       return;
     }
 
-    setState(() {
-      _verifiedSeats.addAll(_selectedSeats);
-      _selectedSeats.clear(); // Clear selected seats after payment step
-    });
-
-    // Simulasi proses verifikasi admin
     try {
-      // 1. Pertama, ubah status kursi menjadi 'verifying' di Firestore
-      for (String seat in _verifiedSeats) {
-        await FirebaseFirestore.instance.collection('seats').doc(seat).set({
-          'status': 'verifying', // Status kursi menjadi 'verifying'
-        }, SetOptions(merge: true)); // Merge untuk tidak menimpa data lain
+      // Upload bukti pembayaran jika ada
+      String? paymentProofUrl;
+      if (_paymentProofImage != null) {
+        paymentProofUrl = await _uploadPaymentProof(_paymentProofImage!);
       }
 
-      // 2. Simpan data transaksi di Firebase
+      // Ambil data tiket dari Firestore
+      DocumentSnapshot ticketSnapshot = await FirebaseFirestore.instance
+          .collection('ticket')
+          .doc(widget.docId1)
+          .get();
+
+      if (!ticketSnapshot.exists) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Data tiket tidak ditemukan."),
+            backgroundColor: Colors.red[400],
+            behavior: SnackBarBehavior.floating,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            margin: EdgeInsets.all(10),
+          ),
+        );
+        return;
+      }
+
+      Map<String, dynamic> ticketData =
+          ticketSnapshot.data() as Map<String, dynamic>;
+      List<dynamic> jenisTiket = ticketData['jenis_tiket'];
+
+// Update status kursi yang dipilih untuk semua jenis tiket
+      for (var jenis in jenisTiket) {
+        (jenis as Map<String, dynamic>).forEach((ticketType, kursiList) {
+          if (_selectedSeatsByType.containsKey(ticketType)) {
+            List<dynamic> selectedSeats = _selectedSeatsByType[ticketType]!;
+            for (var kursiData in kursiList) {
+              if (selectedSeats.contains(kursiData['id'])) {
+                kursiData['status'] = 'Verifying';
+              }
+            }
+          }
+        });
+      }
+
+      // Simpan kembali data tiket dengan status kursi yang diperbarui
+      await FirebaseFirestore.instance
+          .collection('ticket')
+          .doc(widget.docId1)
+          .update({'jenis_tiket': jenisTiket});
+
+      Map<String, dynamic> ticketDetails = {
+        'id_tiket': ticketSnapshot.id, // Menambahkan ID tiket
+        'data_tiket': {
+          'deskripsi': ticketSnapshot['deskripsi'],
+          'gambar_url': ticketSnapshot['gambar_url'],
+          'tempat': ticketSnapshot['tempat'],
+          'tim_away': ticketSnapshot['tim_away'],
+          'tim_home': ticketSnapshot['tim_home'],
+          'user_id': ticketSnapshot['user_id'],
+          'waktu': ticketSnapshot['waktu'],
+        },
+      };
+
+      // Simpan data transaksi ke koleksi transactions
       Map<String, dynamic> transactionData = {
         'name': _nameController.text,
         'email': _emailController.text,
@@ -291,12 +498,38 @@ class _TicketPageState extends State<TransaksiTicketView> {
         'total_price': _totalPrice,
         'payment_method': _paymentMethod,
         'timestamp': FieldValue.serverTimestamp(),
-        'ticket_data': _verifiedSeats.toList(),
+        'ticket_data': {
+          for (var entry in _selectedSeatsByType.entries)
+            entry.key: entry.value
+                .map((seatId) {
+                  // Cari detail kursi dari data tiket asli
+                  var ticketTypeData = jenisTiket.firstWhere(
+                      (type) => type.keys.first == entry.key,
+                      orElse: () => null);
+
+                  if (ticketTypeData != null) {
+                    var seatData = (ticketTypeData[entry.key] as List)
+                        .firstWhere((seat) => seat['id'] == seatId,
+                            orElse: () => null);
+                    if (seatData != null) {
+                      return {
+                        'id': seatData['id'],
+                        'harga': seatData['harga'],
+                        'status': 'Verifying',
+                      };
+                    }
+                  }
+                  return null; // Jika kursi tidak ditemukan, kembalikan null
+                })
+                .where((seat) => seat != null)
+                .toList(),
+        },
         'jenis_ticket': _selectedTicketType,
-        'user_id': FirebaseAuth.instance.currentUser?.uid,
+        'uid': FirebaseAuth.instance.currentUser?.uid,
+        'payment_proof': paymentProofUrl ?? '',
+        'ticket_details': ticketDetails,
       };
 
-      // Simpan data transaksi ke Firestore
       await FirebaseFirestore.instance
           .collection('transactions')
           .add(transactionData);
@@ -312,10 +545,9 @@ class _TicketPageState extends State<TransaksiTicketView> {
         ),
       );
 
-      // Navigasi ke halaman tiket
       Get.toNamed(Routes.TICKET);
     } catch (e) {
-      print("Error during verification or Firebase update: $e");
+      print("Error during transaction process: $e");
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -330,7 +562,6 @@ class _TicketPageState extends State<TransaksiTicketView> {
     }
   }
 
-  // Fungsi untuk upload bukti pembayaran ke Firebase Storage
   Future<String?> _uploadPaymentProof(File paymentProofImage) async {
     try {
       // Mendapatkan referensi ke Firebase Storage
@@ -353,470 +584,51 @@ class _TicketPageState extends State<TransaksiTicketView> {
     }
   }
 
-  // Fungsi untuk mengubah jenis tiket dan mereset indeks
-  void _onTicketTypeChanged(String newTicketType) {
-    setState(() {
-      _selectedTicketType = newTicketType;
-      // Reset indeks saat jenis tiket berubah
-      _startIndex = 0;
-      _endIndex = _seatsPerPage; // Set _endIndex sesuai dengan _seatsPerPage
-    });
-  }
-
-  Widget _buildSeatGrid() {
-    // Ambil rentang kursi yang akan ditampilkan berdasarkan startIndex dan endIndex
-    final seatsToShow =
-        _seats[_selectedTicketType]!.sublist(_startIndex, _endIndex);
-
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 4,
-        crossAxisSpacing: 8,
-        mainAxisSpacing: 8,
-      ),
-      itemCount: seatsToShow.length,
-      itemBuilder: (context, index) {
-        final seat = seatsToShow[index];
-
-        // Gunakan StreamBuilder untuk mendengarkan status kursi, jika kursi sudah ada di Firestore
-        return StreamBuilder<DocumentSnapshot>(
-          stream: FirebaseFirestore.instance
-              .collection('seats')
-              .doc(seat) // Gunakan ID kursi untuk mendengarkan statusnya
-              .snapshots(), // Mendapatkan update real-time
-          builder: (context, snapshot) {
-            // Menunggu status kursi, tampilkan loading jika belum selesai
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator());
-            }
-
-            // Jika ada error
-            if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
-            }
-
-            // Ambil data status kursi yang sudah didapat
-            if (!snapshot.hasData || !snapshot.data!.exists) {
-              // Jika kursi tidak ditemukan di Firestore, anggap statusnya 'available' (hijau)
-              return _buildSeatContainer(seat, 'available');
-            }
-
-            String seatStatus = snapshot.data!['status'] ?? 'available';
-
-            // Tentukan warna berdasarkan status
-            return _buildSeatContainer(seat, seatStatus);
-          },
-        );
-      },
-    );
-  }
-
-  // Widget untuk menampilkan kursi dengan status yang diberikan
-  Widget _buildSeatContainer(String seat, String seatStatus) {
-    Color seatColor;
-
-    // Tentukan warna berdasarkan status
-    if (seatStatus == 'booked') {
-      seatColor = Colors.red;
-    } else if (seatStatus == 'verifying') {
-      seatColor = Colors.grey; // Warna abu-abu untuk status verifying
-    } else {
-      seatColor = _selectedSeats.contains(seat)
-          ? Colors.blue
-          : Colors.green; // Hijau jika belum dipilih
-    }
-
-    return GestureDetector(
-      onTap: seatStatus == 'booked' || seatStatus == 'verifying'
-          ? null // Tidak bisa diklik jika statusnya 'booked' atau 'verifying'
-          : () => _onSeatSelect(seat), // Fungsi untuk memilih kursi
-      child: Container(
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: seatColor,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.chair,
-              color: Colors.white,
-              size: 24,
-            ),
-            SizedBox(height: 4),
-            Text(
-              seat,
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-// Fungsi untuk mengambil status kursi dari Firebase
-  Future<String> _getSeatStatusFromFirebase(String seat) async {
-    var snapshot =
-        await FirebaseFirestore.instance.collection('seats').doc(seat).get();
-
-    if (snapshot.exists) {
-      return snapshot.data()?['status'] ?? 'available'; // Default "available"
-    } else {
-      return 'available';
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Color(0xFFF5F5F7),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new, color: Color(0xFF2D3250)),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          'Transaksi Tiket',
-          style: TextStyle(
-            color: Color(0xFF2D3250),
-            fontSize: 24,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize
-                .min, // This will make the Column take as much space as it needs.
-            children: [
-              _buildSectionTitle('Kontak Detail', Icons.person_outline),
-              SizedBox(height: 16),
-              _buildTextField(
-                  _nameController, 'Nama Lengkap', '', Icons.person_outline),
-              SizedBox(height: 16),
-              _buildTextField(_emailController, 'Alamat Email', '',
-                  Icons.email_outlined, TextInputType.emailAddress),
-              SizedBox(height: 16),
-              _buildTextField(_phoneController, 'No Telepon', '',
-                  Icons.phone_outlined, TextInputType.phone),
-              SizedBox(height: 32),
-              _buildSectionTitle(
-                  'Detail Tiket', Icons.confirmation_number_outlined),
-              SizedBox(height: 16),
-              Container(
-                padding: EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildTicketDetailRow(
-                      'Jenis Tiket',
-                      _selectedTicketType,
-                      Icons.confirmation_number_outlined,
-                    ),
-                    DropdownButton<String>(
-                      value: _selectedTicketType,
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          _selectedTicketType = newValue!;
-                          _selectedSeat = null; // Reset pilihan kursi
-                          _startIndex = 0; // Reset start index ke 0
-                          _endIndex =
-                              _seatsPerPage; // Reset end index ke 50 (halaman pertama)
-                          _updateTicketPrice(); // Update harga tiket
-                        });
-                      },
-                      items: _ticketTypes
-                          .map<DropdownMenuItem<String>>((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        );
-                      }).toList(),
-                    ),
-
-                    SizedBox(height: 16),
-                    _buildTicketDetailRow(
-                      'Harga Tiket',
-                      'Rp $_ticketPrice,00',
-                      Icons.local_offer_outlined,
-                    ),
-                    SizedBox(height: 16),
-                    Text('Pilih Kursi (${_selectedTicketType})',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16)),
-                    SizedBox(height: 16),
-                    _buildSeatGrid(),
-                    SizedBox(height: 8),
-                    // Tombol untuk memuat kursi berikutnya
-                    if (_endIndex < _seats[_selectedTicketType]!.length)
-                      Center(
-                        child: ElevatedButton(
-                          onPressed: _loadNextSeats,
-                          child: Text('Tampilkan Kursi Selanjutnya'),
-                        ),
-                      ),
-                    // Tombol untuk memuat kursi sebelumnya
-                    if (_startIndex > 0)
-                      Center(
-                        child: ElevatedButton(
-                          onPressed: _loadPreviousSeats,
-                          child: Text('Tampilkan Kursi Sebelumnya'),
-                        ),
-                      ),
-                    SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: _selectedSeat != null
-                          ? () {
-                              setState(() {
-                                _bookedSeats.add(_selectedSeat!);
-                                _selectedSeat = null;
-                              });
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                    content: Text('Kursi berhasil dipesan!')),
-                              );
-                            }
-                          : null,
-                      child: Text('Pesan Tiket'),
-                    ),
-                    _buildTicketDetailRow(
-                      'Total Harga',
-                      'Rp ${_totalPrice.toString()},00',
-                      Icons.payment_outlined,
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 32),
-              // Metode Pembayaran Dropdown (Box for payment method)
-              _buildSectionTitle('Metode Pembayaran', Icons.payment),
-              SizedBox(height: 16),
-              Container(
-                padding: EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    DropdownButton<String>(
-                      value: _paymentMethod.isEmpty ? null : _paymentMethod,
-                      onChanged: (String? newMethod) {
-                        setState(() {
-                          _paymentMethod = newMethod!;
-                          _updatePaymentDetails(newMethod);
-                        });
-                      },
-                      items: [
-                        'Transfer Bank',
-                        'Dana',
-                        'ShopeePay',
-                        'OVO',
-                        'Gopay',
-                      ].map<DropdownMenuItem<String>>((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        );
-                      }).toList(),
-                    ),
-                    SizedBox(height: 16),
-                    if (_paymentMethod.isNotEmpty) ...[
-                      Text('Pembayaran melalui $_paymentMethod:'),
-                      SizedBox(height: 8),
-                      Text(_paymentDetails,
-                          style: TextStyle(
-                              fontSize: 16)), // Display the payment details
-                    ],
-                  ],
-                ),
-              ),
-              SizedBox(height: 32),
-              // **Bagian Baru** untuk bukti pembayaran
-              _buildSectionTitle('Bukti Pembayaran', Icons.upload_file),
-              SizedBox(height: 16),
-
-              Container(
-                padding: EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    // Tombol untuk memilih gambar bukti pembayaran
-                    ElevatedButton.icon(
-                        onPressed: _pickImage, // Fungsi untuk memilih gambar
-                        icon: Icon(Icons.photo),
-                        label: Text('Pilih Bukti Pembayaran Gambar'),
-                        style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(
-                              vertical: 12, horizontal: 24),
-                          backgroundColor: Colors
-                              .blue, // Mengubah latar belakang tombol menjadi biru muda
-                          foregroundColor: Colors
-                              .white, // Mengubah warna teks tombol menjadi putih
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        )),
-
-                    SizedBox(height: 16),
-
-                    // Preview gambar yang dipilih
-                    _paymentProofImage != null
-                        ? Image.file(
-                            _paymentProofImage!,
-                            height: 150,
-                            fit: BoxFit.cover,
-                          )
-                        : Text(
-                            'Belum ada gambar dipilih',
-                            style: TextStyle(color: Colors.grey),
-                          ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 32),
-              Center(
-                child: ElevatedButton(
-                  onPressed:
-                      _saveTicketData, // Fungsi yang dipanggil saat tombol ditekan
-                  style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(vertical: 12, horizontal: 40),
-                    backgroundColor: Colors.blue, // Latar belakang biru muda
-                    foregroundColor: Colors.white, // Teks berwarna putih
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                          8), // Membuat sudut tombol melengkung
-                    ),
-                  ),
-                  child: Text(
-                    'Lanjutkan Pembayaran',
-                    style: TextStyle(fontSize: 16), // Ukuran teks
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.explore),
-            label: 'Information',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bookmark),
-            label: 'Bookmark',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.confirmation_number),
-            label: 'Ticket',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.grey,
-        onTap: _onItemTapped,
-      ),
-    );
-  }
-
   Widget _buildSectionTitle(String title, IconData icon) {
     return Row(
       children: [
         Icon(icon, color: Color(0xFF2D3250)),
         SizedBox(width: 8),
-        Text(title,
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+        Text(
+          title,
+          style: TextStyle(
+            color: Color(0xFF2D3250),
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ],
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String labelText,
-      String hintText, IconData icon,
+  Widget _buildTextField(TextEditingController controller, String label,
+      String hint, IconData icon,
       [TextInputType inputType = TextInputType.text]) {
     return TextField(
       controller: controller,
       keyboardType: inputType,
       decoration: InputDecoration(
-        labelText: labelText,
-        hintText: hintText,
         prefixIcon: Icon(icon, color: Color(0xFF2D3250)),
+        labelText: label,
+        hintText: hint,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Colors.grey[300]!),
+          borderSide: BorderSide(color: Color(0xFF2D3250)),
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Color(0xFF2D3250), width: 2),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
-        ),
-        filled: true,
-        fillColor: Color(0xFFF5F5F7),
       ),
     );
   }
 
-  Widget _buildTicketDetailRow(String title, String value, IconData icon) {
+  Widget _buildTicketDetailRow(String label, String value, IconData icon) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Row(
-          children: [
-            Icon(icon, color: Color(0xFF2D3250), size: 20),
-            SizedBox(width: 8),
-            Text(title, style: TextStyle(fontSize: 16)),
-          ],
+        Icon(icon, color: Color(0xFF2D3250)),
+        SizedBox(width: 8),
+        Text(
+          label,
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
+        Spacer(),
         Text(value, style: TextStyle(fontSize: 16)),
       ],
     );
@@ -828,5 +640,307 @@ class _TicketPageState extends State<TransaksiTicketView> {
       onPressed: onPressed,
       color: Color(0xFF2D3250),
     );
+  }
+  // Fungsi untuk mengambil gambar dari galeri
+
+  Future<void> _pickImage() async {
+    // Membuka dialog file picker untuk memilih gambar
+    final XFile? pickedFile =
+        await _picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        _paymentProofImage =
+            File(pickedFile.path); // Simpan path gambar yang dipilih
+      });
+    } else {
+      // Jika tidak ada gambar yang dipilih, set null
+      setState(() {
+        _paymentProofImage = null;
+      });
+    }
+  }
+
+  // Fungsi untuk meng-upload bukti pembayaran
+  Future<void> _savePaymentProof() async {
+    if (_paymentProofImage != null) {
+      // Lakukan logika penyimpanan gambar di sini (misalnya upload ke Firebase Storage)
+      // Misalnya: String imageUrl = await uploadToFirebaseStorage(_paymentProofImage);
+      // Kemudian simpan URL gambar ke Firestore sebagai bukti pembayaran
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Pilih gambar bukti pembayaran!"),
+          backgroundColor: Colors.red[400],
+          behavior: SnackBarBehavior.floating,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          margin: EdgeInsets.all(10),
+        ),
+      );
+    }
+  }
+
+  Widget _buildTicketDropdown() {
+    return DropdownButton<String>(
+      value: _selectedTicketType.isEmpty ? null : _selectedTicketType,
+      onChanged: (newValue) {
+        setState(() {
+          _selectedTicketType = newValue!;
+
+          // Tambahkan default nilai untuk jenis tiket yang baru dipilih jika belum ada
+          _totalPriceByType[_selectedTicketType] ??= 0.0;
+
+          // Hitung ulang total harga global
+          _calculateTotalPrice();
+        });
+      },
+      hint: Text('Pilih Jenis Tiket'),
+      isExpanded: true,
+      items: _ticketTypes.map((ticketType) {
+        return DropdownMenuItem<String>(
+          value: ticketType,
+          child: Text(ticketType),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildSeatsSection() {
+    List<Map<String, dynamic>> availableSeats =
+        _seats[_selectedTicketType] ?? [];
+    _selectedSeatsByType[_selectedTicketType] ??= [];
+
+    // Mendapatkan kursi yang sesuai dengan halaman yang sedang dipilih
+    List<Map<String, dynamic>> seatsToDisplay =
+        _getSeatsForPage(availableSeats);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Pilih Kursi (${_selectedTicketType})',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        SizedBox(height: 16),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 5, // Show 5 seats per row
+            childAspectRatio: 1.0,
+            crossAxisSpacing: 8.0,
+            mainAxisSpacing: 8.0,
+          ),
+          itemCount: seatsToDisplay.length,
+          itemBuilder: (context, index) {
+            String seatId = seatsToDisplay[index]['id'];
+            String seatStatus = seatsToDisplay[index]['status']; // Status kursi
+            bool isSelected =
+                _selectedSeatsByType[_selectedTicketType]?.contains(seatId) ??
+                    false;
+
+            // Menentukan warna berdasarkan status kursi
+            Color seatColor;
+            bool isClickable = true;
+
+            if (seatStatus == 'Available') {
+              seatColor = isSelected
+                  ? const Color.fromRGBO(0, 123, 255, 1) // Selected
+                  : const Color.fromRGBO(40, 167, 69, 1); // Available
+            } else if (seatStatus == 'Verifying') {
+              seatColor = Colors.grey; // Verifying
+              isClickable = false; // Tidak bisa diklik
+            } else if (seatStatus == 'Booked') {
+              seatColor = Colors.red; // Booked
+              isClickable = false; // Tidak bisa diklik
+            } else {
+              seatColor = Colors.grey; // Default untuk status tidak dikenali
+              isClickable = false; // Tidak bisa diklik
+            }
+
+            return GestureDetector(
+              onTap: isClickable
+                  ? () {
+                      setState(() {
+                        if (isSelected) {
+                          _selectedSeatsByType[_selectedTicketType]
+                              ?.remove(seatId);
+                        } else {
+                          if (_selectedSeatsByType.values
+                                  .fold(0, (sum, seats) => sum + seats.length) <
+                              5) {
+                            _selectedSeatsByType[_selectedTicketType]
+                                ?.add(seatId);
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content:
+                                  Text('Maximal 5 kursi hanya bisa dipilih'),
+                            ));
+                          }
+                        }
+
+                        // Hitung total harga per jenis tiket
+                        double ticketPrice = seatsToDisplay.isNotEmpty
+                            ? seatsToDisplay.first['harga']?.toDouble() ?? 0.0
+                            : 0.0;
+                        _totalPriceByType[_selectedTicketType] = ticketPrice *
+                            (_selectedSeatsByType[_selectedTicketType]
+                                    ?.length ??
+                                0);
+
+                        // Hitung total harga global
+                        _calculateTotalPrice();
+                      });
+                    }
+                  : null, // Tidak melakukan aksi ketika kursi tidak bisa diklik
+              child: Container(
+                decoration: BoxDecoration(
+                  color: seatColor,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.chair, // Ikon kursi
+                        color: Colors.white,
+                        size: 40,
+                      ),
+                      Text(
+                        seatId,
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+        SizedBox(height: 23),
+        // Tombol untuk menampilkan kursi berikutnya
+        if (_currentSeatPage * _seatsPerPage + _seatsPerPage <
+            availableSeats.length)
+          TextButton(
+            onPressed: () {
+              setState(() {
+                _currentSeatPage++;
+              });
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.white,
+              backgroundColor:
+                  Color.fromRGBO(112, 128, 144, 1), // Warna teks putih
+              padding: EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8), // Sudut membulat
+              ),
+            ),
+            child: Text('Tampilkan Kursi Selanjutnya'),
+          ),
+        if (_currentSeatPage > 0)
+          TextButton(
+            onPressed: () {
+              setState(() {
+                _currentSeatPage--;
+              });
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.white,
+              backgroundColor:
+                  Color.fromRGBO(112, 128, 144, 1), // Warna teks putih
+              padding: EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8), // Sudut membulat
+              ),
+            ),
+            child: Text('Tampilkan Kursi Sebelumnya'),
+          ),
+      ],
+    );
+  }
+
+  void _calculateTotalPrice() {
+    // Hitung ulang total harga global dari semua jenis tiket
+    _totalPrice =
+        _totalPriceByType.values.fold(0.0, (sum, price) => sum + price);
+  }
+
+  String _getSelectedSeatsInfo() {
+    String info = '';
+    _selectedSeatsByType.forEach((ticketType, seats) {
+      if (seats.isNotEmpty) {
+        info +=
+            'Jenis Tiket $ticketType: ${seats.length} kursi (${seats.join(', ')})\n';
+      }
+    });
+    return info.isEmpty ? 'Belum ada kursi yang dipilih.' : info.trim();
+  }
+
+  Widget _buildPriceSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Kursi yang Dipilih:',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        Text(
+          _getSelectedSeatsInfo(),
+          style: TextStyle(fontSize: 14),
+        ),
+        SizedBox(height: 16),
+        Text(
+          'Harga Tiket (${_selectedTicketType}): ${_ticketPrice.toString()}',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        SizedBox(height: 8),
+        Text(
+          'Total Harga: ${_totalPrice.toString()}',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+      ],
+    );
+  }
+
+  void _updateTicketPrice() {
+    if (_selectedTicketType.isNotEmpty) {
+      final selectedTicket = jenisTiketList.firstWhere(
+        (e) => e.keys.first == _selectedTicketType,
+        orElse: () {
+          return {'name': '', 'harga': 0.0, 'kursi': []};
+        },
+      );
+
+      // Ambil data kursi dari jenis tiket yang dipilih
+      final ticketTypeData = selectedTicket[_selectedTicketType];
+
+      // Jika data kursi ada dan tidak kosong
+      if (ticketTypeData != null && ticketTypeData.isNotEmpty) {
+        // Ambil harga tiket dari kursi pertama
+        _ticketPrice = (ticketTypeData[0]['harga'] as num).toDouble();
+      } else {
+        _ticketPrice = 0.0; // Set default jika tidak ada harga
+      }
+
+      print(
+          'Ticket Price Updated: $_ticketPrice'); // Debugging: Check updated ticket price
+    }
+  }
+
+  List<Map<String, dynamic>> _getSeatsForPage(
+      List<Map<String, dynamic>> availableSeats) {
+    int startIndex = _currentSeatPage * _seatsPerPage;
+    int endIndex = startIndex + _seatsPerPage;
+
+    // Mengambil kursi sesuai dengan halaman yang dipilih
+    if (availableSeats.length <= startIndex) {
+      return [];
+    }
+
+    return availableSeats.sublist(startIndex,
+        endIndex > availableSeats.length ? availableSeats.length : endIndex);
   }
 }
