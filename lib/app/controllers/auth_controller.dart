@@ -45,56 +45,44 @@ class AuthController extends GetxController {
 
   Future<void> login(String email, String password) async {
     try {
-      // Proses login ke Firebase dengan email dan password
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
 
-      // Menampilkan UID di debug console
-      print('Logged in user UID: ${userCredential.user?.uid}');
+      if (userCredential.user?.emailVerified ?? false) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('token', 'your_token_value');
 
-      // Cek apakah email adalah admin
-      if (email == 'admin@gmail.com' && password == '123456') {
-        // Jika admin, langsung masuk ke halaman admin
-        Get.offAllNamed(Routes.MANAGEMENT_ADMIN);
-      } else {
-        // Cek status verifikasi email untuk pengguna biasa
-        if (userCredential.user?.emailVerified ?? false) {
-          // Jika email sudah diverifikasi, simpan status login di SharedPreferences
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setString('token', 'your_token_value');
+        Get.snackbar('Success', 'Login successful',
+            backgroundColor: Colors.green);
 
-          Get.snackbar('Success', 'Login successful',
-              backgroundColor: Colors.green);
+        // Cek apakah user adalah pengguna baru
+        bool isNewUser = prefs.getBool('isNewUser') ?? false;
+        if (isNewUser) {
+          // Reset flag setelah login berhasil
+          await prefs.setBool('isNewUser', false);
 
-          var currentUser = FirebaseAuth.instance.currentUser;
-          if (currentUser != null) {
-            // Muat status bookmark setelah login
-            ngalamTerbaruController.loadBookmarkStatus();
-          }
-
+          // Langsung arahkan ke halaman homescreen
+          Get.offAllNamed(Routes.HOME);
+        } else {
           // Panggil loadUserData untuk memuat data pengguna
           final HalamanInformasiPribadiController
               halamanInformasiPribadiController = Get.find();
-          halamanInformasiPribadiController.loadUserData();
+          await halamanInformasiPribadiController.loadUserData();
 
           // Jika berhasil login, arahkan ke HOME
           Get.offAllNamed(Routes.HOME);
-        } else {
-          // Jika email belum diverifikasi, beri tahu pengguna
-          Get.snackbar(
-            'Verification Needed',
-            'Please verify your email to log in. A verification email has been sent.',
-            backgroundColor: Colors.orange,
-          );
-
-          // Kirim ulang email verifikasi
-          await userCredential.user?.sendEmailVerification();
-
-          // Logout agar sesi tidak disimpan
-          await _auth.signOut();
         }
+      } else {
+        Get.snackbar(
+          'Verification Needed',
+          'Please verify your email to log in. A verification email has been sent.',
+          backgroundColor: Colors.orange,
+        );
+
+        await userCredential.user?.sendEmailVerification();
+        await _auth.signOut();
       }
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {

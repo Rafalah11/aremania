@@ -110,8 +110,15 @@ class HalamanInformasiPribadiController extends GetxController {
         nomorHandphone.value = doc['nomor_handphone'] ?? '';
         email.value = doc['email'] ?? '';
       } else {
+        Get.snackbar(
+          'Data Missing',
+          'Please complete your personal information.',
+          backgroundColor: Colors.orange,
+        );
+
+        // Jika data tidak ada, arahkan ke halaman edit informasi pribadi
         Get.to(
-            HalamanEditInformasiPribadiView(userId: userId, isNewUser: true));
+            HalamanEditInformasiPribadiView(userId: userId, isNewUser: false));
       }
     }
   }
