@@ -13,10 +13,8 @@ class NgalamReadTerbaruView extends StatelessWidget {
         articleData['data']; // Data artikel yang dikirimkan
 
     // Format tanggal jika ada
-    String formattedDate = isiArtikel['tanggal_upload'] != null
-        ? DateFormat('yyyy-MM-dd').format(isiArtikel['tanggal_upload'].toDate())
-        : 'No Date';
-
+    String formattedDate = DateFormat('dd MMMM yyyy')
+        .format(isiArtikel['tanggal_upload'].toDate());
     final NgalamTerbaruController controller =
         Get.find<NgalamTerbaruController>();
 
@@ -72,14 +70,17 @@ class NgalamReadTerbaruView extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.account_circle, size: 16, color: Colors.grey),
+                      Icon(Icons.account_circle, size: 30, color: Colors.grey),
                       SizedBox(width: 4),
-                      Text(isiArtikel['nama_upload'] ?? 'Unknown'),
+                      Text(
+                        isiArtikel['nama_upload'] ?? 'Unknown',
+                        style: TextStyle(fontSize: 20),
+                      ),
                     ],
                   ),
                   Text(
-                    'Uploaded on: $formattedDate',
-                    style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                    '$formattedDate',
+                    style: TextStyle(fontSize: 18, color: Colors.grey[600]),
                   ),
                 ],
               ),

@@ -15,10 +15,7 @@ class ReadDetailArtikelView extends StatelessWidget {
     // Ambil argumen dari Get.arguments
     final Map<String, dynamic> articleData = Get.arguments;
 
-    // Debug: Cek apakah articleData tersedia
-    print('Article Data: $articleData');
-
-    if (articleData == null || articleData.isEmpty) {
+    if (articleData.isEmpty) {
       return Scaffold(
         body: Center(child: Text('Invalid Article ID or Data')),
       );
@@ -27,10 +24,6 @@ class ReadDetailArtikelView extends StatelessWidget {
     final String idArtikel = articleData['id']; // ID artikel yang dikirimkan
     final Map<String, dynamic> isiArtikel =
         articleData['data']; // Data artikel yang dikirimkan
-
-    // Debug: Cek apakah ID artikel dan data artikel valid
-    print('ID Artikel: $idArtikel');
-    print('Isi Artikel: $isiArtikel');
 
     return Scaffold(
       appBar: PreferredSize(
@@ -89,6 +82,8 @@ class ReadDetailArtikelView extends StatelessWidget {
           if (!snapshot.hasData || snapshot.data == null) {
             return Center(child: Text("Article not found"));
           }
+          String formattedDate = DateFormat('dd MMMM yyyy')
+              .format(isiArtikel['tanggal_upload'].toDate());
 
           return SingleChildScrollView(
             child: Padding(
@@ -123,11 +118,7 @@ class ReadDetailArtikelView extends StatelessWidget {
                           Icon(Icons.access_time, size: 16, color: Colors.grey),
                           SizedBox(width: 5),
                           Text(
-                            isiArtikel['tanggal_upload'] != null
-                                ? DateFormat('dd-MM-yyyy').format(
-                                    (isiArtikel['tanggal_upload'] as Timestamp)
-                                        .toDate())
-                                : 'No Date',
+                            formattedDate,
                             style: TextStyle(color: Colors.black, fontSize: 14),
                           ),
                         ],

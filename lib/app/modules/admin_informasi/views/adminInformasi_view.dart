@@ -15,14 +15,27 @@ class AdminFormPage extends StatefulWidget {
 
 class AdmininformasiView extends State<AdminFormPage> {
   final _formKey = GlobalKey<FormState>();
-  String? idArtikel,
-      judulArtikel,
-      namaUpload,
-      isiArtikel,
-      kategori,
-      subKategori;
+  String? idArtikel, judulArtikel, namaUpload, isiArtikel;
   DateTime? tanggalUpload;
-  XFile? gambar, gambar2;
+  XFile? gambar;
+  List<String> subKategoriList = [];
+
+  String? kategori; // Variabel untuk menyimpan nilai kategori yang dipilih
+  final List<String> kategoriList = [
+    'ngalam',
+    'arema',
+    'aremania',
+    'nasional',
+  ]; // Daftar pilihan kategori
+
+  String? subKategori;
+
+  final Map<String, List<String>> kategoriSubKategoriMap = {
+    'ngalam': ['terbaru', 'destinasi', 'malangan', 'kuliner', 'info_penting'],
+    'arema': ['editorial', 'arema_putri', 'berita_foto', 'arema_junior'],
+    'aremania': [],
+    'nasional': [],
+  };
 
   final picker = ImagePicker();
   final dateFormat = DateFormat('yyyy-MM-dd');
@@ -42,8 +55,6 @@ class AdmininformasiView extends State<AdminFormPage> {
     setState(() {
       if (isPrimary) {
         gambar = selectedImage;
-      } else {
-        gambar2 = selectedImage;
       }
     });
   }
@@ -87,8 +98,8 @@ class AdmininformasiView extends State<AdminFormPage> {
           judulArtikelController.text.isEmpty ||
           namaUploadController.text.isEmpty ||
           isiArtikelController.text.isEmpty ||
-          kategoriController.text.isEmpty ||
-          subKategoriController.text.isEmpty ||
+          kategori == null ||
+          subKategori == null ||
           tanggalUpload == null) {
         // Tampilkan snackbar jika ada input yang kosong
         ScaffoldMessenger.of(context).showSnackBar(
@@ -101,7 +112,6 @@ class AdmininformasiView extends State<AdminFormPage> {
 
       // Upload gambar utama dan gambar opsional ke Firebase Storage
       String? imageUrl = await _uploadImage(gambar);
-      String? imageUrl2 = await _uploadImage(gambar2);
 
       // Masukkan data dan URL gambar ke dalam Firestore
       await FirebaseFirestore.instance.collection('Informasi').add({
@@ -113,7 +123,6 @@ class AdmininformasiView extends State<AdminFormPage> {
         'kategori': kategori,
         'sub_kategori': subKategori,
         'gambar_url': imageUrl,
-        'gambar2_url': imageUrl2,
       });
 
       // Tampilkan notifikasi sukses
@@ -133,7 +142,8 @@ class AdmininformasiView extends State<AdminFormPage> {
       setState(() {
         tanggalUpload = null;
         gambar = null;
-        gambar2 = null;
+        kategori = null;
+        subKategori == null;
       });
     }
   }
@@ -182,16 +192,68 @@ class AdmininformasiView extends State<AdminFormPage> {
               onSaved: (value) => isiArtikel = value,
               maxLines: 5,
             ),
-            TextFormField(
-              controller: kategoriController,
-              decoration: InputDecoration(labelText: 'Kategori'),
+            SizedBox(height: 15),
+            DropdownButtonFormField<String>(
+              value: kategori, // Nilai awal dropdown kategori
+              decoration: InputDecoration(
+                labelText: 'Kategori',
+                border: OutlineInputBorder(),
+              ),
+              items: kategoriList.map((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  kategori = value; // Simpan nilai kategori
+                  subKategori =
+                      null; // Reset sub-kategori saat kategori berubah
+                  subKategoriList = kategoriSubKategoriMap[kategori] ??
+                      []; // Update sub-kategori
+                });
+              },
               onSaved: (value) => kategori = value,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Kategori harus dipilih';
+                }
+                return null;
+              },
             ),
-            TextFormField(
-              controller: subKategoriController,
-              decoration: InputDecoration(labelText: 'Sub Kategori'),
+
+            SizedBox(height: 15),
+            DropdownButtonFormField<String>(
+              value: subKategori, // Nilai awal dropdown sub-kategori
+              decoration: InputDecoration(
+                labelText: 'Sub-Kategori',
+                border: OutlineInputBorder(),
+              ),
+              items: subKategoriList.map((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  subKategori = value; // Simpan nilai sub-kategori
+                });
+              },
               onSaved: (value) => subKategori = value,
+              validator: (value) {
+                if (kategori == 'aremania' || kategori == 'nasional') {
+                  return null; // Tidak perlu validasi untuk kategori tanpa sub-kategori
+                }
+                if (value == null || value.isEmpty) {
+                  return 'Sub-Kategori harus dipilih';
+                }
+                return null;
+              },
             ),
+
+            SizedBox(height: 15),
             TextFormField(
               controller: tanggalUploadController,
               decoration: InputDecoration(labelText: 'Tanggal Upload'),
@@ -205,13 +267,7 @@ class AdmininformasiView extends State<AdminFormPage> {
                   ? 'Pilih Gambar Utama'
                   : 'Gambar Utama Terpilih'),
             ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () => _pickImage(false),
-              child: Text(gambar2 == null
-                  ? 'Pilih Gambar Kedua (Opsional)'
-                  : 'Gambar Kedua Terpilih'),
-            ),
+
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: _submitForm,

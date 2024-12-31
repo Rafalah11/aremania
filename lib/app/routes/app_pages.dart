@@ -16,6 +16,8 @@ import '../modules/Halaman_Trending/bindings/halaman_trending_binding.dart';
 import '../modules/Halaman_Trending/views/halaman_trending_view.dart';
 import '../modules/ReadFavorite/bindings/read_favorite_binding.dart';
 import '../modules/ReadFavorite/views/read_favorite_view.dart';
+import '../modules/SearchArticlePage/bindings/search_article_page_binding.dart';
+import '../modules/SearchArticlePage/views/search_article_page_view.dart';
 import '../modules/admin_home/bindings/admin_home_binding.dart';
 import '../modules/admin_home/views/admin_home_view.dart';
 import '../modules/admin_informasi/bindings/admin_informasiBinding.dart';
@@ -34,14 +36,6 @@ import '../modules/arema_beritafoto/bindings/arema_beritafoto_binding.dart';
 import '../modules/arema_beritafoto/views/arema_beritafoto_view.dart';
 import '../modules/arema_editorial/bindings/arema_editorial_binding.dart';
 import '../modules/arema_editorial/views/arema_editorial_view.dart';
-import '../modules/arema_read_aremajunior/bindings/arema_read_aremajunior_binding.dart';
-import '../modules/arema_read_aremajunior/views/arema_read_aremajunior_view.dart';
-import '../modules/arema_read_aremaputri/bindings/arema_read_aremaputri_binding.dart';
-import '../modules/arema_read_aremaputri/views/arema_read_aremaputri_view.dart';
-import '../modules/arema_read_beritafoto/bindings/arema_read_beritafoto_binding.dart';
-import '../modules/arema_read_beritafoto/views/arema_read_beritafoto_view.dart';
-import '../modules/arema_read_editorial/bindings/arema_read_editorial_binding.dart';
-import '../modules/arema_read_editorial/views/arema_read_editorial_view.dart';
 import '../modules/aremaday_semua/bindings/aremaday_semua_binding.dart';
 import '../modules/aremaday_semua/views/aremaday_semua_view.dart';
 import '../modules/aremania_semua/bindings/aremania_semua_binding.dart';
@@ -56,7 +50,6 @@ import '../modules/halaman_daftar/views/halaman_daftar_view.dart';
 import '../modules/halaman_history_ticket/bindings/halaman_history_ticket_binding.dart';
 import '../modules/halaman_history_ticket/views/halaman_history_ticket_view.dart';
 import '../modules/halaman_informasi_pribadi/bindings/halaman_informasi_pribadi_binding.dart';
-import '../modules/halaman_informasi_pribadi/views/halaman_edit_informasi_pribadi_view.dart';
 import '../modules/halaman_informasi_pribadi/views/halaman_informasi_pribadi_view.dart';
 import '../modules/halaman_login/bindings/halaman_login_binding.dart';
 import '../modules/halaman_login/views/halaman_login_view.dart';
@@ -129,14 +122,6 @@ class AppPages {
   static const READ_AREMANIA = Routes.READ_AREMANIA;
   static const NGALAM_TERBARU = Routes.NGALAM_TERBARU;
   static const NGALAM_READ_TERBARU = Routes.NGALAM_READ_TERBARU;
-  static const NGALAM_READ_DESTINASI = Routes.NGALAM_READ_DESTINASI;
-  static const NGALAM_READ_MALANGAN = Routes.NGALAM_READ_MALANGAN;
-  static const NGALAM_READ_MALANGANKULINER = Routes.NGALAM_READ_MALANGANKULINER;
-  static const NGALAM_READ_INFO_PENTING = Routes.NGALAM_READ_INFO_PENTING;
-  static const AREMA_READ_BERITAFOTO = Routes.AREMA_READ_BERITAFOTO;
-  static const AREMA_READ_AREMAJUNIOR = Routes.AREMA_READ_AREMAJUNIOR;
-  static const AREMA_READ_AREMAPUTRI = Routes.AREMA_READ_AREMAPUTRI;
-  static const AREMA_READ_EDITORIAL = Routes.AREMA_READ_EDITORIAL;
   static const AREMA_AREMAJUNIOR = Routes.AREMA_AREMAJUNIOR;
   static const AREMA_AREMAPUTRI = Routes.AREMA_AREMAPUTRI;
   static const AREMA_BERITAFOTO = Routes.AREMA_BERITAFOTO;
@@ -205,26 +190,6 @@ class AppPages {
       name: _Paths.NGALAM_READ_TERBARU,
       page: () => NgalamReadTerbaruView(),
       binding: NgalamReadTerbaruBinding(),
-    ),
-    GetPage(
-      name: _Paths.AREMA_READ_EDITORIAL,
-      page: () => AremaReadEditorialView(),
-      binding: AremaReadEditorialBinding(),
-    ),
-    GetPage(
-      name: _Paths.AREMA_READ_AREMAPUTRI,
-      page: () => AremaReadAremaputriView(),
-      binding: AremaReadAremaputriBinding(),
-    ),
-    GetPage(
-      name: _Paths.AREMA_READ_AREMAJUNIOR,
-      page: () => AremaReadAremajuniorView(),
-      binding: AremaReadAremajuniorBinding(),
-    ),
-    GetPage(
-      name: _Paths.AREMA_READ_BERITAFOTO,
-      page: () => AremaReadBeritafotoView(),
-      binding: AremaReadBeritafotoBinding(),
     ),
     GetPage(
       name: _Paths.AREMA_EDITORIAL,
@@ -316,13 +281,6 @@ class AppPages {
     GetPage(
       name: _Paths.HALAMAN_INFORMASI_PRIBADI,
       page: () => HalamanInformasiPribadiView(),
-      binding: HalamanInformasiPribadiBinding(),
-    ),
-    GetPage(
-      name: _Paths.HALAMAN_EDIT_INFORMASI_PRIBADI,
-      page: () => HalamanEditInformasiPribadiView(
-        userId: '',
-      ),
       binding: HalamanInformasiPribadiBinding(),
     ),
     GetPage(
@@ -448,6 +406,11 @@ class AppPages {
       name: _Paths.HALAMAN_AREMANIA,
       page: () => HalamanAremaniaView(),
       binding: HalamanAremaniaBinding(),
+    ),
+    GetPage(
+      name: _Paths.SEARCH_ARTICLE_PAGE,
+      page: () => SearchArticlePageView(),
+      binding: SearchArticlePageBinding(),
     ),
   ];
 }

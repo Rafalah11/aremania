@@ -240,7 +240,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text("Welcome!",
+                    Text("Selamat Datang!",
                         style: TextStyle(
                             fontSize: 24, fontWeight: FontWeight.bold)),
                     // IconButton(
@@ -596,6 +596,132 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget _buildArticleCard(DocumentSnapshot articleData) {
+    return GestureDetector(
+      onTap: () async {
+        String articleId = articleData.id; // Ambil ID artikel
+        var articleDetails = articleData.data(); // Ambil data artikel
+
+        // Kirim ID dan data artikel ke halaman NGALAM_READ_TERBARU
+        Get.toNamed(
+          Routes.READDETAILARTIKEL,
+          arguments: {
+            'id': articleId, // Mengirimkan ID artikel
+            'data': articleDetails, // Mengirimkan data artikel
+          },
+        );
+      },
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 300), // Durasi animasi border
+        width: 330, // Set width untuk setiap card
+        margin: EdgeInsets.only(right: 9), // Jarak antar card
+        child: Card(
+          elevation: 8, // Memberikan efek shadow pada card
+          shape: RoundedRectangleBorder(
+            borderRadius:
+                BorderRadius.circular(15), // Sudut melengkung untuk Card luar
+          ),
+          child: ClipRRect(
+            borderRadius:
+                BorderRadius.circular(15), // Sudut melengkung untuk Card dalam
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(
+                    15), // Sudut melengkung untuk Card dalam
+              ),
+              child: Stack(
+                children: [
+                  // Gambar akan menutupi seluruh card dan diberi transparansi
+                  articleData['gambar_url'] != null
+                      ? Positioned.fill(
+                          child: Image.network(
+                            articleData['gambar_url'],
+                            fit: BoxFit
+                                .cover, // Gambar mengisi seluruh area card
+                            color: const Color.fromARGB(0, 0, 0, 0)
+                                .withOpacity(0), // Menambahkan transparansi
+                            colorBlendMode: BlendMode
+                                .darken, // Membuat gambar lebih gelap dengan transparansi
+                          ),
+                        )
+                      : Positioned.fill(
+                          child: Container(
+                            color: Colors.grey[300],
+                            child: Center(child: Text('No Image')),
+                          ),
+                        ),
+                  // Lapisan semi-transparan di atas gambar agar teks lebih terlihat
+                  Positioned.fill(
+                    child: Container(
+                      color:
+                          Colors.black.withOpacity(0.4), // Transparansi hitam
+                    ),
+                  ),
+                  // Teks berada di atas gambar
+                  Positioned(
+                    bottom: 10,
+                    left: 10,
+                    right: 10,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            articleData['judul_artikel'] ?? 'No Title',
+                            style: TextStyle(
+                              fontFamily: 'Montserrat', // Gunakan Montserrat
+                              fontWeight:
+                                  FontWeight.w900, // Gunakan Black (tertebal)
+                              fontSize: 20,
+                              color: Colors
+                                  .white, // Sesuaikan dengan warna teks yang diinginkan
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          SizedBox(height: 5),
+                          Row(
+                            children: [
+                              Icon(Icons.account_circle,
+                                  size: 12, color: Colors.white),
+                              SizedBox(width: 5),
+                              Text(
+                                articleData['nama_upload'] ?? 'Unknown Author',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 17),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 5),
+                          Row(
+                            children: [
+                              Icon(Icons.remove_red_eye,
+                                  size: 12, color: Colors.white),
+                              SizedBox(width: 5),
+                              Text(
+                                articleData['tanggal_upload'] != null
+                                    ? DateFormat('dd MMMM yyyy').format(
+                                        articleData['tanggal_upload']
+                                            .toDate()) // Menampilkan tanggal, bulan dan tahun
+                                    : 'No Date',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 16),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
   // Perbaikan pada fungsi _buildArticleCard
   // Widget _buildArticleCard(DocumentSnapshot articleData) {
   //   return GestureDetector(
@@ -729,130 +855,4 @@ class _HomeScreenState extends State<HomeScreen> {
   //     ),
   //   );
   // }
-  Widget _buildArticleCard(DocumentSnapshot articleData) {
-    return GestureDetector(
-      onTap: () async {
-        String articleId = articleData.id; // Ambil ID artikel
-        var articleDetails = articleData.data(); // Ambil data artikel
-
-        // Kirim ID dan data artikel ke halaman NGALAM_READ_TERBARU
-        Get.toNamed(
-          Routes.READDETAILARTIKEL,
-          arguments: {
-            'id': articleId, // Mengirimkan ID artikel
-            'data': articleDetails, // Mengirimkan data artikel
-          },
-        );
-      },
-      child: AnimatedContainer(
-        duration: Duration(milliseconds: 300), // Durasi animasi border
-        width: 330, // Set width untuk setiap card
-        margin: EdgeInsets.only(right: 9), // Jarak antar card
-        child: Card(
-          elevation: 8, // Memberikan efek shadow pada card
-          shape: RoundedRectangleBorder(
-            borderRadius:
-                BorderRadius.circular(15), // Sudut melengkung untuk Card luar
-          ),
-          child: ClipRRect(
-            borderRadius:
-                BorderRadius.circular(15), // Sudut melengkung untuk Card dalam
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(
-                    15), // Sudut melengkung untuk Card dalam
-              ),
-              child: Stack(
-                children: [
-                  // Gambar akan menutupi seluruh card dan diberi transparansi
-                  articleData['gambar_url'] != null
-                      ? Positioned.fill(
-                          child: Image.network(
-                            articleData['gambar_url'],
-                            fit: BoxFit
-                                .cover, // Gambar mengisi seluruh area card
-                            color: const Color.fromARGB(0, 0, 0, 0)
-                                .withOpacity(0), // Menambahkan transparansi
-                            colorBlendMode: BlendMode
-                                .darken, // Membuat gambar lebih gelap dengan transparansi
-                          ),
-                        )
-                      : Positioned.fill(
-                          child: Container(
-                            color: Colors.grey[300],
-                            child: Center(child: Text('No Image')),
-                          ),
-                        ),
-                  // Lapisan semi-transparan di atas gambar agar teks lebih terlihat
-                  Positioned.fill(
-                    child: Container(
-                      color:
-                          Colors.black.withOpacity(0.4), // Transparansi hitam
-                    ),
-                  ),
-                  // Teks berada di atas gambar
-                  Positioned(
-                    bottom: 10,
-                    left: 10,
-                    right: 10,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            articleData['judul_artikel'] ?? 'No Title',
-                            style: TextStyle(
-                              fontFamily: 'Montserrat', // Gunakan Montserrat
-                              fontWeight:
-                                  FontWeight.w900, // Gunakan Black (tertebal)
-                              fontSize: 20,
-                              color: Colors
-                                  .white, // Sesuaikan dengan warna teks yang diinginkan
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          SizedBox(height: 5),
-                          Row(
-                            children: [
-                              Icon(Icons.account_circle,
-                                  size: 12, color: Colors.white),
-                              SizedBox(width: 5),
-                              Text(
-                                articleData['nama_upload'] ?? 'Unknown Author',
-                                style: TextStyle(
-                                    color: Colors.white, fontSize: 17),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 5),
-                          Row(
-                            children: [
-                              Icon(Icons.remove_red_eye,
-                                  size: 12, color: Colors.white),
-                              SizedBox(width: 5),
-                              Text(
-                                articleData['tanggal_upload'] != null
-                                    ? DateFormat('dd MMMM yyyy').format(
-                                        articleData['tanggal_upload']
-                                            .toDate()) // Menampilkan tanggal, bulan dan tahun
-                                    : 'No Date',
-                                style: TextStyle(
-                                    color: Colors.white, fontSize: 16),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }

@@ -34,14 +34,6 @@ class KategoriView extends StatelessWidget {
             Get.back(); // Menggunakan Get.back untuk kembali ke halaman sebelumnya
           },
         ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.search, color: Colors.black),
-            onPressed: () {
-              // Tambahkan fungsi pencarian di sini jika diperlukan
-            },
-          ),
-        ],
       ),
       body: ListView(
         children: [

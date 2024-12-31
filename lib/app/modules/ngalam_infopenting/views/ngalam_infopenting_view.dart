@@ -4,12 +4,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:myapp/app/modules/Favorite/views/favorite_view.dart';
+import 'package:myapp/app/modules/SearchArticlePage/views/search_article_page_view.dart';
 import 'package:myapp/app/modules/home/views/home_view.dart';
 import 'package:myapp/app/modules/kategori/views/kategori_view.dart';
 import 'package:myapp/app/modules/ngalam_destinasi/views/ngalam_destinasi_view.dart';
-import 'package:myapp/app/modules/ngalam_infopenting/controllers/ngalam_infopenting_controller.dart';
 import 'package:myapp/app/modules/ngalam_kuliner/views/ngalam_kuliner_view.dart';
 import 'package:myapp/app/modules/ngalam_malangan/views/ngalam_malangan_view.dart';
+import 'package:myapp/app/modules/ngalam_terbaru/controllers/ngalam_terbaru_controller.dart';
 import 'package:myapp/app/modules/ticket/views/ticket_view.dart';
 import 'package:myapp/app/modules/ngalam_terbaru/views/ngalam_terbaru_view.dart';
 import 'package:myapp/app/routes/app_pages.dart';
@@ -37,8 +38,8 @@ class _NgalamInfopentingViewState extends State<NgalamInfopentingView> {
   // bool _isBookmarked = false;
   int _selectedIndex = 1;
   int _selectedMenuIndex = 4;
-  final NgalamInfopentingController _controller =
-      Get.put(NgalamInfopentingController());
+  final NgalamTerbaruController _controller =
+      Get.put(NgalamTerbaruController());
 
   final List<String> _menuTitles = [
     'Terbaru',
@@ -120,7 +121,9 @@ class _NgalamInfopentingViewState extends State<NgalamInfopentingView> {
         actions: [
           IconButton(
             icon: Icon(Icons.search, color: Colors.black),
-            onPressed: () {},
+            onPressed: () {
+              Get.to(() => SearchArticlePageView());
+            },
           ),
         ],
       ),
@@ -173,117 +176,107 @@ class _NgalamInfopentingViewState extends State<NgalamInfopentingView> {
                       child: Center(child: CircularProgressIndicator()),
                     );
                   }
-
-                  final articleData = articleSnapshot.data!.docs.isNotEmpty
-                      ? articleSnapshot.data!.docs[0]
-                      : null;
+                  final articles =
+                      articleSnapshot.data!.docs; // Ambil semua dokumen
+                  if (articles.isEmpty) {
+                    return Container(
+                      height: 100,
+                      child: Center(child: Text('Tidak ada artikel terbaru')),
+                    );
+                  }
+                  final articleData = articles[0].data()
+                      as Map<String, dynamic>; // Data artikel pertama
+                  String formattedDate = DateFormat('dd MMMM yyyy')
+                      .format(articleData['tanggal_upload'].toDate());
+                  String articleId = articles[0].id; // ID artikel pertama
 
                   return GestureDetector(
                     onTap: () {
-                      // Pastikan data artikel tidak null sebelum dikirim
-                      if (articleData != null) {
-                        Get.toNamed(
-                          Routes.NGALAM_READ_TERBARU,
-                          arguments: {
-                            'id': latestId, // Mengirimkan ID artikel terbaru
-                            'data': articleData
-                                .data(), // Mengirimkan data artikel sebagai Map<String, dynamic>
-                          },
-                        );
-                      } else {
-                        Get.snackbar('Error', 'Data artikel tidak tersedia');
-                      }
+                      Get.toNamed(
+                        Routes.NGALAM_READ_TERBARU,
+                        arguments: {
+                          'id': articleId, // Mengirimkan ID artikel
+                          'data': articleData, // Mengirimkan data artikel
+                        },
+                      );
                     },
-                    child: Container(
-                      height: 200, // Set tinggi untuk gambar
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(
-                            0), // Pastikan tidak ada radius
-                        color: Colors
-                            .transparent, // Pastikan latar belakang transparan
-                      ),
-                      child: Stack(
-                        children: [
-                          // Gambar dengan transparansi
-                          Opacity(
-                            opacity: 0.8,
-                            child: articleData != null &&
-                                    articleData['gambar_url'] != null
-                                ? ClipRect(
-                                    child: Image.network(
-                                      articleData['gambar_url'],
-                                      fit: BoxFit.cover,
-                                      width: double.infinity,
-                                      height: 200,
-                                    ),
+                    child: Stack(
+                      children: [
+                        // Gambar dengan opacity lebih kecil
+                        Stack(
+                          children: [
+                            // Gambar utama
+                            articleData['gambar_url'] != null
+                                ? Image.network(
+                                    articleData['gambar_url'],
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                    height: 220,
                                   )
                                 : Container(
+                                    height: 200,
                                     color: Colors.grey[300],
                                     child: Center(
                                         child: Text('No Image Available')),
                                   ),
-                          ),
-                          // Overlay dengan teks di atas gambar
-                          Positioned(
-                            bottom: 0,
-                            left: 0,
-                            right: 0,
-                            child: Container(
-                              color: const Color.fromARGB(207, 0, 0, 0),
-                              padding: EdgeInsets.all(8),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                            // Overlay warna hitam dengan opacity
+                            Container(
+                              height: 220,
+                              width: double.infinity,
+                              color: Colors.black.withOpacity(
+                                  0.5), // Warna hitam dengan transparansi
+                            ),
+                          ],
+                        ),
+
+                        // Overlay teks di atas gambar
+                        Positioned(
+                          bottom: 20,
+                          left: 20,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                articleData['judul_artikel'] ?? 'No Title',
+                                style: TextStyle(
+                                  fontFamily: 'Montserrat',
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              SizedBox(height: 5),
+                              Row(
                                 children: [
+                                  Icon(Icons.account_circle,
+                                      color: Colors.white, size: 20),
+                                  SizedBox(width: 5),
                                   Text(
-                                    articleData?['judul_artikel'] ?? 'No Title',
+                                    articleData['nama_upload'] ??
+                                        'Unknown Author',
                                     style: TextStyle(
+                                      fontFamily: 'Montserrat',
                                       color: Colors.white,
                                       fontSize: 16,
-                                      fontWeight: FontWeight.bold,
                                     ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                  SizedBox(height: 5),
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        Icons.account_circle,
-                                        color: Colors.white,
-                                        size: 20,
-                                      ),
-                                      SizedBox(width: 5),
-                                      Text(
-                                        articleData?['nama_upload'] ??
-                                            'Unknown Author',
-                                        style: TextStyle(
-                                            color: Colors.white, fontSize: 18),
-                                      ),
-                                      SizedBox(width: 15),
-                                      Icon(
-                                        Icons.access_time,
-                                        color: Colors.white,
-                                        size: 20,
-                                      ),
-                                      SizedBox(width: 5),
-                                      Text(
-                                        articleData?['tanggal_upload'] != null
-                                            ? DateFormat('dd-MM-yyyy').format(
-                                                articleData!['tanggal_upload']
-                                                    .toDate())
-                                            : 'No Date',
-                                        style: TextStyle(
-                                            color: Colors.white, fontSize: 18),
-                                      ),
-                                    ],
+                                  SizedBox(width: 15),
+                                  Text(
+                                    formattedDate,
+                                    style: TextStyle(
+                                      fontFamily: 'Montserrat',
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                    ),
                                   ),
                                 ],
                               ),
-                            ),
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   );
                 },
@@ -330,112 +323,131 @@ class _NgalamInfopentingViewState extends State<NgalamInfopentingView> {
                   .collection('Informasi')
                   .where('kategori', isEqualTo: 'ngalam')
                   .where('sub_kategori', isEqualTo: 'info_penting')
-                  .snapshots(),
+                  .orderBy('tanggal_upload',
+                      descending:
+                          true) // Urutkan berdasarkan tanggal_upload (terbaru pertama)
+                  .snapshots(includeMetadataChanges: true),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
                   return Center(child: CircularProgressIndicator());
                 }
 
                 final articles = snapshot.data!.docs;
+
                 if (articles.isEmpty) {
                   return Center(child: Text('No articles available.'));
                 }
 
+                // Mengecualikan artikel yang baru diunggah (terbaru pertama)
+                // Mengambil artikel kecuali yang pertama (artikel terbaru)
+                final filteredArticles = articles
+                    .sublist(1); // Menyingkirkan artikel pertama (terbaru)
+
                 return ListView.builder(
-                  itemCount: articles.length,
+                  itemCount: filteredArticles.length,
                   itemBuilder: (context, index) {
-                    // Ambil data artikel dari snapshot
                     final articleData =
-                        articles[index].data() as Map<String, dynamic>;
-
-                    // Mengonversi timestamp ke tanggal
-                    String formattedDate = DateFormat('yyyy-MM-dd')
+                        filteredArticles[index].data() as Map<String, dynamic>;
+                    String formattedDate = DateFormat('dd MMMM yyyy')
                         .format(articleData['tanggal_upload'].toDate());
-
-                    String articleId = articles[index].id;
+                    String articleId = filteredArticles[index].id;
 
                     return Obx(() {
-                      // Ambil status bookmark dari bookmarkStatus dengan ID artikel
                       bool isBookmarked =
                           _controller.bookmarkStatus[articleId] ?? false;
 
-                      return ListTile(
-                        title: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                articleData['judul_artikel'] ?? 'No Title',
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                            IconButton(
-                              icon: Icon(
-                                isBookmarked
-                                    ? Icons.bookmark
-                                    : Icons.bookmark_border,
-                                color: isBookmarked ? Colors.blue : Colors.grey,
-                                size: 24,
-                              ),
-                              onPressed: () {
-                                var currentUser =
-                                    FirebaseAuth.instance.currentUser;
-                                if (currentUser == null) {
-                                  // Jika belum login, arahkan ke halaman login
-                                  Get.toNamed(Routes.HALAMAN_LOGIN);
-                                  return;
-                                }
-                                _controller.toggleBookmark(articleId);
-                              },
-                            ),
-                          ],
-                        ),
-                        subtitle: Row(
-                          children: [
-                            Icon(Icons.account_circle,
-                                size: 16, color: Colors.grey),
-                            SizedBox(width: 4),
-                            Text(articleData['nama_upload'] ?? 'Unknown'),
-                            SizedBox(width: 10),
-                            Icon(Icons.access_time,
-                                size: 16, color: Colors.grey),
-                            SizedBox(width: 4),
-                            Text(formattedDate),
-                          ],
-                        ),
-                        leading: articleData['gambar_url'] != null
-                            ? SizedBox(
-                                width: 115,
-                                height: 150,
-                                child: Image.network(
-                                  articleData['gambar_url'],
-                                  fit: BoxFit.cover,
-                                ),
-                              )
-                            : SizedBox(
-                                width: 115,
-                                height: 150,
-                                child: Container(
-                                  color: Colors.grey[300],
-                                  child:
-                                      Center(child: Text('No Image Available')),
-                                ),
-                              ),
+                      return InkWell(
                         onTap: () {
-                          // Ambil ID dokumen dan seluruh data artikel
-                          String articleId = articles[index].id;
-                          var articleData = articles[index].data();
-
-                          // Kirim ID dan data artikel ke halaman detail
                           Get.toNamed(
                             Routes.NGALAM_READ_TERBARU,
                             arguments: {
-                              'id': articleId, // Mengirimkan ID dokumen
-                              'data': articleData, // Mengirimkan data dokumen
+                              'id': articleId,
+                              'data': articleData,
                             },
                           );
                         },
+                        child: Container(
+                          margin: EdgeInsets.symmetric(vertical: 8),
+                          padding: EdgeInsets.only(left: 17, bottom: 1),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              articleData['gambar_url'] != null
+                                  ? Container(
+                                      width: 140,
+                                      height: 88,
+                                      decoration: BoxDecoration(
+                                        image: DecorationImage(
+                                          image: NetworkImage(
+                                              articleData['gambar_url']),
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    )
+                                  : Container(
+                                      width: 140,
+                                      height: 88,
+                                      color: Colors.grey[300],
+                                      child: Center(
+                                          child: Text('No Image Available')),
+                                    ),
+                              SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      articleData['judul_artikel'] ??
+                                          'No Title',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    SizedBox(height: 4),
+                                    Row(
+                                      children: [
+                                        Icon(Icons.account_circle,
+                                            size: 16, color: Colors.grey),
+                                        SizedBox(width: 4),
+                                        Text(articleData['nama_upload'] ??
+                                            'Unknown'),
+                                      ],
+                                    ),
+                                    SizedBox(height: 4),
+                                    Row(
+                                      children: [
+                                        Icon(Icons.access_time,
+                                            size: 16, color: Colors.grey),
+                                        SizedBox(width: 4),
+                                        Text(formattedDate),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              IconButton(
+                                icon: Icon(
+                                  isBookmarked
+                                      ? Icons.bookmark
+                                      : Icons.bookmark_border,
+                                  color:
+                                      isBookmarked ? Colors.blue : Colors.grey,
+                                  size: 24,
+                                ),
+                                onPressed: () {
+                                  var currentUser =
+                                      FirebaseAuth.instance.currentUser;
+                                  if (currentUser == null) {
+                                    Get.toNamed(Routes.HALAMAN_LOGIN);
+                                    return;
+                                  }
+                                  _controller.toggleBookmark(articleId);
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
                       );
                     });
                   },

@@ -7,15 +7,17 @@ class ReadFavoriteView extends StatelessWidget {
   Widget build(BuildContext context) {
     // Ambil data artikel yang dikirim sebagai argument
     final Map<String, dynamic> articleData = Get.arguments;
+    final Map<String, dynamic> isiArtikel =
+        articleData['data']; // Data artikel yang dikirimkan
 
-    // Mengonversi timestamp ke tanggal yang dapat dibaca
-    String formattedDate =
-        DateFormat('yyyy-MM-dd').format(articleData['tanggal_upload'].toDate());
+    // // Mengonversi timestamp ke tanggal yang dapat dibaca
+    String formattedDate = DateFormat('dd MMMM yyyy')
+        .format(isiArtikel['tanggal_upload'].toDate());
 
     return Scaffold(
-     appBar: AppBar(
+      appBar: AppBar(
         title: Text(
-          articleData['kategori'] ?? 'No Title',
+          isiArtikel['kategori'] ?? 'No Title',
         ),
         centerTitle: true, // Menengahkan teks di AppBar
       ),
@@ -27,7 +29,7 @@ class ReadFavoriteView extends StatelessWidget {
             children: [
 // Tampilkan judul artikel dengan align justify
               Text(
-                articleData['judul_artikel'] ?? 'No Title',
+                isiArtikel['judul_artikel'] ?? 'No Title',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -44,11 +46,11 @@ class ReadFavoriteView extends StatelessWidget {
                     children: [
                       Icon(Icons.account_circle, size: 16, color: Colors.grey),
                       SizedBox(width: 4),
-                      Text(articleData['nama_upload'] ?? 'Unknown'),
+                      Text(isiArtikel['nama_upload'] ?? 'Unknown'),
                     ],
                   ),
                   Text(
-                    'Uploaded on: $formattedDate',
+                    formattedDate,
                     style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                   ),
                 ],
@@ -62,12 +64,12 @@ class ReadFavoriteView extends StatelessWidget {
               ),
               SizedBox(height: 20),
 // Tampilkan gambar jika ada
-              articleData['gambar_url'] != null
+              isiArtikel['gambar_url'] != null
                   ? SizedBox(
                       width: double
                           .infinity, // Memastikan gambar memenuhi lebar layar
                       child: Image.network(
-                        articleData['gambar_url'],
+                        isiArtikel['gambar_url'],
                         fit: BoxFit.cover,
                       ),
                     )
@@ -82,7 +84,7 @@ class ReadFavoriteView extends StatelessWidget {
 
 // Contoh: Tampilkan konten atau deskripsi artikel dengan justify
               Text(
-                articleData['isi_artikel'] ?? 'No content available.',
+                isiArtikel['isi_artikel'] ?? 'No content available.',
                 style: TextStyle(fontSize: 16),
                 textAlign: TextAlign.justify, // Menjadikan teks rata kiri-kanan
               ),

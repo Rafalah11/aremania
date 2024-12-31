@@ -15,9 +15,16 @@ class AdminHomeView extends StatefulWidget {
 
 class AdminHomeViewState extends State<AdminHomeView> {
   final _formKey = GlobalKey<FormState>();
-  String? idArtikel, judulArtikel, namaUpload, isiArtikel, kategori;
+  String? idArtikel, judulArtikel, namaUpload, isiArtikel;
   DateTime? tanggalUpload;
-  XFile? gambar, gambar2;
+  XFile? gambar;
+  String? kategori; // Variabel untuk menyimpan nilai kategori yang dipilih
+  final List<String> kategoriList = [
+    'beritaterbaru',
+    'trending',
+    'aremaday',
+    'aremania',
+  ]; // Daftar pilihan kategori
 
   final picker = ImagePicker();
   final dateFormat = DateFormat('yyyy-MM-dd');
@@ -36,8 +43,6 @@ class AdminHomeViewState extends State<AdminHomeView> {
     setState(() {
       if (isPrimary) {
         gambar = selectedImage;
-      } else {
-        gambar2 = selectedImage;
       }
     });
   }
@@ -76,14 +81,13 @@ class AdminHomeViewState extends State<AdminHomeView> {
   // Fungsi submit untuk memasukkan data dan URL gambar ke Firestore
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      // Cek apakah ada input yang masih kosong
+      // Periksa nilai semua field secara langsung
       if (idArtikelController.text.isEmpty ||
           judulArtikelController.text.isEmpty ||
           namaUploadController.text.isEmpty ||
           isiArtikelController.text.isEmpty ||
-          kategoriController.text.isEmpty ||
+          kategori == null || // Periksa langsung nilai kategori
           tanggalUpload == null) {
-        // Tampilkan snackbar jika ada input yang kosong
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Textfield tidak Boleh Ada Yang Kosong')),
         );
@@ -94,37 +98,33 @@ class AdminHomeViewState extends State<AdminHomeView> {
 
       // Upload gambar utama dan gambar opsional ke Firebase Storage
       String? imageUrl = await _uploadImage(gambar);
-      String? imageUrl2 = await _uploadImage(gambar2);
 
-      // Masukkan data dan URL gambar ke dalam Firestore pada collection 'Home'
+      // Masukkan data ke Firestore
       await FirebaseFirestore.instance.collection('Home').add({
-        'id_artikel': idArtikel,
-        'judul_artikel': judulArtikel,
+        'id_artikel': idArtikelController.text,
+        'judul_artikel': judulArtikelController.text,
         'tanggal_upload': tanggalUpload,
-        'nama_upload': namaUpload,
-        'isi_artikel': isiArtikel,
+        'nama_upload': namaUploadController.text,
+        'isi_artikel': isiArtikelController.text,
         'kategori': kategori,
         'gambar_url': imageUrl,
-        'gambar2_url': imageUrl2,
       });
 
-      // Tampilkan notifikasi sukses
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Data berhasil ditambahkan!')),
       );
 
-      // Reset form dan variabel setelah submit
+      // Reset form setelah submit
       _formKey.currentState!.reset();
       idArtikelController.clear();
       judulArtikelController.clear();
       namaUploadController.clear();
       isiArtikelController.clear();
-      kategoriController.clear();
       tanggalUploadController.clear();
       setState(() {
+        kategori = null;
         tanggalUpload = null;
         gambar = null;
-        gambar2 = null;
       });
     }
   }
@@ -173,10 +173,34 @@ class AdminHomeViewState extends State<AdminHomeView> {
               onSaved: (value) => isiArtikel = value,
               maxLines: 5,
             ),
-            TextFormField(
-              controller: kategoriController,
-              decoration: InputDecoration(labelText: 'Kategori'),
-              onSaved: (value) => kategori = value,
+            SizedBox(height: 15),
+            DropdownButtonFormField<String>(
+              value:
+                  kategori, // Nilai awal dropdown (bisa diatur jika diperlukan)
+              decoration: InputDecoration(
+                labelText: 'Kategori',
+                border: OutlineInputBorder(),
+              ),
+              items: kategoriList.map((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  kategori =
+                      value; // Mengubah nilai kategori berdasarkan pilihan
+                });
+              },
+              onSaved: (value) =>
+                  kategori = value, // Menyimpan nilai saat form disubmit
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Kategori harus dipilih';
+                }
+                return null;
+              },
             ),
             TextFormField(
               controller: tanggalUploadController,
@@ -190,13 +214,6 @@ class AdminHomeViewState extends State<AdminHomeView> {
               child: Text(gambar == null
                   ? 'Pilih Gambar Utama'
                   : 'Gambar Utama Terpilih'),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () => _pickImage(false),
-              child: Text(gambar2 == null
-                  ? 'Pilih Gambar Kedua (Opsional)'
-                  : 'Gambar Kedua Terpilih'),
             ),
             SizedBox(height: 20),
             ElevatedButton(

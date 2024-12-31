@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 
-class AremaReadEditorialController extends GetxController {
-  //TODO: Implement AremaReadEditorialController
+class SearchArticlePageController extends GetxController {
+  //TODO: Implement SearchArticlePageController
 
   final count = 0.obs;
   @override

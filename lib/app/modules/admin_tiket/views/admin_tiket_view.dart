@@ -205,12 +205,42 @@ class AdminTiketViewState extends State<AdminTiketView> {
               controller: _controller.tempatController,
               decoration: InputDecoration(labelText: 'Tempat'),
             ),
-            ElevatedButton(
-              onPressed: () => _selectDate(context),
-              child: Text(_controller.waktu == null
-                  ? 'Pilih Waktu'
-                  : 'Waktu Terpilih: ${_controller.waktu}'),
+            SizedBox(height: 10),
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.blue, // Warna 1
+                    const Color.fromARGB(255, 0, 255, 94), // Warna 2
+                    Colors.pink, // Warna 3
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(
+                    10), // Membuat sudut tombol melengkung
+              ),
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors
+                      .transparent, // Warna tombol transparan agar gradasi terlihat
+                  shadowColor:
+                      Colors.transparent, // Menghapus bayangan bawaan tombol
+                ),
+                onPressed: () => _selectDate(context),
+                child: Text(
+                  _controller.waktu == null
+                      ? 'Pilih Waktu'
+                      : 'Waktu Terpilih: ${_controller.waktu}',
+                  style: TextStyle(
+                    color: const Color.fromARGB(
+                        255, 0, 0, 0), // Warna teks agar kontras dengan gradasi
+                  ),
+                ),
+              ),
             ),
+
+            SizedBox(height: 10),
             TextField(
               controller: _controller.deskripsiController,
               decoration: InputDecoration(

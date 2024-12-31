@@ -54,7 +54,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:myapp/app/controllers/auth_controller.dart';
-import 'package:myapp/app/modules/connection/bindings/connection_binding.dart';
+import 'package:myapp/app/controllers/bookmarkcntroller.dart';
 import 'package:myapp/app/modules/halaman_informasi_pribadi/controllers/halaman_informasi_pribadi_controller.dart';
 import 'package:myapp/app/modules/ngalam_terbaru/controllers/ngalam_terbaru_controller.dart';
 import 'package:myapp/app/modules/readdetailartikel/controllers/readdetailartikel_controller.dart';
@@ -66,27 +66,29 @@ import 'app/routes/app_pages.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Inisialisasi Firebase terlebih dahulu
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Initialize dependencies
-
+  // Masukkan controller ke dalam Get.put
   Get.put(NgalamTerbaruController());
   Get.put<AuthController>(AuthController());
-  Get.put<HalamanInformasiPribadiController>(
-      HalamanInformasiPribadiController());
   Get.put(TicketSayaController());
   Get.put(ReaddetailartikelController());
+  Get.put<BookmarkController>(BookmarkController());
+  Get.put<HalamanInformasiPribadiController>(
+      HalamanInformasiPribadiController());
 
   runApp(
     GetMaterialApp(
       title: "Application",
-      initialBinding: ConnectionBinding(),
-      initialRoute:
-          Routes.NO_CONNECTION, // Initial route could be NO_CONNECTION
+      initialRoute: Routes
+          .HALAMAN_ANIMASI_AWAL, // Halaman pertama adalah HalamanAnimasiAwal
       getPages: AppPages.routes,
     ),
   );
+  // Inisialisasi dependensi
   DependencyInjection.init();
 }

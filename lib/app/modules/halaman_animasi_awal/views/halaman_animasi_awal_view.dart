@@ -15,26 +15,23 @@ class _HalamanAnimasiAwalViewState extends State<HalamanAnimasiAwalView> {
     super.initState();
 
     // Tunggu selama 5 detik untuk animasi
-    Timer(Duration(seconds: 5), _navigateBasedOnAuth);
+    Future.delayed(Duration(seconds: 5), _navigateBasedOnAuth);
   }
 
   // Fungsi untuk menavigasi berdasarkan status autentikasi pengguna
   void _navigateBasedOnAuth() async {
-
-    // Tunggu status autentikasi
+    // Cek status autentikasi
     User? user = FirebaseAuth.instance.currentUser;
 
+    print("Navigating after 5 seconds...");
+
     if (user != null) {
-      // Jika pengguna sudah login, arahkan ke home atau admin
-      if (user.email == 'admin@example.com') {
-        // Arahkan ke halaman admin
-        Get.offAllNamed(Routes.MANAGEMENT_ADMIN);
-      } else {
-        // Arahkan ke halaman home
-        Get.offAllNamed(Routes.HOME);
-      }
+      // Jika pengguna sudah login, arahkan ke halaman HOME
+      print("User is logged in. Navigating to HOME.");
+      Get.offAllNamed(Routes.HOME);
     } else {
       // Jika pengguna belum login, arahkan ke halaman login
+      print("User is not logged in. Navigating to LOGIN.");
       Get.offAllNamed(Routes.HOME);
     }
   }

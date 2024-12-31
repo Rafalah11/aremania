@@ -14,14 +14,6 @@ abstract class Routes {
   static const READ_AREMANIA = _Paths.READ_AREMANIA;
   static const NGALAM_TERBARU = _Paths.NGALAM_TERBARU;
   static const NGALAM_READ_TERBARU = _Paths.NGALAM_READ_TERBARU;
-  static const NGALAM_READ_DESTINASI = _Paths.NGALAM_READ_DESTINASI;
-  static const NGALAM_READ_MALANGAN = _Paths.NGALAM_READ_MALANGAN;
-  static const NGALAM_READ_MALANGANKULINER = _Paths.NGALAM_READ_MALANGANKULINER;
-  static const NGALAM_READ_INFO_PENTING = _Paths.NGALAM_READ_INFO_PENTING;
-  static const AREMA_READ_EDITORIAL = _Paths.AREMA_READ_EDITORIAL;
-  static const AREMA_READ_AREMAPUTRI = _Paths.AREMA_READ_AREMAPUTRI;
-  static const AREMA_READ_AREMAJUNIOR = _Paths.AREMA_READ_AREMAJUNIOR;
-  static const AREMA_READ_BERITAFOTO = _Paths.AREMA_READ_BERITAFOTO;
   static const AREMA_EDITORIAL = _Paths.AREMA_EDITORIAL;
   static const AREMA_AREMAPUTRI = _Paths.AREMA_AREMAPUTRI;
   static const AREMA_AREMAJUNIOR = _Paths.AREMA_AREMAJUNIOR;
@@ -70,6 +62,7 @@ abstract class Routes {
   static const HALAMAN_TRENDING = _Paths.HALAMAN_TRENDING;
   static const HALAMAN_AREMA_DAY = _Paths.HALAMAN_AREMA_DAY;
   static const HALAMAN_AREMANIA = _Paths.HALAMAN_AREMANIA;
+  static const SEARCH_ARTICLE_PAGE = _Paths.SEARCH_ARTICLE_PAGE;
 }
 
 abstract class _Paths {
@@ -85,14 +78,6 @@ abstract class _Paths {
   static const READ_AREMANIA = '/read-aremania';
   static const NGALAM_TERBARU = '/ngalam-terbaru';
   static const NGALAM_READ_TERBARU = '/ngalam-read-terbaru';
-  static const NGALAM_READ_DESTINASI = '/ngalam-read-destinasi';
-  static const NGALAM_READ_MALANGAN = '/ngalam-read-malangan';
-  static const NGALAM_READ_MALANGANKULINER = '/ngalam-read-malangankuliner';
-  static const NGALAM_READ_INFO_PENTING = '/ngalam-read-info-penting';
-  static const AREMA_READ_EDITORIAL = '/arema-read-editorial';
-  static const AREMA_READ_AREMAPUTRI = '/arema-read-aremaputri';
-  static const AREMA_READ_AREMAJUNIOR = '/arema-read-aremajunior';
-  static const AREMA_READ_BERITAFOTO = '/arema-read-beritafoto';
   static const AREMA_EDITORIAL = '/arema-editorial';
   static const AREMA_AREMAPUTRI = '/arema-aremaputri';
   static const AREMA_AREMAJUNIOR = '/arema-aremajunior';
@@ -141,4 +126,5 @@ abstract class _Paths {
   static const HALAMAN_TRENDING = '/halaman-trending';
   static const HALAMAN_AREMA_DAY = '/halaman-arema-day';
   static const HALAMAN_AREMANIA = '/halaman-aremania';
+  static const SEARCH_ARTICLE_PAGE = '/search-article-page';
 }
