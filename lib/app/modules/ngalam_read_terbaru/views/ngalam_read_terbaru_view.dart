@@ -65,9 +65,10 @@ class NgalamReadTerbaruView extends StatelessWidget {
               ),
               SizedBox(height: 20),
               // Menampilkan nama pengunggah dan tanggal upload
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Nama Pengunggah
                   Row(
                     children: [
                       Icon(Icons.account_circle, size: 30, color: Colors.grey),
@@ -78,12 +79,23 @@ class NgalamReadTerbaruView extends StatelessWidget {
                       ),
                     ],
                   ),
-                  Text(
-                    '$formattedDate',
-                    style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+                  SizedBox(
+                      height: 9), // Jarak antara nama pengunggah dan tanggal
+                  Row(
+                    children: [
+                      Icon(Icons.access_time,
+                          size: 30, color: Colors.grey), // Ikon jam
+                      SizedBox(
+                          width: 4), // Jarak antara ikon jam dan teks tanggal
+                      Text(
+                        '$formattedDate',
+                        style: TextStyle(fontSize: 20, color: Colors.grey[600]),
+                      ),
+                    ],
                   ),
                 ],
               ),
+
               SizedBox(height: 10),
               Divider(
                 color: Colors.black,

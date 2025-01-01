@@ -1,7 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:myapp/app/modules/halaman_informasi_pribadi/controllers/halaman_informasi_pribadi_controller.dart';
 import 'package:myapp/app/modules/halaman_login/views/halaman_login_view.dart';
 import 'package:myapp/app/modules/ngalam_terbaru/controllers/ngalam_terbaru_controller.dart';
 import 'package:myapp/app/routes/app_pages.dart';
@@ -51,34 +52,54 @@ class AuthController extends GetxController {
         password: password,
       );
 
-      // Menampilkan UID di debug console
-      print('Logged in user UID: ${userCredential.user?.uid}');
-
       // Cek apakah email adalah admin
       if (email == 'admin@gmail.com' && password == '123456') {
         // Jika admin, langsung masuk ke halaman admin
         Get.offAllNamed(Routes.MANAGEMENT_ADMIN);
-      } else {
-        // Cek status verifikasi email untuk pengguna biasa
-        if (userCredential.user?.emailVerified ?? false) {
-          // Jika email sudah diverifikasi, simpan status login di SharedPreferences
+        return;
+      }
+      // // Cek status verifikasi email untuk pengguna biasa
+      // if (userCredential.user?.emailVerified ?? false) {
+      //   // Jika email sudah diverifikasi, simpan status login di SharedPreferences
+      //   final prefs = await SharedPreferences.getInstance();
+      //   await prefs.setString('token', 'your_token_value');
+
+      //   Get.snackbar('Success', 'Login successful',
+      //       backgroundColor: Colors.green);
+
+      //   var currentUser = FirebaseAuth.instance.currentUser;
+      //   if (currentUser != null) {
+      //     // Muat status bookmark setelah login
+      //     ngalamTerbaruController.loadBookmarkStatus();
+      //   }
+
+      //   // Jika berhasil login, arahkan ke HOME
+      //   Get.offAllNamed(Routes.HOME);
+      User? currentUser = userCredential.user;
+
+      if (currentUser != null) {
+        if (currentUser.emailVerified) {
+          // Simpan status login di SharedPreferences
           final prefs = await SharedPreferences.getInstance();
-          await prefs.setString('token', 'your_token_value');
+          await prefs.setString('uid', currentUser.uid);
+
+          // Ambil FCM token
+          final fcmToken = await FirebaseMessaging.instance.getToken();
+          if (fcmToken != null) {
+            // Simpan token ke Firestore
+            await FirebaseFirestore.instance
+                .collection('FCMUsers')
+                .doc(currentUser.uid)
+                .set({'fcmToken': fcmToken}, SetOptions(merge: true));
+          }
 
           Get.snackbar('Success', 'Login successful',
               backgroundColor: Colors.green);
 
-          var currentUser = FirebaseAuth.instance.currentUser;
-          if (currentUser != null) {
-            // Muat status bookmark setelah login
-            ngalamTerbaruController.loadBookmarkStatus();
-          }
+          // Muat status bookmark
+          ngalamTerbaruController.loadBookmarkStatus();
 
-          // Panggil loadUserData untuk memuat data pengguna
-          final HalamanInformasiPribadiController
-              halamanInformasiPribadiController = Get.find();
-
-          // Jika berhasil login, arahkan ke HOME
+          // Arahkan ke HOME
           Get.offAllNamed(Routes.HOME);
         } else {
           // Jika email belum diverifikasi, beri tahu pengguna

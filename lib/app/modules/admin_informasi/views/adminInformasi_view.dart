@@ -33,8 +33,8 @@ class AdmininformasiView extends State<AdminFormPage> {
   final Map<String, List<String>> kategoriSubKategoriMap = {
     'ngalam': ['terbaru', 'destinasi', 'malangan', 'kuliner', 'info_penting'],
     'arema': ['editorial', 'arema_putri', 'berita_foto', 'arema_junior'],
-    'aremania': [],
-    'nasional': [],
+    'aremania': ['aremania'],
+    'nasional': ['nasional'],
   };
 
   final picker = ImagePicker();

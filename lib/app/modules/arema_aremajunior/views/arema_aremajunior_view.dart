@@ -15,10 +15,6 @@ import 'package:myapp/app/modules/ngalam_terbaru/views/ngalam_terbaru_view.dart'
 import 'package:myapp/app/modules/ticket/views/ticket_view.dart';
 import 'package:myapp/app/routes/app_pages.dart';
 
-void main() {
-  runApp(MyApp());
-}
-
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -164,16 +160,12 @@ class _NewsPageState extends State<AremaAremajuniorView> {
                 );
               }
 
-              // Ambil id_artikel terbaru
-              String latestId = latestArticleDoc['id_artikel'];
-
-              // Ambil detail artikel berdasarkan id_artikel terbaru
               return StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
                     .collection('Informasi')
-                    .where('id_artikel',
-                        isEqualTo:
-                            latestId) // Mengambil detail berdasarkan id_artikel terbaru
+                    .where('kategori', isEqualTo: 'arema')
+                    .where('sub_kategori', isEqualTo: 'arema_hunior')
+                    .orderBy('tanggal_upload', descending: true)
                     .snapshots(),
                 builder: (context, articleSnapshot) {
                   if (!articleSnapshot.hasData) {
@@ -182,6 +174,7 @@ class _NewsPageState extends State<AremaAremajuniorView> {
                       child: Center(child: CircularProgressIndicator()),
                     );
                   }
+
                   final articles =
                       articleSnapshot.data!.docs; // Ambil semua dokumen
                   if (articles.isEmpty) {
@@ -190,6 +183,7 @@ class _NewsPageState extends State<AremaAremajuniorView> {
                       child: Center(child: Text('Tidak ada artikel terbaru')),
                     );
                   }
+
                   final articleData = articles[0].data()
                       as Map<String, dynamic>; // Data artikel pertama
                   String formattedDate = DateFormat('dd MMMM yyyy')
@@ -239,6 +233,7 @@ class _NewsPageState extends State<AremaAremajuniorView> {
                         Positioned(
                           bottom: 20,
                           left: 20,
+                          right: 10,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -250,7 +245,7 @@ class _NewsPageState extends State<AremaAremajuniorView> {
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                 ),
-                                maxLines: 1,
+                                maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                               ),
                               SizedBox(height: 5),
@@ -265,16 +260,19 @@ class _NewsPageState extends State<AremaAremajuniorView> {
                                     style: TextStyle(
                                       fontFamily: 'Montserrat',
                                       color: Colors.white,
-                                      fontSize: 16,
+                                      fontSize: 14,
                                     ),
                                   ),
                                   SizedBox(width: 15),
+                                  Icon(Icons.access_time,
+                                      color: Colors.white, size: 20),
+                                  SizedBox(width: 5),
                                   Text(
                                     formattedDate,
                                     style: TextStyle(
                                       fontFamily: 'Montserrat',
                                       color: Colors.white,
-                                      fontSize: 16,
+                                      fontSize: 14,
                                     ),
                                   ),
                                 ],

@@ -144,12 +144,12 @@ class _NgalamTerbaruViewState extends State<NgalamTerbaruView> {
                 );
               }
 
-              String latestId = latestArticleDoc['id_artikel'];
-
               return StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
                     .collection('Informasi')
-                    .where('id_artikel', isEqualTo: latestId)
+                    .where('kategori', isEqualTo: 'ngalam')
+                    .where('sub_kategori', isEqualTo: 'terbaru')
+                    .orderBy('tanggal_upload', descending: true)
                     .snapshots(),
                 builder: (context, articleSnapshot) {
                   if (!articleSnapshot.hasData) {
@@ -217,6 +217,7 @@ class _NgalamTerbaruViewState extends State<NgalamTerbaruView> {
                         Positioned(
                           bottom: 20,
                           left: 20,
+                          right: 10,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -228,7 +229,7 @@ class _NgalamTerbaruViewState extends State<NgalamTerbaruView> {
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                 ),
-                                maxLines: 1,
+                                maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                               ),
                               SizedBox(height: 5),
@@ -243,7 +244,7 @@ class _NgalamTerbaruViewState extends State<NgalamTerbaruView> {
                                     style: TextStyle(
                                       fontFamily: 'Montserrat',
                                       color: Colors.white,
-                                      fontSize: 16,
+                                      fontSize: 14,
                                     ),
                                   ),
                                   SizedBox(width: 15),
@@ -255,7 +256,7 @@ class _NgalamTerbaruViewState extends State<NgalamTerbaruView> {
                                     style: TextStyle(
                                       fontFamily: 'Montserrat',
                                       color: Colors.white,
-                                      fontSize: 16,
+                                      fontSize: 14,
                                     ),
                                   ),
                                 ],

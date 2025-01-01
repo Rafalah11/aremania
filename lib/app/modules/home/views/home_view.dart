@@ -264,7 +264,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         DateFormat('EEEE, dd MMMM yyyy').format(currentTime);
 
                     return Text(
-                      "Hari ini, $formattedDate",
+                      "$formattedDate",
                       style:
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     );

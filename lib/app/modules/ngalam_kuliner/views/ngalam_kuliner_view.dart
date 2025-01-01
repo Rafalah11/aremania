@@ -170,16 +170,12 @@ class _NgalamKulinerViewState extends State<NgalamKulinerView> {
                 );
               }
 
-              // Ambil id_artikel terbaru
-              String latestId = latestArticleDoc['id_artikel'];
-
-              // Ambil detail artikel berdasarkan id_artikel terbaru
               return StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
                     .collection('Informasi')
-                    .where('id_artikel',
-                        isEqualTo:
-                            latestId) // Mengambil detail berdasarkan id_artikel terbaru
+                    .where('kategori', isEqualTo: 'ngalam')
+                    .where('sub_kategori', isEqualTo: 'kuliner')
+                    .orderBy('tanggal_upload', descending: true)
                     .snapshots(),
                 builder: (context, articleSnapshot) {
                   if (!articleSnapshot.hasData) {
@@ -188,6 +184,7 @@ class _NgalamKulinerViewState extends State<NgalamKulinerView> {
                       child: Center(child: CircularProgressIndicator()),
                     );
                   }
+
                   final articles =
                       articleSnapshot.data!.docs; // Ambil semua dokumen
                   if (articles.isEmpty) {
@@ -196,6 +193,7 @@ class _NgalamKulinerViewState extends State<NgalamKulinerView> {
                       child: Center(child: Text('Tidak ada artikel terbaru')),
                     );
                   }
+
                   final articleData = articles[0].data()
                       as Map<String, dynamic>; // Data artikel pertama
                   String formattedDate = DateFormat('dd MMMM yyyy')
@@ -245,6 +243,7 @@ class _NgalamKulinerViewState extends State<NgalamKulinerView> {
                         Positioned(
                           bottom: 20,
                           left: 20,
+                          right: 10,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -256,7 +255,7 @@ class _NgalamKulinerViewState extends State<NgalamKulinerView> {
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                 ),
-                                maxLines: 1,
+                                maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                               ),
                               SizedBox(height: 5),
@@ -271,16 +270,19 @@ class _NgalamKulinerViewState extends State<NgalamKulinerView> {
                                     style: TextStyle(
                                       fontFamily: 'Montserrat',
                                       color: Colors.white,
-                                      fontSize: 16,
+                                      fontSize: 14,
                                     ),
                                   ),
                                   SizedBox(width: 15),
+                                  Icon(Icons.access_time,
+                                      color: Colors.white, size: 20),
+                                  SizedBox(width: 5),
                                   Text(
                                     formattedDate,
                                     style: TextStyle(
                                       fontFamily: 'Montserrat',
                                       color: Colors.white,
-                                      fontSize: 16,
+                                      fontSize: 14,
                                     ),
                                   ),
                                 ],
