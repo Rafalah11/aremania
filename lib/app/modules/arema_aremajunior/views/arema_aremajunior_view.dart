@@ -164,7 +164,7 @@ class _NewsPageState extends State<AremaAremajuniorView> {
                 stream: FirebaseFirestore.instance
                     .collection('Informasi')
                     .where('kategori', isEqualTo: 'arema')
-                    .where('sub_kategori', isEqualTo: 'arema_hunior')
+                    .where('sub_kategori', isEqualTo: 'arema_junior')
                     .orderBy('tanggal_upload', descending: true)
                     .snapshots(),
                 builder: (context, articleSnapshot) {

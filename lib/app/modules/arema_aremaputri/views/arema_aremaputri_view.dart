@@ -103,7 +103,7 @@ class _NewsPageState extends State<AremaAremaputriView> {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          'Berita Terbaru',
+          'Berita Arema',
           style: TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.bold,
