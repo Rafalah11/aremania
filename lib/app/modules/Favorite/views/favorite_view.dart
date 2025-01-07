@@ -325,13 +325,12 @@ class _FavoriteView extends State<FavoriteView> {
         _filteredNewsItems.removeWhere((article) => article.id == articleId);
       });
       // Update status isBookmarked to false in 'Informasi' collection
+      _ngalamTerbaruController.bookmarkStatus[articleId] = false;
+      _readArtikelController.bookmarkStatus[articleId] = false;
       await FirebaseFirestore.instance
           .collection('Informasi')
           .doc(articleId)
           .update({'isBookmarked': false});
-
-      _ngalamTerbaruController.bookmarkStatus[articleId] = false;
-      _readArtikelController.bookmarkStatus[articleId] = false;
 
       print("Artikel berhasil dihapus");
     } catch (e) {

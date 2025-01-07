@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/snackbar/snackbar.dart';
 import 'package:http/http.dart' as http;
+import 'package:permission_handler/permission_handler.dart';
 
 class TicketSayaController extends GetxController {
   var latitude = 0.0.obs;
@@ -90,6 +91,28 @@ class TicketSayaController extends GetxController {
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
+    }
+  }
+
+  // Fungsi untuk memeriksa izin dan meminta izin lokasi
+  Future<void> requestLocationPermission() async {
+    PermissionStatus status = await Permission.location.request();
+
+    if (status.isGranted) {
+      // Jika izin diberikan, dapatkan lokasi perangkat
+      await getCurrentLocation();
+    } else if (status.isDenied) {
+      // Jika izin ditolak, minta ulang izin
+      Get.snackbar(
+        'Izin Diperlukan',
+        'Untuk melanjutkan, izinkan aplikasi mengakses lokasi.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } else if (status.isPermanentlyDenied) {
+      // Jika izin ditolak secara permanen, arahkan ke pengaturan
+      openAppSettings();
     }
   }
 }

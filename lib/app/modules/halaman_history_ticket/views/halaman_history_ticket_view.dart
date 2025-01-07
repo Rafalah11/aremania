@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:myapp/app/modules/halaman_history_ticket/controllers/halaman_history_ticket_controller.dart';
 import 'package:myapp/app/modules/ticket_saya/controllers/ticket_saya_controller.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:firebase_auth/firebase_auth.dart';
@@ -30,6 +31,7 @@ class _HalamanHistoryTicketViewState extends State<HalamanHistoryTicketView>
   bool _isListening = false; // Status apakah sedang mendengarkan suara
   String _searchQuery = ""; // Query pencarian
   TextEditingController _searchController = TextEditingController();
+  TicketSayaController controller = TicketSayaController();
 
   @override
   void initState() {
@@ -47,6 +49,7 @@ class _HalamanHistoryTicketViewState extends State<HalamanHistoryTicketView>
     ).animate(_controller);
 
     _speechToText.initialize();
+    HalamanHistoryTicketController().requestLocationPermission();
   }
 
   @override
@@ -202,180 +205,170 @@ class _HalamanHistoryTicketViewState extends State<HalamanHistoryTicketView>
                     Timestamp timestamp = ticketDetails['data_tiket']['waktu'];
                     Timestamp timestamp2 = ticket['timestamp'];
 
-                    if (timestamp != null) {
-                      DateTime purchaseTime =
-                          DateTime.fromMillisecondsSinceEpoch(
-                              timestamp2.seconds * 1000);
-                      String purchaseDateStr =
-                          DateFormat('dd MMMM yyyy').format(purchaseTime);
-                      String purchaseTimeStr =
-                          DateFormat('HH:mm').format(purchaseTime);
+                    DateTime purchaseTime = DateTime.fromMillisecondsSinceEpoch(
+                        timestamp2.seconds * 1000);
+                    String purchaseDateStr =
+                        DateFormat('dd MMMM yyyy').format(purchaseTime);
+                    String purchaseTimeStr =
+                        DateFormat('HH:mm').format(purchaseTime);
 
-                      int seconds = timestamp.seconds;
-                      DateTime matchTime =
-                          DateTime.fromMillisecondsSinceEpoch(seconds * 1000);
-                      String matchTimeStr =
-                          DateFormat('HH:mm').format(matchTime);
-                      String matchDateStr =
-                          DateFormat('dd MMMM yyyy').format(matchTime);
+                    int seconds = timestamp.seconds;
+                    DateTime matchTime =
+                        DateTime.fromMillisecondsSinceEpoch(seconds * 1000);
+                    String matchTimeStr = DateFormat('HH:mm').format(matchTime);
+                    String matchDateStr =
+                        DateFormat('dd MMMM yyyy').format(matchTime);
 
-                      String match =
-                          "${ticketDetails['data_tiket']['tim_home']} vs ${ticketDetails['data_tiket']['tim_away']}";
-                      String stadiumName = ticketDetails['data_tiket']
-                              ['tempat'] ??
-                          'Nama tempat tidak tersedia';
+                    String match =
+                        "${ticketDetails['data_tiket']['tim_home']} vs ${ticketDetails['data_tiket']['tim_away']}";
+                    String stadiumName = ticketDetails['data_tiket']
+                            ['tempat'] ??
+                        'Nama tempat tidak tersedia';
 
-                      return Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: GestureDetector(
-                          onTap: () {
-                            showLocationDialog(context, stadiumName);
-                          },
-                          child: AnimatedBuilder(
-                            animation: _controller,
-                            builder: (context, child) {
-                              return Container(
-                                padding: EdgeInsets.all(20),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                                    color: _borderColorAnimation.value ??
-                                        Colors.blue,
-                                    width: 2,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.1),
-                                      blurRadius: 8,
-                                      offset: Offset(0, 4),
-                                    ),
-                                  ],
+                    return Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: GestureDetector(
+                        onTap: () {
+                          showLocationDialog(context, stadiumName);
+                        },
+                        child: AnimatedBuilder(
+                          animation: _controller,
+                          builder: (context, child) {
+                            return Container(
+                              padding: EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: _borderColorAnimation.value ??
+                                      Colors.blue,
+                                  width: 2,
                                 ),
-                                child: child,
-                              );
-                            },
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text("Nama: ${ticket['name']}",
-                                    style: TextStyle(fontSize: 16)),
-                                SizedBox(height: 10),
-                                Text("Pertandingan: $match",
-                                    style: TextStyle(fontSize: 16)),
-                                SizedBox(height: 10),
-                                Text("Tempat: $stadiumName",
-                                    style: TextStyle(fontSize: 16)),
-                                SizedBox(height: 10),
-                                // Menampilkan waktu pertandingan dengan format yang sudah ditentukan
-                                Text("Tanggal Main: $matchDateStr",
-                                    style: TextStyle(fontSize: 16)),
-                                SizedBox(height: 10),
-                                Text("Pukul: $matchTimeStr",
-                                    style: TextStyle(fontSize: 16)),
-                                SizedBox(height: 10),
-                                // Menampilkan data tiket
-                                Container(
-                                  padding: EdgeInsets.all(
-                                      16), // Padding di dalam container untuk semua teks
-                                  decoration: BoxDecoration(
-                                    color: Colors
-                                        .white, // Warna latar belakang di dalam container
-                                    border: Border.all(
-                                      color: Colors.blue, // Warna border
-                                      width: 2, // Lebar border
-                                    ),
-                                    borderRadius: BorderRadius.circular(
-                                        8), // Sudut membulat pada border
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 8,
+                                    offset: Offset(0, 4),
                                   ),
-                                  width: double
-                                      .infinity, // Membuat lebar container mentok kiri dan kanan
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment
-                                        .start, // Teks mulai dari kiri
-                                    children: [
-                                      // Teks "Data Tiket"
+                                ],
+                              ),
+                              child: child,
+                            );
+                          },
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text("Nama: ${ticket['name']}",
+                                  style: TextStyle(fontSize: 16)),
+                              SizedBox(height: 10),
+                              Text("Pertandingan: $match",
+                                  style: TextStyle(fontSize: 16)),
+                              SizedBox(height: 10),
+                              Text("Tempat: $stadiumName",
+                                  style: TextStyle(fontSize: 16)),
+                              SizedBox(height: 10),
+                              // Menampilkan waktu pertandingan dengan format yang sudah ditentukan
+                              Text("Tanggal Main: $matchDateStr",
+                                  style: TextStyle(fontSize: 16)),
+                              SizedBox(height: 10),
+                              Text("Pukul: $matchTimeStr",
+                                  style: TextStyle(fontSize: 16)),
+                              SizedBox(height: 10),
+                              // Menampilkan data tiket
+                              Container(
+                                padding: EdgeInsets.all(
+                                    16), // Padding di dalam container untuk semua teks
+                                decoration: BoxDecoration(
+                                  color: Colors
+                                      .white, // Warna latar belakang di dalam container
+                                  border: Border.all(
+                                    color: Colors.blue, // Warna border
+                                    width: 2, // Lebar border
+                                  ),
+                                  borderRadius: BorderRadius.circular(
+                                      8), // Sudut membulat pada border
+                                ),
+                                width: double
+                                    .infinity, // Membuat lebar container mentok kiri dan kanan
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment
+                                      .start, // Teks mulai dari kiri
+                                  children: [
+                                    // Teks "Data Tiket"
+                                    Text(
+                                      "Data Tiket:",
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    SizedBox(height: 10), // Jarak antar teks
+
+                                    // Teks "Jenis Tiket"
+                                    for (var jenisTicket
+                                        in ticketData.keys) ...[
                                       Text(
-                                        "Data Tiket:",
-                                        style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold),
+                                        "Jenis Tiket: $jenisTicket",
+                                        style: TextStyle(fontSize: 16),
                                       ),
                                       SizedBox(height: 10), // Jarak antar teks
 
-                                      // Teks "Jenis Tiket"
-                                      for (var jenisTicket
-                                          in ticketData.keys) ...[
+                                      // Teks "ID Kursi" di dalam border
+                                      for (var kursi
+                                          in ticketData[jenisTicket]) ...[
                                         Text(
-                                          "Jenis Tiket: $jenisTicket",
-                                          style: TextStyle(fontSize: 16),
-                                        ),
-                                        SizedBox(
-                                            height: 10), // Jarak antar teks
-
-                                        // Teks "ID Kursi" di dalam border
-                                        for (var kursi
-                                            in ticketData[jenisTicket]) ...[
-                                          Text(
-                                            "ID Kursi: ${kursi['id']} $jenisTicket",
-                                            style: TextStyle(
-                                              color: const Color.fromARGB(
-                                                  255, 0, 8, 255),
-                                              fontSize: 16,
-                                              decoration:
-                                                  TextDecoration.underline,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ), // Jarak antar teks
-                                        ],
+                                          "ID Kursi: ${kursi['id']} $jenisTicket",
+                                          style: TextStyle(
+                                            color: const Color.fromARGB(
+                                                255, 0, 8, 255),
+                                            fontSize: 16,
+                                            decoration:
+                                                TextDecoration.underline,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ), // Jarak antar teks
                                       ],
                                     ],
-                                  ),
+                                  ],
                                 ),
+                              ),
 
-                                SizedBox(height: 10),
-                                // Menampilkan data tiket
-                                Text("Pembelian Tiket dilakukan pada:",
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold)),
-                                SizedBox(height: 10),
-                                // Menampilkan waktu pertandingan dengan format yang sudah ditentukan
-                                Text(
-                                    "Tanggal: $purchaseDateStr", // Menampilkan tanggal pembelian tiket
-                                    style: TextStyle(fontSize: 16)),
-                                SizedBox(height: 10),
-                                Text(
-                                    "Waktu: $purchaseTimeStr", // Menampilkan waktu pembelian tiket
-                                    style: TextStyle(fontSize: 16)),
-                                SizedBox(height: 10),
-// Menambahkan teks catatan
-                                Text(
-                                  "Note: Klik ticket card untuk menampilkan lokasi dan jarak Anda kepada stadion.",
+                              SizedBox(height: 10),
+                              // Menampilkan data tiket
+                              Text("Pembelian Tiket dilakukan pada:",
                                   style: TextStyle(
-                                      fontSize: 14,
-                                      fontStyle: FontStyle.italic,
-                                      color: const Color.fromARGB(
-                                          164, 255, 41, 41)),
-                                ),
-                                SizedBox(height: 20),
-                                Divider(),
-                                Center(
-                                  child: Text("Tiket Berhasil Dibeli!",
-                                      style: TextStyle(
-                                          fontSize: 18, color: Colors.green)),
-                                ),
-                              ],
-                            ),
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold)),
+                              SizedBox(height: 10),
+                              // Menampilkan waktu pertandingan dengan format yang sudah ditentukan
+                              Text(
+                                  "Tanggal: $purchaseDateStr", // Menampilkan tanggal pembelian tiket
+                                  style: TextStyle(fontSize: 16)),
+                              SizedBox(height: 10),
+                              Text(
+                                  "Waktu: $purchaseTimeStr", // Menampilkan waktu pembelian tiket
+                                  style: TextStyle(fontSize: 16)),
+                              SizedBox(height: 10),
+// Menambahkan teks catatan
+                              Text(
+                                "Note: Klik ticket card untuk menampilkan lokasi dan jarak Anda kepada stadion.",
+                                style: TextStyle(
+                                    fontSize: 14,
+                                    fontStyle: FontStyle.italic,
+                                    color:
+                                        const Color.fromARGB(164, 255, 41, 41)),
+                              ),
+                              SizedBox(height: 20),
+                              Divider(),
+                              Center(
+                                child: Text("Tiket Berhasil Dibeli!",
+                                    style: TextStyle(
+                                        fontSize: 18, color: Colors.green)),
+                              ),
+                            ],
                           ),
                         ),
-                      );
-                    } else {
-                      return Center(
-                        child: Text("Waktu pertandingan tidak tersedia",
-                            style: TextStyle(fontSize: 18, color: Colors.red)),
-                      );
-                    }
+                      ),
+                    );
                   },
                 ),
               ),
@@ -387,8 +380,6 @@ class _HalamanHistoryTicketViewState extends State<HalamanHistoryTicketView>
   }
 
   void showLocationDialog(BuildContext context, String stadiumName) {
-    final controller = Get.find<TicketSayaController>(); // Mengakses controller
-
     // Menampilkan dialog terlebih dahulu
     showDialog(
       context: context,
@@ -524,6 +515,16 @@ class _HalamanHistoryTicketViewState extends State<HalamanHistoryTicketView>
                       Text(
                         'Jarak ke stadion: ${(Geolocator.distanceBetween(userLatitude, userLongitude, stadiumLatitude, stadiumLongitude) / 1000).toStringAsFixed(2)} km',
                         style: TextStyle(fontSize: 16),
+                      ),
+                      SizedBox(height: 10),
+                      // Menambahkan catatan setelah jarak ke stadion
+                      Text(
+                        "Jika lokasi tidak akurat, kemungkinan nama stadion tidak terdaftar di dalam data OpenCage API.",
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.redAccent,
+                          fontStyle: FontStyle.italic,
+                        ),
                       ),
                     ],
                   ],
