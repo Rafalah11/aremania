@@ -1,11 +1,11 @@
 <p align="center">
-    <strong>Nomor 1: Halaman Daftar Lapangan</strong>
+    <strong>Nomor 1: Halaman HomePage</strong>
     <br>
     <img src="https://github.com/Rafalah11/aremania/blob/arema/HomePage%20WeAreAremania.net.jpg" width="400" alt="Halaman Daftar Lapangan (Admin)">
     <br><br>
-    <strong>Nomor 2: Halaman HomePage</strong>
+    <strong>Nomor 2: Halaman Jarak Lokasi User dan Stadion</strong>
     <br>
-    <img src="https://github.com/Rafalah11/UnitySports/blob/KBT/storage/public/gambar/Screenshot%202025-02-06%20153514.png" width="400" alt="Halaman HomePage">
+    <img src="https://github.com/Rafalah11/aremania/blob/arema/Lokasi%20WeAreAremania.net.jpg" width="400" alt="Halaman HomePage">
     <br><br>
     <strong>Nomor 3: Halaman Login</strong>
     <br>
