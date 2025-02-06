@@ -7,9 +7,9 @@
     <br>
     <img src="https://github.com/Rafalah11/aremania/blob/arema/Lokasi%20WeAreAremania.net.jpg" width="400" alt="Halaman HomePage">
     <br><br>
-    <strong>Nomor 3: Halaman Login</strong>
+    <strong>Nomor 3: Halaman Pencarian Artikel</strong>
     <br>
-    <img src="https://github.com/Rafalah11/UnitySports/blob/KBT/storage/public/gambar/Screenshot%202025-02-06%20153836.png" width="400" alt="Halaman Login">
+    <img src="https://github.com/Rafalah11/aremania/blob/arema/PencarianWeAreAremania.net.jpg" width="400" alt="Halaman Login">
 </p>
 
 
